@@ -1,6 +1,6 @@
 {
   "name": "@glyphui/ui",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "React components on Tailwind CSS v4 that take their entire look from one theme file. Forms, data tables, app layouts and async states included.",
   "license": "MIT",
   "author": "Mohak Gupta (https://github.com/khalmohak)",
