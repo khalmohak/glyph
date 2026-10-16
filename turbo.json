@@ -15,6 +15,10 @@
     },
     "test": {
       "outputs": []
+    },
+    "check:exports": {
+      "dependsOn": ["build"],
+      "outputs": []
     }
   }
 }
