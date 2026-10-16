@@ -2,7 +2,7 @@
 
 React components on Tailwind CSS v4 that take their whole look from **one typed theme file**, with the parts every app rebuilds already solved: forms, data tables, app layout, and loading / empty / error states.
 
-[Live showcase](https://khalmohak.github.io/glyph/) · [GitHub](https://github.com/khalmohak/glyph) · [Changelog](https://github.com/khalmohak/glyph/blob/main/packages/ui/CHANGELOG.md)
+[Docs](https://khalmohak.github.io/glyph/) · [Components](https://khalmohak.github.io/glyph/components) · [Showcase](https://khalmohak.github.io/glyph/showcase/) · [GitHub](https://github.com/khalmohak/glyph) · [Changelog](https://github.com/khalmohak/glyph/blob/main/packages/ui/CHANGELOG.md)
 
 ## Install
 

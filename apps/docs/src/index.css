@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@import "@glyphui/ui/styles.css";
+
+html {
+  scroll-padding-top: 5rem;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Syntax colors follow the active Glyph theme. */
+:root {
+  --shiki-foreground: var(--color-foreground);
+  --shiki-background: transparent;
+  --shiki-token-keyword: var(--color-primary);
+  --shiki-token-string: color-mix(in oklab, var(--color-success) 75%, var(--color-foreground));
+  --shiki-token-string-expression: color-mix(
+    in oklab,
+    var(--color-success) 75%,
+    var(--color-foreground)
+  );
+  --shiki-token-comment: var(--color-faint-foreground);
+  --shiki-token-constant: color-mix(in oklab, var(--color-warning) 70%, var(--color-foreground));
+  --shiki-token-function: color-mix(in oklab, var(--color-info) 70%, var(--color-foreground));
+  --shiki-token-parameter: var(--color-foreground);
+  --shiki-token-punctuation: var(--color-muted-foreground);
+  --shiki-token-link: var(--color-primary);
+}
+
+.shiki {
+  margin: 0;
+  background: transparent !important;
+}

@@ -48,14 +48,17 @@ export function Button(inProps: ButtonProps) {
       {...(!asChild && { type: type ?? 'button', disabled: disabled || loading })}
       {...rest}
     >
-      {iconOnly
-        ? icon(loading ? <Spinner size={size === 'lg' ? 'md' : 'sm'} /> : children)
-        : // Children stay direct (no Fragment) so Slot can find the Slottable when asChild is set.
-          [
-            <Fragment key="start">{icon(loading ? <Spinner size="sm" /> : leftIcon)}</Fragment>,
-            <Slot.Slottable key="content">{children}</Slot.Slottable>,
-            <Fragment key="end">{icon(rightIcon)}</Fragment>,
-          ]}
+      {iconOnly && asChild
+        ? // The child element (e.g. a link) holds its own icon; Slot merges button props onto it.
+          children
+        : iconOnly
+          ? icon(loading ? <Spinner size={size === 'lg' ? 'md' : 'sm'} /> : children)
+          : // Children stay direct (no Fragment) so Slot can find the Slottable when asChild is set.
+            [
+              <Fragment key="start">{icon(loading ? <Spinner size="sm" /> : leftIcon)}</Fragment>,
+              <Slot.Slottable key="content">{children}</Slot.Slottable>,
+              <Fragment key="end">{icon(rightIcon)}</Fragment>,
+            ]}
     </Comp>
   )
 }

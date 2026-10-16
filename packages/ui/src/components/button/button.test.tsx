@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { GlyphProvider } from '../../provider'
@@ -48,5 +48,20 @@ describe('Button', () => {
   it('IconButton requires and exposes an accessible name', () => {
     render(<IconButton icon={<svg />} aria-label="Close" />)
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
+  })
+})
+
+describe('Button iconOnly with asChild', () => {
+  it('merges button props onto the child link and keeps its icon', () => {
+    render(
+      <Button iconOnly asChild variant="ghost">
+        <a href="https://github.com" aria-label="GitHub">
+          <svg data-testid="icon" />
+        </a>
+      </Button>,
+    )
+    const link = screen.getByRole('link', { name: 'GitHub' })
+    expect(link).toHaveAttribute('data-slot', 'button')
+    expect(within(link).getByTestId('icon')).toBeInTheDocument()
   })
 })
