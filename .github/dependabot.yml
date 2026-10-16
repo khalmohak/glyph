@@ -8,6 +8,10 @@ updates:
     # Matches the 14-day minimumReleaseAge in pnpm-workspace.yaml.
     cooldown:
       default-days: 14
+    # Major upgrades (TypeScript, Vitest, React...) need a real migration; do them by hand.
+    ignore:
+      - dependency-name: '*'
+        update-types: [version-update:semver-major]
     groups:
       dev-dependencies:
         dependency-type: development
