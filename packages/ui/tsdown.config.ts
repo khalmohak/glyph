@@ -5,6 +5,7 @@ export default defineConfig({
     index: 'src/index.ts',
     form: 'src/patterns/form/index.ts',
     'data-table': 'src/patterns/data-table/index.ts',
+    chart: 'src/patterns/chart/index.ts',
   },
   format: 'esm',
   platform: 'neutral',

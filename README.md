@@ -79,9 +79,11 @@ const form = useForm({ schema, defaultValues })   // zod, valibot, arktype: any 
 
 | Import | What you get |
 |---|---|
-| `@glyphui/ui` | ~30 components on Radix, `AppShell` / `Sidebar` / `Navbar` / `PageHeader`, `Async` + `EmptyState` / `ErrorState`, `GlyphProvider`, `useColorMode`, presets |
+| `@glyphui/ui` | 80+ components on Radix (Modal, DatePicker, Combobox, FileUpload, CommandMenu, Toast...), `AppShell` / `Sidebar` / `Navbar` / `PageHeader`, `Async` + `EmptyState` / `ErrorState`, `GlyphProvider`, `useColorMode`, presets |
 | `@glyphui/ui/form` | `useForm`, `Form`, `FormField`, `FormSubmit`, `FormError` |
 | `@glyphui/ui/data-table` | `DataTable` with sorting, search, selection, paging and loading / empty / error states |
+| `@glyphui/ui/chart` | `LineChart`, `AreaChart`, `BarChart`, `DonutChart`, `Sparkline`, colored by the theme (needs `recharts`) |
+| `@glyphui/blocks` | Page sections: Hero, Pricing, FAQ, Testimonials, Newsletter, AuthCard, SiteFooter and more |
 | `@glyphui/tokens` | The framework-free theme engine, if you only need the CSS variables |
 
 ## Develop
@@ -97,6 +99,7 @@ Showcase deep links: `?theme=brutalist&mode=light`.
 
 ```
 packages/tokens   theme engine (no React)
+packages/blocks   page sections built from @glyphui/ui
 packages/ui       components/, patterns/, provider/, hooks/, utils/, register.ts, themes.ts
 apps/docs         component catalog, examples, prop tables, roadmap (GitHub Pages /glyph/)
 apps/showcase     one app, four themes (GitHub Pages /glyph/showcase/)

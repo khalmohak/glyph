@@ -15,6 +15,7 @@ export const categories = [
   'Typography',
   'Layout',
   'Patterns',
+  'Blocks',
 ] as const
 
 export type Category = (typeof categories)[number]
@@ -26,7 +27,12 @@ export type Category = (typeof categories)[number]
  */
 export type Status = 'stable' | 'beta' | 'planned'
 
-export type Entry = '@glyphui/ui' | '@glyphui/ui/form' | '@glyphui/ui/data-table'
+export type Entry =
+  | '@glyphui/ui'
+  | '@glyphui/ui/form'
+  | '@glyphui/ui/data-table'
+  | '@glyphui/ui/chart'
+  | '@glyphui/blocks'
 
 export interface ExampleMeta {
   /** File name in `examples/` without `.tsx`. */

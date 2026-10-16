@@ -1,0 +1,8 @@
+/*
+ * Import after @glyphui/ui/styles.css so Tailwind generates the classes blocks use:
+ *
+ *   @import "tailwindcss";
+ *   @import "@glyphui/ui/styles.css";
+ *   @import "@glyphui/blocks/styles.css";
+ */
+@source "./src";
