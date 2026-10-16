@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea
+    url: https://github.com/khalmohak/glyph/discussions
+    about: Ask how to do something or share an idea before it becomes an issue.
+  - name: Security vulnerability
+    url: https://github.com/khalmohak/glyph/security/advisories/new
+    about: Report privately. Please don't open a public issue.

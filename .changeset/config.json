@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "khalmohak/glyph"
+    }
+  ],
+  "commit": false,
+  "fixed": [["@glyphkit/tokens", "@glyphkit/ui"]],
+  "access": "public",
+  "baseBranch": "main",
+  "ignore": ["showcase"]
+}

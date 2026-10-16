@@ -1,0 +1,114 @@
+{
+  "name": "@glyphkit/ui",
+  "version": "0.0.0",
+  "description": "React components on Tailwind CSS v4 that take their entire look from one theme file. Forms, data tables, app layouts and async states included.",
+  "license": "MIT",
+  "author": "Mohak Gupta (https://github.com/khalmohak)",
+  "homepage": "https://github.com/khalmohak/glyph#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khalmohak/glyph.git",
+    "directory": "packages/ui"
+  },
+  "bugs": {
+    "url": "https://github.com/khalmohak/glyph/issues"
+  },
+  "keywords": [
+    "react",
+    "tailwindcss",
+    "tailwind",
+    "components",
+    "ui",
+    "design-system",
+    "radix-ui",
+    "theme",
+    "dark-mode",
+    "forms",
+    "data-table"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "@glyphkit/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./form": {
+      "@glyphkit/source": "./src/patterns/form/index.ts",
+      "types": "./dist/form.d.ts",
+      "default": "./dist/form.js"
+    },
+    "./data-table": {
+      "@glyphkit/source": "./src/patterns/data-table/index.ts",
+      "types": "./dist/data-table.d.ts",
+      "default": "./dist/data-table.js"
+    },
+    "./styles.css": "./styles.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "styles.css",
+    "!src/**/*.test.tsx",
+    "!src/**/*.test-d.tsx",
+    "!src/test"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@glyphkit/tokens": "workspace:^",
+    "@standard-schema/spec": "^1.1.0",
+    "clsx": "^2.1.1",
+    "radix-ui": "^1.6.7",
+    "tailwind-merge": "^3.7.0",
+    "tailwind-variants": "^3.3.1"
+  },
+  "peerDependencies": {
+    "@hookform/resolvers": ">=5.1.0",
+    "@tanstack/react-table": "^8.20.0",
+    "react": ">=19",
+    "react-dom": ">=19",
+    "react-hook-form": "^7.55.0",
+    "tailwindcss": ">=4.1"
+  },
+  "peerDependenciesMeta": {
+    "@hookform/resolvers": {
+      "optional": true
+    },
+    "@tanstack/react-table": {
+      "optional": true
+    },
+    "react-hook-form": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@glyphkit/tsconfig": "workspace:*",
+    "@hookform/resolvers": "^5.9.1",
+    "@tanstack/react-table": "^8.21.3",
+    "@testing-library/jest-dom": "^6.10.0",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "jsdom": "^27.4.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-hook-form": "^7.89.0",
+    "tsdown": "^0.23.0",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.7",
+    "zod": "^4.6.5"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

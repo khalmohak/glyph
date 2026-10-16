@@ -1,0 +1,37 @@
+name: Bug report
+description: Something renders or behaves incorrectly.
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting. A minimal reproduction gets bugs fixed fastest.
+  - type: input
+    id: package
+    attributes:
+      label: Package and version
+      placeholder: "@glyphkit/ui 0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: A link (StackBlitz, CodeSandbox, repo) or the smallest code that shows the problem.
+    validations:
+      required: true
+  - type: dropdown
+    id: theme
+    attributes:
+      label: Theme
+      options: [glyph, brutalist, editorial, playful, custom]
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "React 19.2, Tailwind 4.3, Vite 7, Chrome 140, macOS"

@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import "@glyphkit/ui/styles.css";
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+/* Unlayered on purpose: wins over any host page reset when the showcase is embedded. */
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}

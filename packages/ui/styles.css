@@ -1,0 +1,178 @@
+/*
+ * Glyph ↔ Tailwind CSS v4 bridge. Import once, after tailwindcss:
+ *
+ *   @import "tailwindcss";
+ *   @import "@glyphkit/ui/styles.css";
+ *
+ * Values come from the --glyph-* variables that <GlyphProvider theme={...}> injects, so one
+ * stylesheet serves every theme. Your own markup can use the same utilities (bg-primary,
+ * rounded-lg, text-h2, shadow-md, font-display, ...).
+ */
+
+/* Generate the utilities Glyph's components use. */
+@source "./src";
+
+@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+
+@theme inline {
+  --color-background: var(--glyph-background);
+  --color-foreground: var(--glyph-foreground);
+  --color-subtle: var(--glyph-subtle);
+  --color-surface: var(--glyph-surface);
+  --color-raised: var(--glyph-raised);
+  --color-muted: var(--glyph-muted);
+  --color-muted-foreground: var(--glyph-muted-foreground);
+  --color-faint-foreground: var(--glyph-faint-foreground);
+  --color-border: var(--glyph-border);
+  --color-border-strong: var(--glyph-border-strong);
+  --color-input: var(--glyph-input);
+  --color-ring: var(--glyph-ring);
+  --color-primary: var(--glyph-primary);
+  --color-primary-foreground: var(--glyph-primary-foreground);
+  --color-secondary: var(--glyph-secondary);
+  --color-secondary-foreground: var(--glyph-secondary-foreground);
+  --color-success: var(--glyph-success);
+  --color-success-foreground: var(--glyph-success-foreground);
+  --color-warning: var(--glyph-warning);
+  --color-warning-foreground: var(--glyph-warning-foreground);
+  --color-danger: var(--glyph-danger);
+  --color-danger-foreground: var(--glyph-danger-foreground);
+  --color-info: var(--glyph-info);
+  --color-info-foreground: var(--glyph-info-foreground);
+  --color-overlay: var(--glyph-overlay);
+
+  --radius-xs: var(--glyph-radius-xs);
+  --radius-sm: var(--glyph-radius-sm);
+  --radius-md: var(--glyph-radius-md);
+  --radius-lg: var(--glyph-radius-lg);
+  --radius-xl: var(--glyph-radius-xl);
+  --radius-pill: var(--glyph-radius-pill);
+
+  --shadow-xs: var(--glyph-shadow-xs);
+  --shadow-sm: var(--glyph-shadow-sm);
+  --shadow-md: var(--glyph-shadow-md);
+  --shadow-lg: var(--glyph-shadow-lg);
+
+  --font-sans: var(--glyph-font-sans);
+  --font-display: var(--glyph-font-display);
+  --font-serif: var(--glyph-font-serif);
+  --font-mono: var(--glyph-font-mono);
+
+  --text-display: var(--glyph-text-display);
+  --text-display--line-height: var(--glyph-text-display-leading);
+  --text-display--letter-spacing: var(--glyph-text-display-tracking);
+  --text-display--font-weight: var(--glyph-text-display-weight);
+  --text-h1: var(--glyph-text-h1);
+  --text-h1--line-height: var(--glyph-text-h1-leading);
+  --text-h1--letter-spacing: var(--glyph-text-h1-tracking);
+  --text-h1--font-weight: var(--glyph-text-h1-weight);
+  --text-h2: var(--glyph-text-h2);
+  --text-h2--line-height: var(--glyph-text-h2-leading);
+  --text-h2--letter-spacing: var(--glyph-text-h2-tracking);
+  --text-h2--font-weight: var(--glyph-text-h2-weight);
+  --text-h3: var(--glyph-text-h3);
+  --text-h3--line-height: var(--glyph-text-h3-leading);
+  --text-h3--letter-spacing: var(--glyph-text-h3-tracking);
+  --text-h3--font-weight: var(--glyph-text-h3-weight);
+  --text-h4: var(--glyph-text-h4);
+  --text-h4--line-height: var(--glyph-text-h4-leading);
+  --text-h4--letter-spacing: var(--glyph-text-h4-tracking);
+  --text-h4--font-weight: var(--glyph-text-h4-weight);
+  --text-lead: var(--glyph-text-lead);
+  --text-lead--line-height: var(--glyph-text-lead-leading);
+  --text-lead--letter-spacing: var(--glyph-text-lead-tracking);
+  --text-lead--font-weight: var(--glyph-text-lead-weight);
+  --text-body: var(--glyph-text-body);
+  --text-body--line-height: var(--glyph-text-body-leading);
+  --text-body--letter-spacing: var(--glyph-text-body-tracking);
+  --text-body--font-weight: var(--glyph-text-body-weight);
+  --text-small: var(--glyph-text-small);
+  --text-small--line-height: var(--glyph-text-small-leading);
+  --text-small--letter-spacing: var(--glyph-text-small-tracking);
+  --text-small--font-weight: var(--glyph-text-small-weight);
+  --text-caption: var(--glyph-text-caption);
+  --text-caption--line-height: var(--glyph-text-caption-leading);
+  --text-caption--letter-spacing: var(--glyph-text-caption-tracking);
+  --text-caption--font-weight: var(--glyph-text-caption-weight);
+
+  --ease-standard: var(--glyph-ease-standard);
+  --ease-emphasized: var(--glyph-ease-emphasized);
+
+  --animate-pop-in: glyph-pop-in var(--glyph-duration-fast) var(--glyph-ease-standard);
+  --animate-fade-in: glyph-fade-in var(--glyph-duration-base) var(--glyph-ease-standard);
+  --animate-slide-in-left: glyph-slide-in-left var(--glyph-duration-slow) var(--glyph-ease-standard);
+  --animate-slide-in-top: glyph-slide-in-top var(--glyph-duration-slow) var(--glyph-ease-standard);
+}
+
+@keyframes glyph-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.98);
+  }
+}
+@keyframes glyph-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes glyph-slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+}
+@keyframes glyph-slide-in-top {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    font-feature-settings: var(--glyph-font-features);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-primary) 30%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

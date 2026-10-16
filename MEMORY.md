@@ -1,0 +1,1 @@
+- [Glyph design taste](glyph-design-taste.md) — Linear/Vercel, dark-first, Geist, blue accent, soft shadows; show visuals before deciding

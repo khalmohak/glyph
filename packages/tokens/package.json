@@ -1,0 +1,55 @@
+{
+  "name": "@glyphkit/tokens",
+  "version": "0.0.0",
+  "description": "Framework-agnostic theme engine for Glyph: token schema, defineTheme, CSS generation and presets.",
+  "license": "MIT",
+  "author": "Mohak Gupta (https://github.com/khalmohak)",
+  "homepage": "https://github.com/khalmohak/glyph#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khalmohak/glyph.git",
+    "directory": "packages/tokens"
+  },
+  "bugs": {
+    "url": "https://github.com/khalmohak/glyph/issues"
+  },
+  "keywords": [
+    "design-tokens",
+    "theme",
+    "oklch",
+    "css-variables",
+    "tailwindcss",
+    "design-system"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@glyphkit/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.test.ts",
+    "!src/**/*.test-d.ts"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@glyphkit/tsconfig": "workspace:*",
+    "tsdown": "^0.23.0",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.7"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
