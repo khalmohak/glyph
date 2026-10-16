@@ -1,5 +1,28 @@
 # @glyphui/ui
 
+## 0.2.0
+
+### Minor Changes
+
+- [#14](https://github.com/khalmohak/glyph/pull/14) [`dcac22c`](https://github.com/khalmohak/glyph/commit/dcac22c01ca3fa45bd4bf300df62ff255cd31c92) Thanks [@khalmohak](https://github.com/khalmohak)! - 25 new components, all themed by tokens and registered for typed theme overrides:
+
+  - Overlays: Dialog, Sheet, Popover, DropdownMenu, AlertDialog with `useConfirm()` (`await confirm({ title, tone: 'danger' })`), and Toast (`toast()`, `toast.promise`).
+  - Navigation: Breadcrumb, Pagination, Link, CommandMenu with a ⌘K shortcut hook.
+  - Forms: RadioGroup (with option cards), Slider (single and range), Combobox (searchable, single or multiple, typed values).
+  - Feedback: Alert, Banner, Progress and ProgressCircle.
+  - Data display: Accordion, DescriptionList, StatCard.
+  - Typography: Code, CodeBlock, Blockquote, Prose.
+  - Layout: Grid, AspectRatio, ScrollArea.
+
+  GlyphProvider now provides `useConfirm()` everywhere and takes an optional `toaster` prop. Button supports `iconOnly` together with `asChild`.
+
+### Patch Changes
+
+- [#13](https://github.com/khalmohak/glyph/pull/13) [`366a4ab`](https://github.com/khalmohak/glyph/commit/366a4ab9cc414741181386c5dd0ab33e3b6415cc) Thanks [@khalmohak](https://github.com/khalmohak)! - Badge no longer stretches to full width inside flex-column containers such as Card.
+
+- Updated dependencies []:
+  - @glyphui/tokens@0.2.0
+
 ## 0.1.1
 
 ### Patch Changes
