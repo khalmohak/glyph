@@ -9,7 +9,7 @@ import {
   Text,
   ThemeScope,
   useColorMode,
-} from '@glyphkit/ui'
+} from '@glyphui/ui'
 import { ArrowRight } from 'lucide-react'
 import { useThemeChoice } from '../app'
 import { CodeBlock } from '../components/code-block'
@@ -17,7 +17,7 @@ import { CopyButton } from '../components/copy-button'
 import { themeOptions, themes } from '../glyph.theme'
 
 const themeFile = `
-import { defineTheme, presets } from '@glyphkit/ui'
+import { defineTheme, presets } from '@glyphui/ui'
 
 export default defineTheme({
   name: 'acme',
@@ -60,10 +60,10 @@ export function Hero() {
             <CopyButton
               size="lg"
               variant="outline"
-              text="pnpm add @glyphkit/ui"
+              text="pnpm add @glyphui/ui"
               className="font-mono"
             >
-              pnpm add @glyphkit/ui
+              pnpm add @glyphui/ui
             </CopyButton>
           </div>
         </div>

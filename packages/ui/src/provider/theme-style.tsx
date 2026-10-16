@@ -1,4 +1,4 @@
-import { type Theme, themeToCss } from '@glyphkit/tokens'
+import { type Theme, themeToCss } from '@glyphui/tokens'
 import { useMemo } from 'react'
 
 interface ThemeStyleProps {

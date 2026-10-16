@@ -1,4 +1,4 @@
-import type { ComponentName, GlyphComponentRegistry } from '@glyphkit/tokens'
+import type { ComponentName, GlyphComponentRegistry } from '@glyphui/tokens'
 import { useContext } from 'react'
 import { GlyphContext } from '../provider/glyph-context'
 

@@ -73,7 +73,7 @@ export const dataTableStyles = tv({
   defaultVariants: { variant: 'card' },
 })
 
-declare module '@glyphkit/tokens' {
+declare module '@glyphui/tokens' {
   interface GlyphComponentRegistry {
     DataTable: StylesEntry<typeof dataTableStyles>
   }

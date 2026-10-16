@@ -1,5 +1,5 @@
 {
-  "name": "@glyphkit/tokens",
+  "name": "@glyphui/tokens",
   "version": "0.0.0",
   "description": "Framework-agnostic theme engine for Glyph: token schema, defineTheme, CSS generation and presets.",
   "license": "MIT",
@@ -25,7 +25,7 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "@glyphkit/source": "./src/index.ts",
+      "@glyphui/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "@glyphkit/tsconfig": "workspace:*",
+    "@glyphui/tsconfig": "workspace:*",
     "tsdown": "^0.23.0",
     "typescript": "~5.9.3",
     "vitest": "^3.2.7"

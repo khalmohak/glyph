@@ -1,4 +1,4 @@
-import type { Theme } from '@glyphkit/tokens'
+import type { Theme } from '@glyphui/tokens'
 import { Tooltip } from 'radix-ui'
 import { type ReactNode, useMemo } from 'react'
 import { glyph } from '../themes'

@@ -1,4 +1,4 @@
-import { Button, Navbar } from '@glyphkit/ui'
+import { Button, Navbar } from '@glyphui/ui'
 import { Logo } from '../components/logo'
 import { ModeToggle } from '../components/mode-toggle'
 import { ThemeSelect } from '../components/theme-select'

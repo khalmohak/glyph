@@ -1,4 +1,4 @@
-import { type PresetName, Select, SelectItem } from '@glyphkit/ui'
+import { type PresetName, Select, SelectItem } from '@glyphui/ui'
 import { useThemeChoice } from '../app'
 import { themeOptions } from '../glyph.theme'
 

@@ -10,8 +10,8 @@ import {
   Select,
   SelectItem,
   Text,
-} from '@glyphkit/ui'
-import { Form, FormError, FormField, FormSubmit, useForm } from '@glyphkit/ui/form'
+} from '@glyphui/ui'
+import { Form, FormError, FormField, FormSubmit, useForm } from '@glyphui/ui/form'
 import { CheckCircle2 } from 'lucide-react'
 import { useState } from 'react'
 import { z } from 'zod'

@@ -1,4 +1,4 @@
-import { GlyphProvider, type PresetName } from '@glyphkit/ui'
+import { GlyphProvider, type PresetName } from '@glyphui/ui'
 import { createContext, useContext } from 'react'
 import { themeOptions, themes } from './glyph.theme'
 import { Showcase } from './sections/components'

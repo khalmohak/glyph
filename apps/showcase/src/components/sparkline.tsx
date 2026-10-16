@@ -1,4 +1,4 @@
-import { cn } from '@glyphkit/ui'
+import { cn } from '@glyphui/ui'
 import { useId } from 'react'
 
 /** Small trend line with an area fill. Colored by `currentColor`. */

@@ -1,4 +1,4 @@
-import type { Theme } from '@glyphkit/tokens'
+import type { Theme } from '@glyphui/tokens'
 import {
   createContext,
   type ElementType,

@@ -1,4 +1,4 @@
-import { Container, Eyebrow, Heading, Section, Text } from '@glyphkit/ui'
+import { Container, Eyebrow, Heading, Section, Text } from '@glyphui/ui'
 import { AppDemo } from './patterns/app-demo'
 import { FormDemo } from './patterns/form-demo'
 

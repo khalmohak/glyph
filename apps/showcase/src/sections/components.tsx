@@ -29,7 +29,7 @@ import {
   TabsTrigger,
   Text,
   Tooltip,
-} from '@glyphkit/ui'
+} from '@glyphui/ui'
 import { ArrowUpRight, Bell, Check, Globe, Plus, Search, Settings2 } from 'lucide-react'
 import { useState } from 'react'
 import { Sparkline } from '../components/sparkline'

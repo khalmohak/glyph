@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "@glyphkit/ui/styles.css";
+@import "@glyphui/ui/styles.css";
 
 html {
   scroll-behavior: smooth;

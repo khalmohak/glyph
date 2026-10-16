@@ -8,6 +8,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     // Use Glyph's TypeScript source in the monorepo: instant HMR, no library rebuilds.
-    conditions: ['@glyphkit/source', ...defaultClientConditions],
+    conditions: ['@glyphui/source', ...defaultClientConditions],
   },
 })

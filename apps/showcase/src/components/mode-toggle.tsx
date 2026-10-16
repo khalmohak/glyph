@@ -1,4 +1,4 @@
-import { type ColorModePreference, IconButton, Tooltip, useColorMode } from '@glyphkit/ui'
+import { type ColorModePreference, IconButton, Tooltip, useColorMode } from '@glyphui/ui'
 import { Monitor, Moon, Sun } from 'lucide-react'
 
 const next: Record<ColorModePreference, ColorModePreference> = {

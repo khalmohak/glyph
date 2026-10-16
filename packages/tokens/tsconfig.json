@@ -1,4 +1,4 @@
 {
-  "extends": "@glyphkit/tsconfig/library.json",
+  "extends": "@glyphui/tsconfig/library.json",
   "include": ["src", "*.config.ts"]
 }

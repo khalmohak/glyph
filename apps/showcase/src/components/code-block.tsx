@@ -1,4 +1,4 @@
-import { cn } from '@glyphkit/ui'
+import { cn } from '@glyphui/ui'
 
 /** Minimal code display. Highlights strings and comments only; enough for short samples. */
 export function CodeBlock({

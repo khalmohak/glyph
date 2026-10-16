@@ -1,4 +1,4 @@
-import { type ColorMode, scopeSelector, type Theme } from '@glyphkit/tokens'
+import { type ColorMode, scopeSelector, type Theme } from '@glyphui/tokens'
 import { Slot } from 'radix-ui'
 import { type ComponentProps, useContext, useMemo } from 'react'
 import { cn } from '../utils/cn'

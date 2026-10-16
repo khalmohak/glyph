@@ -9,7 +9,7 @@ import {
   type TextToken,
   useColorMode,
   useGlyph,
-} from '@glyphkit/ui'
+} from '@glyphui/ui'
 
 const specimens: { token: TextToken; sample: string; className?: string }[] = [
   { token: 'display', sample: 'Ship the details' },

@@ -1,4 +1,4 @@
-import { textTokens } from '@glyphkit/tokens'
+import { textTokens } from '@glyphui/tokens'
 
 /**
  * Teaches tailwind-merge about Glyph's custom utilities so `cn('text-h1', 'text-small')`

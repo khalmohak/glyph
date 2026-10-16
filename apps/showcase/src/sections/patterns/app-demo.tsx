@@ -20,8 +20,8 @@ import {
   TabsTrigger,
   Text,
   useAppShell,
-} from '@glyphkit/ui'
-import { createColumnHelper, DataTable } from '@glyphkit/ui/data-table'
+} from '@glyphui/ui'
+import { createColumnHelper, DataTable } from '@glyphui/ui/data-table'
 import {
   ChevronsUpDown,
   CircleDot,

@@ -1,4 +1,4 @@
-import { Button, type ButtonProps } from '@glyphkit/ui'
+import { Button, type ButtonProps } from '@glyphui/ui'
 import { Check, Copy } from 'lucide-react'
 import { useState } from 'react'
 

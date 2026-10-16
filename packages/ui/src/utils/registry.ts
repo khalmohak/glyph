@@ -1,4 +1,4 @@
-import type { ComponentEntry } from '@glyphkit/tokens'
+import type { ComponentEntry } from '@glyphui/tokens'
 import type { VariantProps } from 'tailwind-variants'
 
 /** Derives a registry entry (variant props + slot names) from a component's `tv()` styles. */

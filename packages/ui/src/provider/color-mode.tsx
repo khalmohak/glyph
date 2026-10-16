@@ -1,4 +1,4 @@
-import type { ColorMode } from '@glyphkit/tokens'
+import type { ColorMode } from '@glyphui/tokens'
 import {
   createContext,
   type ReactNode,

@@ -2,7 +2,7 @@
  * Glyph ↔ Tailwind CSS v4 bridge. Import once, after tailwindcss:
  *
  *   @import "tailwindcss";
- *   @import "@glyphkit/ui/styles.css";
+ *   @import "@glyphui/ui/styles.css";
  *
  * Values come from the --glyph-* variables that <GlyphProvider theme={...}> injects, so one
  * stylesheet serves every theme. Your own markup can use the same utilities (bg-primary,

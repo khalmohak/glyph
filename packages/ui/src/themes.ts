@@ -1,8 +1,8 @@
 import './register'
-import { defineTheme, presets as tokenPresets } from '@glyphkit/tokens'
+import { defineTheme, presets as tokenPresets } from '@glyphui/tokens'
 
 /**
- * Built-in themes: the token presets from @glyphkit/tokens plus per-component recipes.
+ * Built-in themes: the token presets from @glyphui/tokens plus per-component recipes.
  * Extend any of them in your theme file: `defineTheme({ name: 'acme', extends: presets.glyph, ... })`.
  */
 

@@ -3,7 +3,7 @@
  * augment it with each component's variant and slot types:
  *
  * ```ts
- * declare module '@glyphkit/tokens' {
+ * declare module '@glyphui/tokens' {
  *   interface GlyphComponentRegistry {
  *     Button: ComponentEntry<ButtonVariants, 'base'>
  *   }

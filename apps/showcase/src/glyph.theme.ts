@@ -1,4 +1,4 @@
-import { type PresetName, presets, type Theme } from '@glyphkit/ui'
+import { type PresetName, presets, type Theme } from '@glyphui/ui'
 
 /**
  * The design file. A real app exports one theme here, e.g.

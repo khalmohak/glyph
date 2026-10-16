@@ -1,4 +1,4 @@
-import { Container, Text } from '@glyphkit/ui'
+import { Container, Text } from '@glyphui/ui'
 import { LogoMark } from '../components/logo'
 
 export function Footer() {

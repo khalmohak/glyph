@@ -36,7 +36,7 @@ import type {
 import type { stateStyles } from './patterns/async/states'
 import type { StylesEntry } from './utils/registry'
 
-declare module '@glyphkit/tokens' {
+declare module '@glyphui/tokens' {
   interface GlyphComponentRegistry {
     AppShell: StylesEntry<typeof appShellStyles>
     Avatar: StylesEntry<typeof avatarStyles>

@@ -7,7 +7,7 @@
 React components on Tailwind CSS v4 that take their whole look from one typed theme, with the parts every app rebuilds (forms, data tables, app layout, loading / empty / error states) already solved.
 
 [![CI](https://github.com/khalmohak/glyph/actions/workflows/ci.yml/badge.svg)](https://github.com/khalmohak/glyph/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@glyphkit/ui?label=%40glyphkit%2Fui)](https://www.npmjs.com/package/@glyphkit/ui)
+[![npm](https://img.shields.io/npm/v/@glyphui/ui?label=%40glyphui%2Fui)](https://www.npmjs.com/package/@glyphui/ui)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 [Live showcase](https://khalmohak.github.io/glyph/) · [Contributing](./CONTRIBUTING.md) · [Changelog](./packages/ui/CHANGELOG.md)
@@ -17,7 +17,7 @@ React components on Tailwind CSS v4 that take their whole look from one typed th
 ## Install
 
 ```sh
-pnpm add @glyphkit/ui
+pnpm add @glyphui/ui
 # optional, for the form and data-table patterns
 pnpm add react-hook-form @hookform/resolvers zod @tanstack/react-table
 ```
@@ -25,14 +25,14 @@ pnpm add react-hook-form @hookform/resolvers zod @tanstack/react-table
 ```css
 /* index.css */
 @import "tailwindcss";
-@import "@glyphkit/ui/styles.css";
+@import "@glyphui/ui/styles.css";
 ```
 
 ## One theme file
 
 ```ts
 // glyph.theme.ts
-import { defineTheme, presets } from '@glyphkit/ui'
+import { defineTheme, presets } from '@glyphui/ui'
 
 export default defineTheme({
   name: 'acme',
@@ -47,7 +47,7 @@ export default defineTheme({
 
 ```tsx
 // main.tsx
-import { GlyphProvider } from '@glyphkit/ui'
+import { GlyphProvider } from '@glyphui/ui'
 import theme from './glyph.theme'
 
 createRoot(root).render(
@@ -62,7 +62,7 @@ A theme sets color (per light and dark mode), typography (a nine-step scale with
 ## Solved patterns
 
 ```tsx
-import { Form, FormField, FormSubmit, useForm } from '@glyphkit/ui/form'
+import { Form, FormField, FormSubmit, useForm } from '@glyphui/ui/form'
 
 const form = useForm({ schema, defaultValues })   // zod, valibot, arktype: any Standard Schema
 
@@ -79,10 +79,10 @@ const form = useForm({ schema, defaultValues })   // zod, valibot, arktype: any 
 
 | Import | What you get |
 |---|---|
-| `@glyphkit/ui` | ~30 components on Radix, `AppShell` / `Sidebar` / `Navbar` / `PageHeader`, `Async` + `EmptyState` / `ErrorState`, `GlyphProvider`, `useColorMode`, presets |
-| `@glyphkit/ui/form` | `useForm`, `Form`, `FormField`, `FormSubmit`, `FormError` |
-| `@glyphkit/ui/data-table` | `DataTable` with sorting, search, selection, paging and loading / empty / error states |
-| `@glyphkit/tokens` | The framework-free theme engine, if you only need the CSS variables |
+| `@glyphui/ui` | ~30 components on Radix, `AppShell` / `Sidebar` / `Navbar` / `PageHeader`, `Async` + `EmptyState` / `ErrorState`, `GlyphProvider`, `useColorMode`, presets |
+| `@glyphui/ui/form` | `useForm`, `Form`, `FormField`, `FormSubmit`, `FormError` |
+| `@glyphui/ui/data-table` | `DataTable` with sorting, search, selection, paging and loading / empty / error states |
+| `@glyphui/tokens` | The framework-free theme engine, if you only need the CSS variables |
 
 ## Develop
 

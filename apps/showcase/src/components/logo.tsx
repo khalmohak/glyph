@@ -1,4 +1,4 @@
-import { cn } from '@glyphkit/ui'
+import { cn } from '@glyphui/ui'
 
 export function LogoMark({ className }: { className?: string }) {
   return (

@@ -7,7 +7,7 @@
     }
   ],
   "commit": false,
-  "fixed": [["@glyphkit/tokens", "@glyphkit/ui"]],
+  "fixed": [["@glyphui/tokens", "@glyphui/ui"]],
   "access": "public",
   "baseBranch": "main",
   "ignore": ["showcase"]

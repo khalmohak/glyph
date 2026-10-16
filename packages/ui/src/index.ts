@@ -1,6 +1,6 @@
 import './register'
 
-// Theme engine (re-exported so apps only import from @glyphkit/ui).
+// Theme engine (re-exported so apps only import from @glyphui/ui).
 export {
   type ColorMode,
   type ColorToken,
@@ -14,7 +14,7 @@ export {
   type Tone,
   themeToCss,
   tokenVar,
-} from '@glyphkit/tokens'
+} from '@glyphui/tokens'
 // Components
 export * from './components/avatar'
 export * from './components/badge'
