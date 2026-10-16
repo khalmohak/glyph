@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Glyph Docs</title>
+    <meta name="description" content="Docs and component catalog for Glyph, React components on Tailwind CSS v4 themed by one file." />
+    <script>
+      ;(() => {
+        const root = document.documentElement
+        let mode = null
+        try {
+          mode = localStorage.getItem('glyph-mode')
+        } catch {}
+        if (mode !== 'light' && mode !== 'dark' && mode !== 'system') mode = 'dark'
+        if (mode === 'system') mode = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        root.dataset.mode = mode
+        root.style.colorScheme = mode
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

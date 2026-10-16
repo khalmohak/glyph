@@ -15,6 +15,19 @@ Every component follows the same shape so any of them can be fixed without learn
 9. **Form controls call `useFieldControl(props)`** so `Field` can wire id, `aria-describedby`, `aria-invalid`, `required` and `disabled`.
 10. **Export** the component, its `Props` type and its styles from the folder's `index.ts`, then from `src/index.ts`.
 
+## Documenting a component
+
+Every component has a catalog entry in `apps/docs/src/content/<slug>/`:
+
+- `meta.ts`: `defineDoc({ name, slug, category, status, description, exports, source, propsOf, examples, notes })`
+- `examples/<file>.tsx`: one file per example, whose default export renders it. The docs show this file's source verbatim, so examples are type-checked and can't drift.
+
+Prop tables are extracted from the TypeScript source at build time, and the Theming section reads slots and variants from the component's `*Styles`. Write JSDoc on props; it becomes the description.
+
+`pnpm --filter docs test` fails if any runtime export of `@glyphui/ui`, `/form` or `/data-table` is missing from a `meta.ts`, if a listed export no longer exists, or if examples and files disagree. Planned components live in `apps/docs/src/content/roadmap.ts`; move an entry into its own folder when it ships.
+
+Status: `stable` (API settled), `beta` (usable, may change), `planned` (roadmap).
+
 ## Type contracts
 
 `*.test-d.ts(x)` files are checked by `pnpm typecheck` and never run. Use `// @ts-expect-error` to lock in what must *not* compile.

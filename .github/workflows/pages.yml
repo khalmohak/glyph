@@ -1,4 +1,4 @@
-name: Showcase
+name: Docs and showcase
 
 on:
   push:
@@ -25,10 +25,19 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo run build --filter=showcase
+      - run: pnpm turbo run build --filter=docs --filter=showcase
+        env:
+          DOCS_BASE: /glyph/
+      # Docs at /glyph/, showcase at /glyph/showcase/. 404.html lets deep links load the SPA.
+      - run: |
+          mkdir -p site
+          cp -R apps/docs/dist/. site/
+          cp site/index.html site/404.html
+          mkdir -p site/showcase
+          cp -R apps/showcase/dist/. site/showcase/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: apps/showcase/dist
+          path: site
 
   deploy:
     needs: build

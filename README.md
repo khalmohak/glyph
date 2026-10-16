@@ -10,7 +10,7 @@ React components on Tailwind CSS v4 that take their whole look from one typed th
 [![npm](https://img.shields.io/npm/v/@glyphui/ui?label=%40glyphui%2Fui)](https://www.npmjs.com/package/@glyphui/ui)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-[Live showcase](https://khalmohak.github.io/glyph/) · [Contributing](./CONTRIBUTING.md) · [Changelog](./packages/ui/CHANGELOG.md)
+[Docs](https://khalmohak.github.io/glyph/) · [Components](https://khalmohak.github.io/glyph/components) · [Showcase](https://khalmohak.github.io/glyph/showcase/) · [Contributing](./CONTRIBUTING.md) · [Changelog](./packages/ui/CHANGELOG.md)
 
 </div>
 
@@ -88,7 +88,7 @@ const form = useForm({ schema, defaultValues })   // zod, valibot, arktype: any 
 
 ```sh
 pnpm install
-pnpm dev          # showcase at http://localhost:5173, running on library source (instant HMR)
+pnpm dev          # showcase at :5173 and docs at :5174, running on library source (instant HMR)
 pnpm check        # lint, typecheck (incl. type tests), tests, build
 pnpm changeset    # describe a change to a published package
 ```
@@ -98,7 +98,8 @@ Showcase deep links: `?theme=brutalist&mode=light`.
 ```
 packages/tokens   theme engine (no React)
 packages/ui       components/, patterns/, provider/, hooks/, utils/, register.ts, themes.ts
-apps/showcase     one app, four themes (deployed to GitHub Pages)
+apps/docs         component catalog, examples, prop tables, roadmap (GitHub Pages /glyph/)
+apps/showcase     one app, four themes (GitHub Pages /glyph/showcase/)
 tooling/tsconfig  shared TypeScript configs
 ```
 
