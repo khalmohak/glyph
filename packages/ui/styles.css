@@ -102,6 +102,22 @@
   --animate-fade-in: glyph-fade-in var(--glyph-duration-base) var(--glyph-ease-standard);
   --animate-slide-in-left: glyph-slide-in-left var(--glyph-duration-slow) var(--glyph-ease-standard);
   --animate-slide-in-top: glyph-slide-in-top var(--glyph-duration-slow) var(--glyph-ease-standard);
+  --animate-fade-out: glyph-fade-out var(--glyph-duration-fast) var(--glyph-ease-standard);
+  --animate-sheet-in-right: glyph-sheet-in-right var(--glyph-duration-slow)
+    var(--glyph-ease-standard);
+  --animate-sheet-out-right: glyph-sheet-out-right var(--glyph-duration-base)
+    var(--glyph-ease-standard);
+  --animate-sheet-in-left: glyph-sheet-in-left var(--glyph-duration-slow) var(--glyph-ease-standard);
+  --animate-sheet-out-left: glyph-sheet-out-left var(--glyph-duration-base)
+    var(--glyph-ease-standard);
+  --animate-sheet-in-top: glyph-sheet-in-top var(--glyph-duration-slow) var(--glyph-ease-standard);
+  --animate-sheet-out-top: glyph-sheet-out-top var(--glyph-duration-base) var(--glyph-ease-standard);
+  --animate-sheet-in-bottom: glyph-sheet-in-bottom var(--glyph-duration-slow)
+    var(--glyph-ease-standard);
+  --animate-sheet-out-bottom: glyph-sheet-out-bottom var(--glyph-duration-base)
+    var(--glyph-ease-standard);
+  --animate-collapse-down: glyph-collapse-down var(--glyph-duration-base) var(--glyph-ease-standard);
+  --animate-collapse-up: glyph-collapse-up var(--glyph-duration-base) var(--glyph-ease-standard);
 }
 
 @keyframes glyph-pop-in {

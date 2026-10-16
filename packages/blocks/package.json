@@ -1,0 +1,76 @@
+{
+  "name": "@glyphui/blocks",
+  "version": "0.2.0",
+  "description": "Ready-made page sections for Glyph: hero, pricing, FAQ, testimonials, auth and more. Themed entirely by your Glyph theme.",
+  "license": "MIT",
+  "author": "Mohak Gupta (https://github.com/khalmohak)",
+  "homepage": "https://github.com/khalmohak/glyph#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khalmohak/glyph.git",
+    "directory": "packages/blocks"
+  },
+  "bugs": {
+    "url": "https://github.com/khalmohak/glyph/issues"
+  },
+  "keywords": [
+    "react",
+    "tailwindcss",
+    "landing-page",
+    "sections",
+    "blocks",
+    "design-system"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "@glyphui/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./styles.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "styles.css",
+    "!src/**/*.test.tsx"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc",
+    "test": "vitest run",
+    "check:exports": "attw --pack . --profile esm-only --exclude-entrypoints ./styles.css"
+  },
+  "dependencies": {
+    "@glyphui/ui": "workspace:^"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "react-dom": ">=19",
+    "tailwindcss": ">=4.1"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@glyphui/tsconfig": "workspace:*",
+    "@testing-library/jest-dom": "^6.10.0",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "jsdom": "^27.4.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tsdown": "^0.23.0",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.7"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

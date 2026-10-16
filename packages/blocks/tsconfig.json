@@ -1,0 +1,5 @@
+{
+  "extends": "@glyphui/tsconfig/library.json",
+  "compilerOptions": { "types": ["vitest/globals", "@testing-library/jest-dom"] },
+  "include": ["src", "*.config.ts"]
+}

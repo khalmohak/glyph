@@ -7,8 +7,8 @@
     }
   ],
   "commit": false,
-  "fixed": [["@glyphui/tokens", "@glyphui/ui"]],
+  "fixed": [["@glyphui/tokens", "@glyphui/ui", "@glyphui/blocks"]],
   "access": "public",
   "baseBranch": "main",
-  "ignore": ["showcase"]
+  "ignore": ["showcase", "docs"]
 }

@@ -26,3 +26,5 @@ globalThis.ResizeObserver ??= class {
   unobserve() {}
   disconnect() {}
 }
+// input-otp measures layout with elementFromPoint, which jsdom lacks.
+document.elementFromPoint ??= () => null

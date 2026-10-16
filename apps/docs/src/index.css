@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@glyphui/ui/styles.css";
+@import "@glyphui/blocks/styles.css";
 
 html {
   scroll-padding-top: 5rem;

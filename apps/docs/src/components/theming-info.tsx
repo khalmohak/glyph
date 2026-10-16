@@ -1,5 +1,7 @@
+import * as blocks from '@glyphui/blocks'
 import * as ui from '@glyphui/ui'
 import { Text } from '@glyphui/ui'
+import * as chart from '@glyphui/ui/chart'
 import * as dataTable from '@glyphui/ui/data-table'
 import * as form from '@glyphui/ui/form'
 import { HighlightedCode } from './snippet'
@@ -10,7 +12,7 @@ interface StylesFn {
   defaultVariants?: Record<string, unknown>
 }
 
-const modules: Record<string, unknown>[] = [ui, form, dataTable]
+const modules: Record<string, unknown>[] = [ui, form, dataTable, chart, blocks]
 
 export function findStyles(component: string): StylesFn | undefined {
   const key = `${component[0]!.toLowerCase()}${component.slice(1)}Styles`

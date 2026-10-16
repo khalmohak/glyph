@@ -15,10 +15,10 @@ export const accordionStyles = tv({
     ],
     chevron:
       'size-4 shrink-0 text-faint-foreground transition-transform duration-(--glyph-duration-base) ease-standard group-data-[state=open]:rotate-180',
-    content: 'overflow-hidden text-small text-muted-foreground',
-    // Opening fades and slides in (via @starting-style); closing is instant.
-    contentInner:
-      'pb-4 transition-[opacity,translate] duration-(--glyph-duration-base) ease-standard starting:-translate-y-1 starting:opacity-0',
+    content:
+      'overflow-hidden text-small text-muted-foreground data-[state=open]:animate-collapse-down data-[state=closed]:animate-collapse-up',
+    // Height animates open and closed using Radix's measured content height.
+    contentInner: 'pb-4',
   },
   variants: {
     variant: {

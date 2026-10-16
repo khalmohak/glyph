@@ -1,4 +1,6 @@
+import * as blocks from '@glyphui/blocks'
 import * as ui from '@glyphui/ui'
+import * as chart from '@glyphui/ui/chart'
 import * as dataTable from '@glyphui/ui/data-table'
 import * as form from '@glyphui/ui/form'
 import { describe, expect, it } from 'vitest'
@@ -8,6 +10,8 @@ const entries = {
   '@glyphui/ui': ui,
   '@glyphui/ui/form': form,
   '@glyphui/ui/data-table': dataTable,
+  '@glyphui/ui/chart': chart,
+  '@glyphui/blocks': blocks,
 } as const
 
 const exampleFiles = Object.keys(import.meta.glob('./content/*/examples/*.tsx')).map((path) =>
