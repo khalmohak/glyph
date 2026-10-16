@@ -15,7 +15,7 @@
     "format": "biome check --write .",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm check:exports",
     "changeset": "changeset",
-    "release": "turbo run build check:exports --filter='./packages/*' && changeset publish",
+    "release": "turbo run build check:exports --filter='./packages/*' && pnpm publish -r --access public --provenance --no-git-checks && changeset tag",
     "prepare": "simple-git-hooks",
     "check:exports": "turbo run check:exports"
   },
