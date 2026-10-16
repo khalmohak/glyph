@@ -1,5 +1,11 @@
 # @glyphui/tokens
 
+## 0.1.1
+
+### Patch Changes
+
+- [`7ea3b02`](https://github.com/khalmohak/glyph/commit/7ea3b022b384ff21be92438c86eda938e9c77f54) Thanks [@khalmohak](https://github.com/khalmohak)! - Publish with npm provenance, so every release links to the commit and workflow that built it.
+
 ## 0.1.0
 
 ### Minor Changes
