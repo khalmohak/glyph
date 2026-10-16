@@ -46,7 +46,7 @@ type Variant = keyof (typeof tones)[Tone]
 export const badgeStyles = tv({
   slots: {
     base: [
-      'inline-flex h-5.5 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-pill border-transparent px-2',
+      'inline-flex h-5.5 w-fit shrink-0 items-center gap-1.5 whitespace-nowrap rounded-pill border-transparent px-2',
       'text-caption tabular-nums',
       themedBorder,
     ],
