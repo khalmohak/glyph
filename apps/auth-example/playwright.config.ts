@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const PORT = 4420
+// Override with PLAYWRIGHT_PORT to run several checkouts (e.g. git worktrees) side by side.
+const PORT = Number(process.env.PLAYWRIGHT_PORT ?? 4420)
 
 /** Auth journeys through the built example: sign-up to sign-out, guards, expiry, tabs. */
 export default defineConfig({

@@ -1,5 +1,5 @@
 import { format as formatDate, isSameDay } from 'date-fns'
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useRef, useState } from 'react'
 import type { DateRange, Matcher } from 'react-day-picker'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { useControllableState } from '../../hooks/use-controllable-state'
@@ -110,69 +110,64 @@ export function DatePicker(inProps: DatePickerProps) {
   // Controlled `undefined` means "no date", not "uncontrolled".
   const current = 'value' in inProps ? valueProp : value
   const s = datePickerStyles({ size })
+  // Clearing removes the clear button, so focus goes back to the trigger.
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <div className={s.root({ class: [slots.root, className] })}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            ref={triggerRef}
+            type="button"
+            id={id}
+            data-slot="date-picker"
+            disabled={disabled}
+            aria-label={ariaLabel}
+            aria-describedby={ariaDescribedBy}
+            aria-invalid={ariaInvalid}
+            className={s.trigger({ class: [slots.trigger, clearable && 'pe-9'] })}
+          >
+            <CalendarIcon className={s.icon({ class: slots.icon })} />
+            {current ? (
+              <span className={s.value({ class: slots.value })}>{formatDate(current, format)}</span>
+            ) : (
+              <span className={s.placeholder({ class: slots.placeholder })}>{placeholder}</span>
+            )}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          className={s.content({ class: [slots.content, contentClassName] })}
+        >
+          <Calendar
+            mode="single"
+            selected={current}
+            defaultMonth={current}
+            disabled={disabledMatchers(props)}
+            onSelect={(date) => {
+              setValue(date)
+              if (date) setOpen(false)
+            }}
+            autoFocus
+          />
+        </PopoverContent>
+        {name && <input type="hidden" name={name} value={current ? iso(current) : ''} />}
+      </Popover>
+      {clearable && current && !disabled && (
         <button
           type="button"
-          id={id}
-          data-slot="date-picker"
-          disabled={disabled}
-          aria-label={ariaLabel}
-          aria-describedby={ariaDescribedBy}
-          aria-invalid={ariaInvalid}
-          className={s.trigger({ class: [slots.trigger, className] })}
-        >
-          <CalendarIcon className={s.icon({ class: slots.icon })} />
-          {current ? (
-            <span className={s.value({ class: slots.value })}>{formatDate(current, format)}</span>
-          ) : (
-            <span className={s.placeholder({ class: slots.placeholder })}>{placeholder}</span>
-          )}
-          {clearable && current && !disabled && (
-            // biome-ignore lint/a11y/useSemanticElements: nested inside the trigger button, so it can't be a <button>
-            <span
-              role="button"
-              tabIndex={0}
-              aria-label="Clear date"
-              className={s.clear({ class: slots.clear })}
-              onPointerDown={(event) => event.stopPropagation()}
-              onClick={(event) => {
-                event.stopPropagation()
-                setValue(undefined)
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault()
-                  event.stopPropagation()
-                  setValue(undefined)
-                }
-              }}
-            >
-              <ClearIcon />
-            </span>
-          )}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className={s.content({ class: [slots.content, contentClassName] })}
-      >
-        <Calendar
-          mode="single"
-          selected={current}
-          defaultMonth={current}
-          disabled={disabledMatchers(props)}
-          onSelect={(date) => {
-            setValue(date)
-            if (date) setOpen(false)
+          aria-label="Clear date"
+          className={s.clear({ class: slots.clear })}
+          onClick={() => {
+            setValue(undefined)
+            triggerRef.current?.focus()
           }}
-          autoFocus
-        />
-      </PopoverContent>
-      {name && <input type="hidden" name={name} value={current ? iso(current) : ''} />}
-    </Popover>
+        >
+          <ClearIcon />
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -228,95 +223,90 @@ export function DateRangePicker(inProps: DateRangePickerProps) {
   })
   const current = 'value' in inProps ? valueProp : value
   const s = datePickerStyles({ size })
+  // Clearing removes the clear button, so focus goes back to the trigger.
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const label = current ? formatRange(current, format) : ''
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <div className={s.root({ class: [slots.root, className] })}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            ref={triggerRef}
+            type="button"
+            id={id}
+            data-slot="date-range-picker"
+            disabled={disabled}
+            aria-label={ariaLabel}
+            aria-describedby={ariaDescribedBy}
+            aria-invalid={ariaInvalid}
+            className={s.trigger({ class: [slots.trigger, clearable && 'pe-9'] })}
+          >
+            <CalendarIcon className={s.icon({ class: slots.icon })} />
+            {label ? (
+              <span className={s.value({ class: slots.value })}>{label}</span>
+            ) : (
+              <span className={s.placeholder({ class: slots.placeholder })}>{placeholder}</span>
+            )}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          className={s.content({ class: [slots.content, contentClassName] })}
+        >
+          <div className={s.layout({ class: slots.layout })}>
+            {presets && presets.length > 0 && (
+              <div className={s.presets({ class: slots.presets })}>
+                {presets.map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    className={s.preset({ class: slots.preset })}
+                    onClick={() => {
+                      setValue(preset.range())
+                      setOpen(false)
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            <Calendar
+              mode="range"
+              selected={current}
+              defaultMonth={current?.from}
+              numberOfMonths={numberOfMonths}
+              disabled={disabledMatchers(props)}
+              onSelect={(range) => setValue(range)}
+              autoFocus
+            />
+          </div>
+        </PopoverContent>
+        {name && (
+          <>
+            <input
+              type="hidden"
+              name={`${name}.from`}
+              value={current?.from ? iso(current.from) : ''}
+            />
+            <input type="hidden" name={`${name}.to`} value={current?.to ? iso(current.to) : ''} />
+          </>
+        )}
+      </Popover>
+      {clearable && current?.from && !disabled && (
         <button
           type="button"
-          id={id}
-          data-slot="date-range-picker"
-          disabled={disabled}
-          aria-label={ariaLabel}
-          aria-describedby={ariaDescribedBy}
-          aria-invalid={ariaInvalid}
-          className={s.trigger({ class: [slots.trigger, className] })}
+          aria-label="Clear dates"
+          className={s.clear({ class: slots.clear })}
+          onClick={() => {
+            setValue(undefined)
+            triggerRef.current?.focus()
+          }}
         >
-          <CalendarIcon className={s.icon({ class: slots.icon })} />
-          {label ? (
-            <span className={s.value({ class: slots.value })}>{label}</span>
-          ) : (
-            <span className={s.placeholder({ class: slots.placeholder })}>{placeholder}</span>
-          )}
-          {clearable && current?.from && !disabled && (
-            // biome-ignore lint/a11y/useSemanticElements: nested inside the trigger button, so it can't be a <button>
-            <span
-              role="button"
-              tabIndex={0}
-              aria-label="Clear dates"
-              className={s.clear({ class: slots.clear })}
-              onPointerDown={(event) => event.stopPropagation()}
-              onClick={(event) => {
-                event.stopPropagation()
-                setValue(undefined)
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault()
-                  event.stopPropagation()
-                  setValue(undefined)
-                }
-              }}
-            >
-              <ClearIcon />
-            </span>
-          )}
+          <ClearIcon />
         </button>
-      </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className={s.content({ class: [slots.content, contentClassName] })}
-      >
-        <div className={s.layout({ class: slots.layout })}>
-          {presets && presets.length > 0 && (
-            <div className={s.presets({ class: slots.presets })}>
-              {presets.map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  className={s.preset({ class: slots.preset })}
-                  onClick={() => {
-                    setValue(preset.range())
-                    setOpen(false)
-                  }}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          )}
-          <Calendar
-            mode="range"
-            selected={current}
-            defaultMonth={current?.from}
-            numberOfMonths={numberOfMonths}
-            disabled={disabledMatchers(props)}
-            onSelect={(range) => setValue(range)}
-            autoFocus
-          />
-        </div>
-      </PopoverContent>
-      {name && (
-        <>
-          <input
-            type="hidden"
-            name={`${name}.from`}
-            value={current?.from ? iso(current.from) : ''}
-          />
-          <input type="hidden" name={`${name}.to`} value={current?.to ? iso(current.to) : ''} />
-        </>
       )}
-    </Popover>
+    </div>
   )
 }

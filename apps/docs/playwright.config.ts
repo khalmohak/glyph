@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const PORT = 4400
+// Override with PLAYWRIGHT_PORT to run several checkouts (e.g. git worktrees) side by side.
+const PORT = Number(process.env.PLAYWRIGHT_PORT ?? 4400)
 const isLinux = process.platform === 'linux'
 
 /**

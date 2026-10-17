@@ -15,3 +15,4 @@ Bug fixes across components:
 - **Avatar** initials keep emoji and other multi-byte characters whole.
 - **FileUpload** lists two rejected files with the same name without a React key warning.
 - `useControllableState` (used by most inputs) applies several functional updates in one event correctly and returns a stable setter.
+- DatePicker and DateRangePicker: the clear control is now a real button beside the trigger instead of a fake button nested inside it, so screen readers announce both correctly, and focus returns to the picker after clearing.

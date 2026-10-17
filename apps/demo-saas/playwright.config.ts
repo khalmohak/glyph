@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const PORT = 4410
+// Override with PLAYWRIGHT_PORT to run several checkouts (e.g. git worktrees) side by side.
+const PORT = Number(process.env.PLAYWRIGHT_PORT ?? 4410)
 
 /** User journeys through the built demo app: the same flows a real Glyph app needs. */
 export default defineConfig({
