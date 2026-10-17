@@ -70,6 +70,12 @@ export function AnimatedNumber({
     if (!inView) return
     const start = current.current
     if (start === value) return
+    // Nothing to tween to or from (NaN, Infinity): show the value as it is.
+    if (!Number.isFinite(start) || !Number.isFinite(value)) {
+      current.current = value
+      setShown(value)
+      return
+    }
     const { duration } = springEasing(spring)
     const begin = performance.now()
     let frame = 0
@@ -99,7 +105,7 @@ export function AnimatedNumber({
       className={cn('tabular-nums', className)}
       {...props}
     >
-      {shown === value ? (
+      {Object.is(shown, value) || !Number.isFinite(value) ? (
         text(value)
       ) : (
         // While counting, screen readers get the final value once, not every frame.

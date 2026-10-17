@@ -6,7 +6,9 @@ import {
   ChartFrame,
   type ChartStateProps,
   ChartTooltipCard,
+  currentHidden,
   defaultFormatter,
+  formatCell,
   type Key,
   resolveColor,
   toggleIn,
@@ -127,21 +129,29 @@ export function useCartesian<T extends object, S extends ChartSeries<T>>(
     defaultValue: props.defaultHiddenSeries ?? [],
     onChange: props.onHiddenSeriesChange as ((value: readonly Key<T>[]) => void) | undefined,
   })
+  const visibleHidden = useMemo(
+    () =>
+      currentHidden(
+        hidden,
+        series.map((item) => item.key),
+      ),
+    [series, hidden],
+  )
   const resolved = useMemo(
     () =>
       series.map((item, i) => ({
         ...item,
         label: item.label ?? item.key,
         stroke: resolveColor(item.color, i),
-        hidden: hidden.includes(item.key),
+        hidden: visibleHidden.includes(item.key),
       })),
-    [series, hidden],
+    [series, visibleHidden],
   )
   const table = {
     columns: [String(index), ...resolved.map((item) => item.label)],
     rows: data.map((row) => [
       String((row as Row)[index]),
-      ...resolved.map((item) => valueFormatter(Number((row as Row)[item.key]))),
+      ...resolved.map((item) => formatCell((row as Row)[item.key], valueFormatter)),
     ]),
   }
   const showLegend = props.showLegend ?? series.length > 1
@@ -155,7 +165,7 @@ export function useCartesian<T extends object, S extends ChartSeries<T>>(
     : undefined
   const onLegendToggle =
     series.length > 1
-      ? (key: string) => setHidden(toggleIn(hidden, key as Key<T>, series.length))
+      ? (key: string) => setHidden(toggleIn(visibleHidden, key as Key<T>, series.length))
       : undefined
   return { resolved, table, legend, onLegendToggle, valueFormatter }
 }

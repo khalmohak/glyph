@@ -1,7 +1,8 @@
 import { Dialog } from 'radix-ui'
-import { type ComponentProps, type ReactNode, useMemo, useState } from 'react'
+import { type ComponentProps, type ReactNode, useEffect, useMemo, useState } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { useControllableState } from '../../hooks/use-controllable-state'
+import { useMediaQuery } from '../../hooks/use-media-query'
 import { type AppShellVariants, appShellStyles } from './app-shell.styles'
 import { AppShellContext } from './app-shell-context'
 import { SidebarTrigger } from './sidebar'
@@ -43,6 +44,13 @@ export function AppShell(inProps: AppShellProps) {
   })
   const [mobileOpen, setMobileOpen] = useState(false)
   const s = appShellStyles({ layout })
+
+  // The drawer is for small screens: growing past `md` (rotating a tablet) closes it, so its
+  // overlay and scroll lock don't stay on top of the desktop layout.
+  const wide = useMediaQuery('(min-width: 768px)')
+  useEffect(() => {
+    if (wide) setMobileOpen(false)
+  }, [wide])
 
   const desktop = useMemo(
     () => ({ collapsed, setCollapsed, mobileOpen, setMobileOpen, inDrawer: false }),

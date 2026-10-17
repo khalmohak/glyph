@@ -222,7 +222,19 @@ export function useTableUrlState(options: UseTableUrlStateOptions = {}): TableUr
   // Typing shows immediately; the URL catches up after the debounce.
   const [pendingSearch, setPendingSearch] = useState<string | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const typing = useRef(false)
   useEffect(() => () => clearTimeout(timer.current), [])
+
+  // The query string this hook last wrote. Any other change (back, forward, a link) while
+  // a search is still being typed wins: the typed text is dropped instead of being written
+  // over the page the user navigated to.
+  const written = useRef<string | null>(null)
+  useEffect(() => {
+    if (!typing.current || normalize(search) === written.current) return
+    clearTimeout(timer.current)
+    typing.current = false
+    setPendingSearch(null)
+  }, [search])
 
   // Changes from one user action (a sort that also resets the page) land in one history
   // entry: they are collected and written together at the end of the task.
@@ -240,6 +252,7 @@ export function useTableUrlState(options: UseTableUrlStateOptions = {}): TableUr
         queued.current = null
         if (!batch) return
         const next = writeTableSearch(adapter.getSearch(), batch.state, optionsRef.current)
+        written.current = next
         if (next !== normalize(adapter.getSearch()))
           adapter.setSearch(next, batch.push ? 'push' : 'replace')
       })
@@ -254,7 +267,10 @@ export function useTableUrlState(options: UseTableUrlStateOptions = {}): TableUr
       if (changed === 'search') {
         setPendingSearch(state.search)
         clearTimeout(timer.current)
+        typing.current = true
+        written.current = normalize(adapter.getSearch())
         timer.current = setTimeout(() => {
+          typing.current = false
           // The page resets with the search; both land in one history entry.
           write({ search: state.search, pagination: state.pagination }, 'replace')
           setPendingSearch(null)
@@ -263,11 +279,12 @@ export function useTableUrlState(options: UseTableUrlStateOptions = {}): TableUr
       }
       write({ [changed]: state[changed] }, changed === 'columnVisibility' ? 'replace' : 'push')
     },
-    [write, searchDebounce],
+    [write, searchDebounce, adapter],
   )
 
   const reset = useCallback(() => {
     clearTimeout(timer.current)
+    typing.current = false
     setPendingSearch(null)
     const params = new URLSearchParams(adapter.getSearch())
     const prefix = optionsRef.current.prefix

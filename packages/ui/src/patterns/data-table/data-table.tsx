@@ -236,6 +236,25 @@ export function moveInOrder(order: readonly string[], id: string, target: string
   return [...internal, ...next.filter((item) => !INTERNAL_COLUMNS.has(item))]
 }
 
+/** Leaf column ids the way TanStack derives them: `id`, else `accessorKey`, else a string header. */
+// biome-ignore lint/suspicious/noExplicitAny: TanStack's own convention for mixed column value types
+export function leafColumnIds<T>(columns: ColumnDef<T, any>[], into = new Set<string>()) {
+  for (const column of columns) {
+    const nested = (column as { columns?: ColumnDef<T, unknown>[] }).columns
+    if (nested) {
+      leafColumnIds(nested, into)
+      continue
+    }
+    const accessorKey = (column as { accessorKey?: unknown }).accessorKey
+    const id =
+      column.id ??
+      (typeof accessorKey === 'string' ? accessorKey.replaceAll('.', '_') : undefined) ??
+      (typeof column.header === 'string' ? column.header : undefined)
+    if (id) into.add(id)
+  }
+  return into
+}
+
 type Offsets = Record<string, { left?: number; right?: number }>
 
 /** Sticky offsets for pinned columns, measured from the rendered header so they always line up. */
@@ -435,14 +454,32 @@ export function DataTable<T>(inProps: DataTableProps<T>) {
     [columns, selectable, renderSubRow, s, idPrefix],
   )
 
+  // Sorting and filters can name columns that are gone (an old shared URL, say); TanStack
+  // logs an error for each one on every render, so only known columns reach it.
+  const knownIds = useMemo(() => leafColumnIds(allColumns), [allColumns])
+  const tableSorting = useMemo(
+    () =>
+      state.sorting.every((sort) => knownIds.has(sort.id))
+        ? state.sorting
+        : state.sorting.filter((sort) => knownIds.has(sort.id)),
+    [state.sorting, knownIds],
+  )
+  const tableFilters = useMemo(
+    () =>
+      state.columnFilters.every((filter) => knownIds.has(filter.id))
+        ? state.columnFilters
+        : state.columnFilters.filter((filter) => knownIds.has(filter.id)),
+    [state.columnFilters, knownIds],
+  )
+
   const table = useReactTable<T>({
     data: data ?? NO_ROWS,
     columns: allColumns,
     state: {
       pagination: state.pagination,
-      sorting: state.sorting,
+      sorting: tableSorting,
       globalFilter: state.search,
-      columnFilters: state.columnFilters,
+      columnFilters: tableFilters,
       columnVisibility: state.columnVisibility,
       columnSizing: state.columnSizing,
       columnPinning: state.columnPinning,
@@ -464,7 +501,16 @@ export function DataTable<T>(inProps: DataTableProps<T>) {
     onColumnSizingChange: (updater) => setState('columnSizing', updater),
     onColumnPinningChange: (updater) => setState('columnPinning', updater),
     onColumnOrderChange: (updater) => setState('columnOrder', updater),
-    onRowSelectionChange: (updater) => setState('rowSelection', updater),
+    onRowSelectionChange: (updater) => {
+      let deselected = false
+      setState('rowSelection', (old) => {
+        const next = typeof updater === 'function' ? updater(old) : updater
+        deselected = Object.keys(old).some((id) => old[id] && !next[id])
+        return next
+      })
+      // Unchecking any row ends "select all matching".
+      if (deselected) setState('allMatchingSelected', false)
+    },
     onExpandedChange: (updater) => setState('expanded', updater),
     meta: { glyph: glyphMeta },
     manualPagination: server,
@@ -518,6 +564,14 @@ export function DataTable<T>(inProps: DataTableProps<T>) {
     }
   }, [data])
 
+  // Server data changed: if the total no longer reaches this page, go to the last one.
+  useEffect(() => {
+    if (!server || !paginated || rowCount === undefined) return
+    const pages = Math.max(1, Math.ceil(rowCount / state.pagination.pageSize))
+    if (state.pagination.pageIndex >= pages)
+      setState('pagination', (old) => ({ ...old, pageIndex: pages - 1 }))
+  }, [server, paginated, rowCount, state.pagination.pageIndex, state.pagination.pageSize, setState])
+
   const selectedIds = useMemo(
     () => Object.keys(state.rowSelection).filter((id) => state.rowSelection[id]),
     [state.rowSelection],
@@ -531,13 +585,24 @@ export function DataTable<T>(inProps: DataTableProps<T>) {
     onSelectionChange?.(selectedRows)
   }, [state.rowSelection])
 
-  // Unchecking any row on the page ends "all matching".
   const pageRows = rows
   const allOnPageSelected =
     pageRows.length > 0 && pageRows.every((row) => !row.getCanSelect() || row.getIsSelected())
+  // While "all matching" is on, rows that arrive later (the next server page, new client
+  // rows) are selected too, so moving between pages keeps it.
+  const rowKey = rows.map((row) => row.id).join('\u0000')
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs when the rows on screen change
   useEffect(() => {
-    if (state.allMatchingSelected && !allOnPageSelected) setState('allMatchingSelected', false)
-  }, [state.allMatchingSelected, allOnPageSelected, setState])
+    if (!state.allMatchingSelected) return
+    const candidates = server ? rows : table.getFilteredRowModel().rows
+    const missing = candidates.filter((row) => row.getCanSelect() && !state.rowSelection[row.id])
+    if (missing.length === 0) return
+    setState('rowSelection', (old) => {
+      const next = { ...old }
+      for (const row of missing) next[row.id] = true
+      return next
+    })
+  }, [state.allMatchingSelected, rowKey])
 
   const total = server ? rowCount : table.getFilteredRowModel().rows.length
   const matchingCount = total ?? selectedIds.length

@@ -20,8 +20,13 @@ function cellText(value: unknown, escapeFormulas: boolean): string {
   if (value instanceof Date) return Number.isNaN(value.getTime()) ? '' : value.toISOString()
   if (typeof value === 'number' || typeof value === 'bigint' || typeof value === 'boolean')
     return String(value)
-  if (Array.isArray(value)) return value.map((item) => cellText(item, false)).join(', ')
-  const text = typeof value === 'object' ? JSON.stringify(value) : String(value)
+  // Lists (tags) are joined first, then checked as a whole: the first item decides how a
+  // spreadsheet reads the cell.
+  const text = Array.isArray(value)
+    ? value.map((item) => cellText(item, false)).join(', ')
+    : typeof value === 'object'
+      ? JSON.stringify(value)
+      : String(value)
   return escapeFormulas && FORMULA_START.test(text) ? `'${text}` : text
 }
 

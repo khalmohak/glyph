@@ -97,6 +97,27 @@ describe('useTableUrlState', () => {
     expect(result.current.state.search).toBe('glo')
   })
 
+  it('drops a search still being typed when the user navigates away', async () => {
+    vi.useFakeTimers()
+    window.history.replaceState(null, '', '/invoices?page=2')
+    const { result } = renderHook(() => useTableUrlState({ searchDebounce: 200 }))
+    act(() =>
+      result.current.onStateChange(
+        { ...defaultTableState, search: 'glo', pagination: { pageIndex: 0, pageSize: 10 } },
+        'search',
+      ),
+    )
+    // Back button before the debounce writes the search.
+    act(() => {
+      window.history.replaceState(null, '', '/invoices?page=5&sort=total')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    await act(async () => vi.advanceTimersByTime(250))
+    expect(window.location.search).toBe('?page=5&sort=total')
+    expect(result.current.state.search).toBe('')
+    expect(result.current.state.pagination?.pageIndex).toBe(4)
+  })
+
   it('writes the changes of one action as one history entry', async () => {
     const { result } = renderHook(() => useTableUrlState())
     const length = window.history.length

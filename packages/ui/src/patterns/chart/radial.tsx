@@ -8,7 +8,9 @@ import {
   ChartFrame,
   type ChartStateProps,
   categoryColor,
+  currentHidden,
   defaultFormatter,
+  formatCell,
   type Key,
   resolveColor,
   toggleIn,
@@ -118,17 +120,21 @@ export function RadialBarChart<T extends object>(props: RadialBarChartProps<T>) 
   const { data, category, value, valueFormatter = defaultFormatter, size = 220 } = props
   const { s, slots } = useChartParts()
   const animation = useChartAnimation()
-  const [hidden, setHidden] = useControllableState<readonly string[]>({ defaultValue: [] })
+  const [hiddenState, setHidden] = useControllableState<readonly string[]>({ defaultValue: [] })
   const rows = data.map((row, i) => ({
     row: row as Row,
     name: String((row as Row)[category]),
     color: categoryColor(props.colors?.[i], i),
   }))
+  const hidden = currentHidden(
+    hiddenState,
+    rows.map((item) => item.name),
+  )
   const visible = rows.filter((item) => !hidden.includes(item.name))
   const max = props.max ?? Math.max(0, ...rows.map((item) => Number(item.row[value]) || 0))
   const table = {
     columns: [String(category), String(value)],
-    rows: rows.map((item) => [item.name, valueFormatter(Number(item.row[value]))]),
+    rows: rows.map((item) => [item.name, formatCell(item.row[value], valueFormatter)]),
   }
   const legend =
     (props.showLegend ?? true)

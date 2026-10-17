@@ -48,9 +48,12 @@ const LEFT = 30
 const TOP = 18
 const DAY = 86_400_000
 
+const valid = (d: Date) => (Number.isNaN(d.getTime()) ? undefined : d)
+
 function toDate(input: unknown): Date | undefined {
-  if (input instanceof Date) return input
-  if (typeof input === 'number') return new Date(input)
+  // An invalid date would become the range end and empty the whole grid.
+  if (input instanceof Date) return valid(input)
+  if (typeof input === 'number') return valid(new Date(input))
   if (typeof input === 'string') {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input)
     if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))

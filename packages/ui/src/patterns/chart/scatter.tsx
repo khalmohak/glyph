@@ -15,7 +15,9 @@ import {
   ChartFrame,
   type ChartStateProps,
   categoryColor,
+  currentHidden,
   defaultFormatter,
+  formatCell,
   type Key,
   toggleIn,
   useChartAnimation,
@@ -70,7 +72,7 @@ export function ScatterChart<T extends object>(props: ScatterChartProps<T>) {
   const { data, x, y, size, name, groupBy, height = 280 } = props
   const { s, slots } = useChartParts()
   const animation = useChartAnimation()
-  const [hidden, setHidden] = useControllableState<readonly string[]>({
+  const [hiddenState, setHidden] = useControllableState<readonly string[]>({
     value: props.hiddenGroups,
     defaultValue: [],
     onChange: props.onHiddenGroupsChange as ((value: readonly string[]) => void) | undefined,
@@ -97,6 +99,10 @@ export function ScatterChart<T extends object>(props: ScatterChartProps<T>) {
       color: categoryColor(props.colors?.[i], i),
     }))
   }, [data, groupBy, props.colors, props.title])
+  const hidden = currentHidden(
+    hiddenState,
+    groups.map((group) => group.key),
+  )
 
   const columns = [
     ...(name ? [String(name)] : []),
@@ -111,9 +117,9 @@ export function ScatterChart<T extends object>(props: ScatterChartProps<T>) {
       ...(name ? [String(row[name])] : []),
       ...(groupBy ? [String(row[groupBy])] : []),
       ...(name || groupBy ? [] : [i + 1]),
-      xFormat(Number(row[x])),
-      yFormat(Number(row[y])),
-      ...(size ? [sizeFormat(Number(row[size]))] : []),
+      formatCell(row[x], xFormat),
+      formatCell(row[y], yFormat),
+      ...(size ? [formatCell(row[size], sizeFormat)] : []),
     ]),
   }
   const legend =
