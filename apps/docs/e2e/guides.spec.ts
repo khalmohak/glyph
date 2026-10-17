@@ -38,9 +38,9 @@ test.describe('Guides', () => {
     await open(page, '/docs/getting-started/')
     await page
       .getByRole('navigation', { name: 'More guides' })
-      .getByRole('link', { name: /Theming/ })
+      .getByRole('link', { name: /Use with AI/ })
       .click()
-    await expect(page.getByRole('heading', { level: 1, name: 'Theming' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'Use with AI' })).toBeVisible()
   })
 
   test('copy the page as Markdown', async ({ page, context }) => {

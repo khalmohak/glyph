@@ -16,6 +16,8 @@ npm install recharts
 
 Requires React 19 and Tailwind CSS 4.1 or later.
 
+Using a coding agent? Add the MCP server so it looks up Glyph's props and examples instead of guessing: `claude mcp add glyph -- npx -y @glyphui/mcp`. Other editors: [Use with AI](https://glyphui.xyz/docs/ai).
+
 ## Set up
 
 ```css

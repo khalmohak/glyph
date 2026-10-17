@@ -1,5 +1,6 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 import { readChangelog } from './changelog'
 import { extractAllProps } from './docs-data'
@@ -21,7 +22,7 @@ const CHANGELOG_ID = 'virtual:glyph-changelog'
 const RELEASES_ID = 'virtual:glyph-releases'
 
 export function docsContent(): Plugin {
-  const root = resolve(__dirname, '..')
+  const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
   const guidesDir = join(root, 'src/guides')
   const contentRoot = join(root, 'src/content')
   const packagesDir = resolve(root, '../../packages')

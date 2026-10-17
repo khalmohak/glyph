@@ -1,10 +1,14 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
-import { join, relative, resolve } from 'node:path'
+import { dirname, join, relative, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { gzipSync } from 'node:zlib'
 import { withCustomConfig } from 'react-docgen-typescript'
 import { codeToHtml, createCssVariablesTheme } from 'shiki'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 import { LIVE_URL, staticRoutes } from '../src/lib/site'
+
+/** This file's folder. Works under Vite's config bundler, its SSR loader and plain Node. */
+const here = dirname(fileURLToPath(import.meta.url))
 
 /**
  * Build-time data for the docs:
@@ -68,7 +72,7 @@ function extractProps(root: string): Record<string, PropDoc[]> {
 
 /** Props of every package's components. ui last, so its names win on a clash. */
 export function extractAllProps(): Record<string, PropDoc[]> {
-  const packages = resolve(__dirname, '../../../packages')
+  const packages = resolve(here, '../../../packages')
   return Object.assign(
     {},
     extractProps(join(packages, 'auth')),
@@ -255,14 +259,14 @@ const escapeAttr = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
 
 export function docsData(): Plugin {
-  const uiRoot = resolve(__dirname, '../../../packages/ui')
-  const viewersRoot = resolve(__dirname, '../../../packages/viewers')
+  const uiRoot = resolve(here, '../../../packages/ui')
+  const viewersRoot = resolve(here, '../../../packages/viewers')
   const sources = [uiRoot, viewersRoot]
-  const contentRoot = resolve(__dirname, '../src/content')
+  const contentRoot = resolve(here, '../src/content')
   let props: Record<string, PropDoc[]> | null = null
   let sizes: Promise<Record<string, number>> | null = null
-  const repoRoot = resolve(__dirname, '../../..')
-  const sizesCache = resolve(__dirname, '../node_modules/.cache/glyph-docs/sizes.json')
+  const repoRoot = resolve(here, '../../..')
+  const sizesCache = resolve(here, '../node_modules/.cache/glyph-docs/sizes.json')
   const loadSizes = () => {
     if (process.env.DOCS_SIZES === '0') return Promise.resolve({})
     mkdirSync(join(sizesCache, '..'), { recursive: true })

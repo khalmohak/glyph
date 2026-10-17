@@ -1,0 +1,30 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "manifest": {
+      "inputs": [
+        "$TURBO_ROOT$/apps/docs/plugins/**",
+        "$TURBO_ROOT$/apps/docs/scripts/mcp-manifest.mjs",
+        "$TURBO_ROOT$/apps/docs/src/content/**",
+        "$TURBO_ROOT$/apps/docs/src/guides/**",
+        "$TURBO_ROOT$/apps/docs/src/lib/**",
+        "$TURBO_ROOT$/packages/*/src/**",
+        "$TURBO_ROOT$/packages/*/package.json",
+        "$TURBO_ROOT$/packages/*/CHANGELOG.md",
+        "$TURBO_ROOT$/.changeset/*.md",
+        "src/manifest.ts"
+      ],
+      "outputs": ["data/**"]
+    },
+    "build": {
+      "dependsOn": ["$TURBO_EXTENDS$", "manifest"]
+    },
+    "test": {
+      "dependsOn": ["build"]
+    },
+    "test:coverage": {
+      "dependsOn": ["build"]
+    }
+  }
+}

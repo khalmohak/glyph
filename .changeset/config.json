@@ -8,7 +8,14 @@
   ],
   "commit": false,
   "fixed": [
-    ["@glyphui/tokens", "@glyphui/ui", "@glyphui/blocks", "@glyphui/auth", "@glyphui/viewers"]
+    [
+      "@glyphui/tokens",
+      "@glyphui/ui",
+      "@glyphui/blocks",
+      "@glyphui/auth",
+      "@glyphui/viewers",
+      "@glyphui/mcp"
+    ]
   ],
   "access": "public",
   "baseBranch": "main",
