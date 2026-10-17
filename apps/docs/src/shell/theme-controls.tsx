@@ -24,13 +24,13 @@ export const presetLabel = (name: PresetName) => name[0]!.toUpperCase() + name.s
 
 /** The site-wide theme preset and color mode. */
 export function ThemeControls() {
-  const { theme, setTheme } = useThemeChoice()
+  const { theme, setTheme, custom } = useThemeChoice()
   const { mode, setMode } = useColorMode()
   return (
     <>
-      <Select<PresetName>
-        value={theme}
-        onValueChange={setTheme}
+      <Select<PresetName | 'custom'>
+        value={custom ? 'custom' : theme}
+        onValueChange={(next) => next !== 'custom' && setTheme(next)}
         size="sm"
         aria-label="Site theme"
         className="w-32"
@@ -40,6 +40,7 @@ export function ThemeControls() {
             {presetLabel(name)}
           </SelectItem>
         ))}
+        {custom && <SelectItem value="custom">Custom</SelectItem>}
       </Select>
       <Tooltip content={`${modeLabel[mode]} mode`}>
         <IconButton

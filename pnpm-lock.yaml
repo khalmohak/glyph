@@ -288,6 +288,9 @@ importers:
       '@glyphui/blocks':
         specifier: workspace:*
         version: link:../../packages/blocks
+      '@glyphui/tokens':
+        specifier: workspace:*
+        version: link:../../packages/tokens
       '@glyphui/ui':
         specifier: workspace:*
         version: link:../../packages/ui

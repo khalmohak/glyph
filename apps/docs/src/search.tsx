@@ -70,6 +70,7 @@ const pages = [
   { label: 'Blocks', href: '/blocks', icon: <Shapes /> },
   { label: 'Theme studio', href: '/themes', icon: <Palette /> },
   { label: 'Templates', href: '/templates', icon: <LayoutTemplate /> },
+  { label: 'File browser template', href: '/templates/viewers', icon: <LayoutTemplate /> },
   { label: 'Changelog', href: '/changelog', icon: <History /> },
 ]
 

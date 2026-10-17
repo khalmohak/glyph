@@ -146,6 +146,11 @@ export const staticRoutes: readonly StaticRoute[] = [
     description: 'Complete example apps built with Glyph, with live demos and source.',
   },
   {
+    path: 'templates/viewers',
+    title: pageTitle('File browser'),
+    description: 'Preview PDFs, CSVs, spreadsheets, JSON, code, Markdown and media in one page.',
+  },
+  {
     path: 'changelog',
     title: pageTitle('Changelog'),
     description: 'What changed in each Glyph release.',

@@ -1,4 +1,4 @@
-import { GlyphProvider, LoadingState, presets } from '@glyphui/ui'
+import { GlyphProvider, LoadingState, type PresetName, presets } from '@glyphui/ui'
 import { reactRouter } from '@glyphui/ui/react-router'
 import { setPdfWorker } from '@glyphui/viewers/pdf'
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
@@ -12,6 +12,8 @@ import { DocsLayout } from './shell/docs-layout'
 import { PageLayout } from './shell/page-layout'
 import { SiteLayout } from './shell/site-layout'
 import { ThemeChoiceProvider } from './theme-choice'
+
+const presetNames = Object.keys(presets) as PresetName[]
 
 // Serve pdf.js's worker from this site instead of the default CDN.
 setPdfWorker(pdfWorker)
@@ -27,6 +29,12 @@ const comingSoon = () => import('./pages/coming-soon')
 const router = createBrowserRouter(
   [
     {
+      // A block on its own, without the site chrome, for the blocks gallery's iframes.
+      path: 'blocks/frame/:slug/:file',
+      hydrateFallbackElement: <LoadingState label="Loading" className="min-h-dvh" />,
+      lazy: page(() => import('./pages/block-frame'), 'BlockFramePage'),
+    },
+    {
       element: <SiteLayout />,
       hydrateFallbackElement: <LoadingState label="Loading" className="min-h-dvh" />,
       children: [
@@ -34,9 +42,13 @@ const router = createBrowserRouter(
           element: <PageLayout />,
           children: [
             { index: true, lazy: page(() => import('./pages/home'), 'HomePage') },
-            { path: 'blocks', lazy: page(comingSoon, 'BlocksPage') },
-            { path: 'themes', lazy: page(comingSoon, 'ThemesPage') },
-            { path: 'templates', lazy: page(comingSoon, 'TemplatesPage') },
+            { path: 'blocks', lazy: page(() => import('./pages/blocks'), 'BlocksPage') },
+            { path: 'themes', lazy: page(() => import('./pages/themes'), 'ThemesPage') },
+            { path: 'templates', lazy: page(() => import('./pages/templates'), 'TemplatesPage') },
+            {
+              path: 'templates/viewers',
+              lazy: page(() => import('./pages/viewers-template'), 'ViewersTemplatePage'),
+            },
             { path: 'changelog', lazy: page(comingSoon, 'ChangelogPage') },
           ],
         },
@@ -64,11 +76,25 @@ const router = createBrowserRouter(
   { basename: import.meta.env.BASE_URL.replace(/\/$/, '') || '/' },
 )
 
+// Block frames follow the site's theme and mode through shared storage. A direct link can pin
+// them with ?theme= and ?mode=, which are not remembered.
+const frame = /\/blocks\/frame\//.test(window.location.pathname)
+const query = new URLSearchParams(window.location.search)
+const fixedTheme = frame ? presetNames.find((name) => name === query.get('theme')) : undefined
+const fixedMode = frame ? query.get('mode') : null
+const pinnedMode = fixedMode === 'light' || fixedMode === 'dark' ? fixedMode : undefined
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeChoiceProvider>
+    <ThemeChoiceProvider fixed={fixedTheme}>
       {(theme) => (
-        <GlyphProvider theme={presets[theme]} defaultMode="dark" router={reactRouter} toaster>
+        <GlyphProvider
+          theme={theme}
+          defaultMode={pinnedMode ?? 'dark'}
+          {...(pinnedMode && { storageKey: null })}
+          router={reactRouter}
+          toaster
+        >
           <RouterProvider router={router} />
         </GlyphProvider>
       )}
