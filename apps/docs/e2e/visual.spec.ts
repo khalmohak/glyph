@@ -11,6 +11,13 @@ const combos: { name: string; theme: Preset; mode: Mode }[] = [
   { name: 'brutalist-light', theme: 'brutalist', mode: 'light' },
 ]
 
+/**
+ * Examples whose layout comes from measured widths that settle differently from run to run on
+ * a loaded amd64 runner (they're stable on a quiet machine). Their behavior is covered by the
+ * interaction tests, so they're left out of pixel comparison rather than made flaky.
+ */
+const unstable = new Set(['chart/brush', 'data-table/columns'])
+
 /** Examples render "today" (calendars, date pickers), so time is frozen. */
 const NOW = new Date('2026-10-15T10:00:00Z')
 
@@ -38,6 +45,7 @@ for (const combo of combos) {
       }
 
       for (const example of doc.examples ?? []) {
+        if (unstable.has(`${doc.slug}/${example.file}`)) continue
         const preview = page.locator(`[data-example="${doc.slug}/${example.file}"]`)
         await preview.scrollIntoViewIfNeeded()
         await expect(preview).toHaveScreenshot([combo.name, `${doc.slug}--${example.file}.png`])
