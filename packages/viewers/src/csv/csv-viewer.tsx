@@ -157,7 +157,7 @@ export function CsvViewer(inProps: CsvViewerProps) {
       {result && table && (
         <>
           {result.errors.length > 0 && (
-            <details className={cn(s.errors({ class: slots.errors }), 'rounded-md')}>
+            <details className={cn(s.errors({ class: slots.errors }), 'rounded-lg')}>
               <summary>
                 {result.errors.length === 1
                   ? '1 row could not be read cleanly'

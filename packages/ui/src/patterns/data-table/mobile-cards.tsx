@@ -24,6 +24,7 @@ export function MobileCards<T>({
   onRowClick,
   renderSubRow,
   idPrefix,
+  label,
 }: {
   table: Table<T>
   rows: Row<T>[]
@@ -37,6 +38,8 @@ export function MobileCards<T>({
   onRowClick: ((row: Row<T>) => (event: MouseEvent<HTMLElement>) => void) | undefined
   renderSubRow: ((row: T) => ReactNode) | undefined
   idPrefix: string
+  /** Accessible name of the card list: the table's `aria-label`. */
+  label?: string | undefined
 }) {
   if (loading) {
     return (
@@ -70,7 +73,11 @@ export function MobileCards<T>({
   const clickable = Boolean(getRowHref || onRowClick)
 
   return (
-    <ul data-slot="data-table-cards" className={cn(s.cards({ class: slots.cards }), 'p-3')}>
+    <ul
+      data-slot="data-table-cards"
+      aria-label={label}
+      className={cn(s.cards({ class: slots.cards }), 'p-3')}
+    >
       {rows.map((row) => {
         const cells = row.getVisibleCells()
         const title = cells.find((cell) => cell.column.id === titleColumn?.id)

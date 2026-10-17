@@ -1,5 +1,10 @@
 import { createAuthClient } from '@glyphui/auth'
-import { guestLoader, protectedLoader, RequireAuth } from '@glyphui/auth/react-router'
+import {
+  AuthRevalidator,
+  guestLoader,
+  protectedLoader,
+  RequireAuth,
+} from '@glyphui/auth/react-router'
 import { restAdapter } from '@glyphui/auth/rest'
 import { createBrowserRouter, Outlet } from 'react-router'
 
@@ -7,7 +12,13 @@ export const auth = createAuthClient(restAdapter({ baseUrl: '/api' }))
 
 export const router = createBrowserRouter([
   {
-    element: <Outlet />,
+    element: (
+      <>
+        {/* Re-runs loaders when the session ends on an open page (idle, another tab, server). */}
+        <AuthRevalidator />
+        <Outlet />
+      </>
+    ),
     // Rendered while the first loaders run (the session check), so there's no blank page.
     hydrateFallbackElement: <p>Loading…</p>,
     children: [

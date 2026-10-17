@@ -3,12 +3,15 @@ import { can, hasRole } from './permissions'
 import type {
   AuthAdapter,
   AuthCapabilities,
+  AuthChallenge,
   AuthSession,
   AuthStatus,
   AuthUser,
+  SecondFactorInput,
   SignInInput,
   SignInResult,
   SignUpInput,
+  VerifyEmailInput,
 } from './types'
 
 export type SignOutReason = 'user' | 'idle' | 'expired' | 'remote'
@@ -27,6 +30,11 @@ export interface AuthState {
   expired: boolean
   /** When the idle timer will sign the user out (ms timestamp), while its warning shows. */
   idleDeadline: number | null
+  /**
+   * The latest sign-out and why it happened (`idle`, `remote` for another tab or the server,
+   * `expired`, `user`). Router integrations use it to leave protected pages.
+   */
+  lastSignOut: { reason: SignOutReason; at: number } | null
 }
 
 export interface AuthClientOptions {
@@ -69,9 +77,11 @@ export interface AuthClient {
     password: string
     email?: string | undefined
   }): Promise<void>
-  verifyEmail(input: { email: string; code: string }): Promise<SignInResult>
+  verifyEmail(input: VerifyEmailInput): Promise<SignInResult>
   resendVerification(email: string): Promise<void>
-  verifySecondFactor(input: { code: string }): Promise<SignInResult>
+  verifySecondFactor(input: SecondFactorInput): Promise<SignInResult>
+  /** Signs in with the token from an emailed sign-in link (`?token=` on your callback page). */
+  completeMagicLink(token: string): Promise<SignInResult>
   switchOrganization(organizationId: string): Promise<AuthSession>
   updateUser(patch: Partial<AuthUser>): Promise<AuthSession>
   /**
@@ -104,6 +114,7 @@ const initialState: AuthState = {
   error: null,
   expired: false,
   idleDeadline: null,
+  lastSignOut: null,
 }
 
 function toAuthError(error: unknown): AuthError {
@@ -153,6 +164,8 @@ export function createAuthClient(
   let stopListeners: (() => void) | null = null
   // Latest-wins for organization switches whose responses can arrive out of order.
   let organizationRequest = 0
+  // The challenge from the latest code step, sent back with the code when the caller omits it.
+  let pendingChallenge: { step: 'verify' | 'second-factor'; challenge: AuthChallenge } | null = null
   /**
    * The server sign-out failed, so the server may still accept the session (an httpOnly
    * cookie can't be cleared from JavaScript). Until a retry succeeds or the user signs in
@@ -287,12 +300,34 @@ export function createAuthClient(
   }
 
   function settle(result: SignInResult): SignInResult {
+    if (result.status === 'needs-verification' || result.status === 'needs-second-factor') {
+      pendingChallenge = result.challenge
+        ? {
+            step: result.status === 'needs-verification' ? 'verify' : 'second-factor',
+            challenge: result.challenge,
+          }
+        : null
+    }
     if (result.status === 'signed-in') {
+      pendingChallenge = null
       setPendingSignOut(false)
       setSession(result.session)
       broadcast()
     }
     return result
+  }
+
+  function signedOut(reason: SignOutReason) {
+    setState({ lastSignOut: { reason, at: Date.now() } })
+    onSignOut?.(reason)
+  }
+
+  function withChallenge<T extends { challenge?: AuthChallenge | undefined }>(
+    input: T,
+    step: 'verify' | 'second-factor',
+  ): T {
+    if (input.challenge !== undefined || pendingChallenge?.step !== step) return input
+    return { ...input, challenge: pendingChallenge.challenge }
   }
 
   async function load(): Promise<AuthState> {
@@ -317,7 +352,7 @@ export function createAuthClient(
         if (!session && wasSignedIn) {
           // Another tab signed out, or the server dropped the session.
           setSession(null)
-          onSignOut?.('remote')
+          signedOut('remote')
         } else setSession(session)
       } catch (error) {
         // A network blip must not sign anyone out: keep the session, report the error.
@@ -382,9 +417,10 @@ export function createAuthClient(
         throw toAuthError(error)
       } finally {
         // Sign out locally even if the server call fails: the user asked to leave.
+        pendingChallenge = null
         setSession(null)
         broadcast()
-        onSignOut?.(reason)
+        signedOut(reason)
       }
     },
     refresh() {
@@ -418,7 +454,7 @@ export function createAuthClient(
     verifyEmail: (input) =>
       run(async () => {
         if (!adapter.verifyEmail) throw notSupported('email codes')
-        return settle(await adapter.verifyEmail(input))
+        return settle(await adapter.verifyEmail(withChallenge(input, 'verify')))
       }),
     resendVerification: (email) =>
       run(async () => {
@@ -428,7 +464,12 @@ export function createAuthClient(
     verifySecondFactor: (input) =>
       run(async () => {
         if (!adapter.verifySecondFactor) throw notSupported('two-factor codes')
-        return settle(await adapter.verifySecondFactor(input))
+        return settle(await adapter.verifySecondFactor(withChallenge(input, 'second-factor')))
+      }),
+    completeMagicLink: (token) =>
+      run(async () => {
+        if (!adapter.completeMagicLink) throw notSupported('magic links')
+        return settle(await adapter.completeMagicLink(token))
       }),
     switchOrganization: (organizationId) =>
       run(async () => {
@@ -532,7 +573,7 @@ export function createAuthClient(
         adapter.subscribe((session) => {
           const wasSignedIn = state.status === 'authenticated'
           setSession(session)
-          if (!session && wasSignedIn) onSignOut?.('remote')
+          if (!session && wasSignedIn) signedOut('remote')
         }),
       )
     }

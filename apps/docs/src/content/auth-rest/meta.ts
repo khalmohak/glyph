@@ -24,6 +24,12 @@ export default defineDoc({
         'For APIs on another domain. Tokens rotate on refresh; pick where they are stored.',
     },
     {
+      file: 'bearer-server',
+      title: 'Bearer mode on the server',
+      description:
+        'Refresh-token rotation with reuse detection, organizations, and the CORS headers a separate API origin needs.',
+    },
+    {
       file: 'contract',
       title: 'What your server returns',
       description:
@@ -33,7 +39,8 @@ export default defineDoc({
   notes: [
     'Endpoints default to /auth/session, /auth/sign-in, /auth/sign-up, /auth/sign-out, /auth/refresh, /auth/password/forgot, /auth/password/reset and /auth/verify; override any with endpoints.',
     'When signed out, GET session should return 200 with { user: null }. A 401 also works, but browsers log it as an error on every signed-out page view. A 401 while holding a refresh token tries one refresh first.',
-    'Return 202 with { status: "needs-verification" } or "needs-second-factor" and the screens show the next step.',
+    'Return 202 with { status: "needs-verification" } or "needs-second-factor" and the screens show the next step. Add a challenge to tie the code to its sign-in, and method ("email", "sms", "totp") to word the code step.',
+    'Sign-in links need capabilities.magicLink and POST /auth/magic-link/verify; render MagicLinkCallback on the page the link opens.',
     'Error bodies with { errors: { email: "…" } } show next to the matching form fields.',
     'storage: "memory" keeps bearer tokens out of web storage, at the cost of signing in again after a reload.',
     'Set capabilities to match what your server implements, e.g. { oauthProviders: ["google"], organizations: true }.',

@@ -35,6 +35,7 @@ export {
   historyAdapter,
   parseTableSearch,
   type TableUrlState,
+  tableSearch,
   type UrlAdapter,
   type UseTableUrlStateOptions,
   useTableUrlState,

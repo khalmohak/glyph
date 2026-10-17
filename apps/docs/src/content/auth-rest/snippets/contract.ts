@@ -13,7 +13,18 @@ export const signedIn = {
 
 // 202 — another step first; the screens show the right form
 export const nextStep = { status: 'needs-verification', email: 'ada@example.com' }
-// or { status: 'needs-second-factor' }
+
+// 202 — the password was right; ask for a second factor. `challenge` (any JSON) comes back
+// with the code, so the server knows which sign-in it completes even without a cookie.
+// `method` ('totp' | 'email' | 'sms') sets the wording; `email` is shown for emailed codes.
+export const secondFactor = {
+  status: 'needs-second-factor',
+  challenge: 'ch_9f2c…',
+  method: 'email',
+  email: 'ada@example.com',
+}
+// POST /auth/two-factor  { code, challenge }  →  200 like sign-in
+// POST /auth/verify      { email, code, challenge? }  →  200 like sign-in
 
 // 204 (or 200 without `user`) also works: the user is then read from GET /auth/session.
 // GET /auth/session — 200 `{ user: null }` when signed out (recommended). A 401 works too,
@@ -27,6 +38,9 @@ export const failed = {
 }
 // Without a JSON `message`, a friendly text is used per status; 429 honors Retry-After.
 
+// POST /auth/sign-up — { email, password, name?, ...extra } (SignUpForm extraFields, e.g. inviteCode)
+// POST /auth/magic-link         { email }  →  202 { status: 'magic-link-sent' }
+// POST /auth/magic-link/verify  { token }  →  200 like sign-in (MagicLinkCallback calls it)
 // POST /auth/sign-out — bearer mode sends { refreshToken } so the server can revoke it.
 // POST /auth/password/reset — { token, password }, plus { email } for code-based resets:
 // check the code against that account only.

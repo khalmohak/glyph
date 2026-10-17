@@ -11,6 +11,7 @@ export { NEXT_PARAM, safeRedirectPath, signInPathFor } from './core/redirect'
 export type {
   AuthAdapter,
   AuthCapabilities,
+  AuthChallenge,
   AuthSession,
   AuthStatus,
   AuthUser,
@@ -18,9 +19,12 @@ export type {
   OAuthProvider,
   Organization,
   Register,
+  SecondFactorInput,
+  SecondFactorMethod,
   SignInInput,
   SignInResult,
   SignUpInput,
+  VerifyEmailInput,
 } from './core/types'
 export {
   AuthProvider,

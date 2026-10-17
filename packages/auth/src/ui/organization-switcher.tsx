@@ -21,6 +21,10 @@ export interface OrganizationSwitcherProps {
   onSwitch?: (organization: Organization) => void
   /** Called when a switch fails; the previous organization stays active. Default: logs it. */
   onError?: (error: unknown) => void
+  /** Heading of the list. Use your product's word: "Workspaces", "Teams". Default "Organizations". */
+  label?: string
+  /** Text of the `onCreate` item. Default "Create organization". */
+  createLabel?: string
   className?: string
 }
 
@@ -50,6 +54,8 @@ export function OrganizationSwitcher({
   onCreate,
   onSwitch,
   onError = (error) => console.error(error),
+  label = 'Organizations',
+  createLabel = 'Create organization',
   className,
 }: OrganizationSwitcherProps) {
   const { session, capabilities, switchOrganization } = useAuth()
@@ -75,7 +81,7 @@ export function OrganizationSwitcher({
         <ChevronsIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-56">
-        <DropdownMenuLabel>Organizations</DropdownMenuLabel>
+        <DropdownMenuLabel>{label}</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={active.id}
           onValueChange={async (id) => {
@@ -110,7 +116,7 @@ export function OrganizationSwitcher({
         {onCreate && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={onCreate}>Create organization</DropdownMenuItem>
+            <DropdownMenuItem onSelect={onCreate}>{createLabel}</DropdownMenuItem>
           </>
         )}
       </DropdownMenuContent>

@@ -72,7 +72,7 @@ export const pdfViewerStyles = /* @__PURE__ */ tv({
     sidebar:
       'h-full w-40 shrink-0 overflow-y-auto border-r border-border bg-subtle p-3 max-sm:hidden',
     thumb:
-      'group/thumb mb-3 grid w-full justify-items-center gap-1 rounded-md p-1.5 text-caption text-muted-foreground tabular-nums outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-[current]:bg-primary/10 data-[current]:text-foreground',
+      'group/thumb mb-3 grid w-full justify-items-center gap-1 rounded-lg p-1.5 text-caption text-muted-foreground tabular-nums outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-[current]:bg-primary/10 data-[current]:text-foreground',
     pages:
       'relative h-full min-w-0 flex-1 overflow-auto bg-subtle outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
     password: 'mx-auto grid w-full max-w-xs gap-3 p-6 text-small',

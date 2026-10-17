@@ -21,28 +21,38 @@ export function getFilterList(filters: ColumnFiltersState | undefined, id: strin
   return toList(filters?.find((filter) => filter.id === id)?.value)
 }
 
-/** Filter types by column id, from each column's `meta.filter` (ids resolved like TanStack's). */
-export function filterTypesOf(
+/** Each column's `meta.filter` config by column id (ids resolved like TanStack's). */
+export function filterConfigsOf(
   // biome-ignore lint/suspicious/noExplicitAny: TanStack's own convention for mixed column value types
   columns: readonly ColumnDef<any, any>[],
-  into: Record<string, FilterType> = {},
-): Record<string, FilterType> {
+  into: Record<string, ColumnFilterConfig> = {},
+): Record<string, ColumnFilterConfig> {
   for (const column of columns) {
     const nested = (column as { columns?: ColumnDef<unknown, unknown>[] }).columns
     if (nested) {
-      filterTypesOf(nested, into)
+      filterConfigsOf(nested, into)
       continue
     }
-    const type = (column.meta as { filter?: ColumnFilterConfig } | undefined)?.filter?.type
-    if (!type) continue
+    const config = (column.meta as { filter?: ColumnFilterConfig } | undefined)?.filter
+    if (!config) continue
     const accessorKey = (column as { accessorKey?: unknown }).accessorKey
     const id =
       column.id ??
       (typeof accessorKey === 'string' ? accessorKey.replaceAll('.', '_') : undefined) ??
       (typeof column.header === 'string' ? column.header : undefined)
-    if (id) into[id] = type
+    if (id) into[id] = config
   }
   return into
+}
+
+/** Filter types by column id, from each column's `meta.filter`. */
+export function filterTypesOf(
+  // biome-ignore lint/suspicious/noExplicitAny: TanStack's own convention for mixed column value types
+  columns: readonly ColumnDef<any, any>[],
+): Record<string, FilterType> {
+  const types: Record<string, FilterType> = {}
+  for (const [id, config] of Object.entries(filterConfigsOf(columns))) types[id] = config.type
+  return types
 }
 
 /** Puts filter values in the shape their filter type expects: `multi` values become arrays. */

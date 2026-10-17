@@ -7,7 +7,13 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { auth } from './auth'
 import { AdminPage, AppLayout, BillingPage, DashboardPage } from './pages/app'
-import { ForgotPasswordPage, ResetPasswordPage, SignInPage, SignUpPage } from './pages/auth-pages'
+import {
+  ForgotPasswordPage,
+  MagicLinkPage,
+  ResetPasswordPage,
+  SignInPage,
+  SignUpPage,
+} from './pages/auth-pages'
 import { HomePage } from './pages/home'
 import { Root } from './root'
 import { installFakeServer } from './server'
@@ -37,6 +43,7 @@ const router = createBrowserRouter(
           element: <SignUpPage />,
         },
         { path: 'forgot-password', element: <ForgotPasswordPage /> },
+        { path: 'magic-link', element: <MagicLinkPage /> },
         { path: 'reset-password', element: <ResetPasswordPage /> },
         {
           path: 'app',

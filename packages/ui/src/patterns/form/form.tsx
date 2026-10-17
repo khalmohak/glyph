@@ -172,7 +172,7 @@ export function FormSubmit({ form, onClick, ...props }: FormSubmitProps) {
 
 export const formErrorStyles = /* @__PURE__ */ tv({
   slots: {
-    base: 'flex items-start gap-2 rounded-md border border-danger/30 bg-danger/8 px-3 py-2.5 text-small text-danger-text',
+    base: 'flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/8 px-3 py-2.5 text-small text-danger-text',
     icon: 'mt-0.5 size-4 shrink-0',
   },
 })

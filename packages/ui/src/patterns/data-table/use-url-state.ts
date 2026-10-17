@@ -5,7 +5,7 @@ import type {
   VisibilityState,
 } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import { filterTypesOf } from './filters/filter-fns'
+import { filterConfigsOf } from './filters/filter-fns'
 import type { DataTableState, DataTableStateKey, FilterType } from './types'
 
 /** Where URL state is read from and written to. The default uses `window.history`. */
@@ -95,8 +95,13 @@ function encodeFilter(value: unknown): string[] {
   return value === undefined || value === null || value === '' ? [] : [String(value)]
 }
 
-function decodeFilter(values: string[], type?: FilterType): unknown {
-  if (type === 'multi') return values
+function decodeFilter(values: string[], type?: FilterType, options?: ReadonlySet<string>): unknown {
+  // Hand-written links often join values with commas (`f.status=open,pending`). Split them,
+  // unless the whole value is itself one of the column's options.
+  if (type === 'multi')
+    return values.flatMap((value) =>
+      options?.has(value) || !value.includes(',') ? [value] : value.split(',').filter(Boolean),
+    )
   if (type === 'select' || type === 'text') return values[0] ?? ''
   if (values.length > 1) return values
   const [value = ''] = values
@@ -154,11 +159,15 @@ export function parseTableSearch(
     const filterPrefix = key('f.')
     const ids = new Set<string>()
     for (const name of params.keys()) if (name.startsWith(filterPrefix)) ids.add(name)
-    const types = { ...(columns && filterTypesOf(columns)), ...filterTypes }
+    const configs = columns ? filterConfigsOf(columns) : {}
     const filters: ColumnFiltersState = []
     for (const name of ids) {
       const id = name.slice(filterPrefix.length)
-      filters.push({ id, value: decodeFilter(params.getAll(name), types[id]) })
+      const config = configs[id]
+      const options =
+        config && 'options' in config ? new Set(config.options.map((o) => o.value)) : undefined
+      const type = filterTypes?.[id] ?? config?.type
+      filters.push({ id, value: decodeFilter(params.getAll(name), type, options) })
     }
     state.columnFilters = filters
   }
@@ -212,6 +221,24 @@ export function writeTableSearch(
   }
   const text = params.toString()
   return text ? `?${text}` : ''
+}
+
+/**
+ * A query string for a table view, e.g. to deep-link from search results or a dashboard:
+ *
+ * ```ts
+ * navigate(`/tickets${tableSearch({ search: 'printer', columnFilters: [{ id: 'status', value: ['open'] }] })}`)
+ * ```
+ *
+ * Same format `useTableUrlState` reads: `page` (1-based), `size`, `sort=col` or `col.desc`
+ * (comma-separated for several), `q`, one `f.<column>` per filter value, `hide=col,col`.
+ * Pass the same `prefix` and `pageSize` options as the table's `useTableUrlState`.
+ */
+export function tableSearch(
+  state: Partial<DataTableState>,
+  options: Pick<UseTableUrlStateOptions, 'prefix' | 'pageSize'> = {},
+): string {
+  return writeTableSearch('', state, options)
 }
 
 const subscribeNoop = () => () => {}

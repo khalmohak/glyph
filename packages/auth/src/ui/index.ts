@@ -6,11 +6,13 @@ export {
 } from './auth.styles'
 export { AuthLayout, type AuthLayoutProps } from './auth-layout'
 export {
+  secondFactorDescription,
   TwoFactorForm,
   type TwoFactorFormProps,
   VerifyEmailForm,
   type VerifyEmailFormProps,
 } from './code-forms'
+export { MagicLinkCallback, type MagicLinkCallbackProps } from './magic-link-callback'
 export {
   OrganizationSwitcher,
   type OrganizationSwitcherProps,
@@ -34,6 +36,6 @@ export {
   SignInForm,
   type SignInFormProps,
 } from './sign-in-form'
-export { SignUpForm, type SignUpFormProps } from './sign-up-form'
+export { type SignUpExtraField, SignUpForm, type SignUpFormProps } from './sign-up-form'
 export { SocialButtons, type SocialButtonsProps } from './social-buttons'
 export { UserMenu, type UserMenuItem, type UserMenuProps } from './user-menu'

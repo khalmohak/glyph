@@ -5,7 +5,7 @@ import { type ReactNode, useState } from 'react'
 import type { AuthSession, OAuthProvider } from '../core/types'
 import { useAuth } from '../react/provider'
 import { VerifyEmailForm } from './code-forms'
-import { email, fields, minLength, required } from './schema'
+import { email, fields, minLength, type Rule, required } from './schema'
 import { AppLink, AuthNotice, type AuthScreenProps, toFormErrors } from './shared'
 import { SocialButtons } from './social-buttons'
 
@@ -21,7 +21,29 @@ export interface SignUpFormProps extends AuthScreenProps {
   /** Shown above the button, e.g. "By signing up you agree to our Terms." */
   terms?: ReactNode
   providers?: readonly OAuthProvider[]
+  /**
+   * More fields your sign-up needs, such as an invite code or a workspace name. Values are
+   * validated with the form and passed to `signUp` as `extra` (the REST adapter sends them in
+   * the request body). Server errors keyed by a field's `name` show beside it.
+   */
+  extraFields?: readonly SignUpExtraField[]
 }
+
+export interface SignUpExtraField {
+  /** Key in `extra` and in server field errors, e.g. `inviteCode`. */
+  name: string
+  label: ReactNode
+  description?: ReactNode
+  /** `true`, or the message to show when it's empty. */
+  required?: boolean | string
+  placeholder?: string
+  autoComplete?: string
+  defaultValue?: string
+  /** Return a message when the value is invalid. */
+  validate?: (value: string) => string | undefined
+}
+
+const CORE_FIELDS = ['name', 'email', 'password'] as const
 
 /** Account creation with name, email and password, OAuth buttons, and the email-code step. */
 export function SignUpForm({
@@ -31,6 +53,7 @@ export function SignUpForm({
   minPasswordLength = 8,
   terms,
   providers,
+  extraFields = [],
   title = 'Create your account',
   description,
   headingLevel,
@@ -39,14 +62,39 @@ export function SignUpForm({
 }: SignUpFormProps) {
   const auth = useAuth()
   const [verifying, setVerifying] = useState<string | null>(null)
-  const [schema] = useState(() =>
-    fields({
+  // Extra fields are read once, like the other options: the form's shape can't change later.
+  const [extras] = useState(() =>
+    extraFields.filter((field) => !(CORE_FIELDS as readonly string[]).includes(field.name)),
+  )
+  const [schema] = useState(() => {
+    const extraRules: Record<string, Rule[]> = {}
+    for (const field of extras) {
+      const rules: Rule[] = []
+      if (field.required)
+        rules.push(
+          required(typeof field.required === 'string' ? field.required : 'Fill in this field.'),
+        )
+      if (field.validate) rules.push((value) => field.validate?.(value))
+      extraRules[field.name] = rules
+    }
+    const shape: Record<string, readonly Rule[]> &
+      Record<(typeof CORE_FIELDS)[number], readonly Rule[]> = {
+      ...extraRules,
       name: collectName ? [required('Enter your name.')] : [],
       email: [required('Enter your email address.'), email()],
       password: [required('Choose a password.'), minLength(minPasswordLength)],
-    }),
-  )
-  const form = useForm({ schema, defaultValues: { name: '', email: '', password: '' } })
+    }
+    return fields(shape)
+  })
+  const form = useForm({
+    schema,
+    defaultValues: {
+      ...Object.fromEntries(extras.map((field) => [field.name, field.defaultValue ?? ''])),
+      name: '',
+      email: '',
+      password: '',
+    },
+  })
   const shared = { headingLevel, className }
 
   if (verifying)
@@ -103,11 +151,16 @@ export function SignUpForm({
               email: values.email.trim(),
               password: values.password,
               ...(collectName && { name: values.name.trim() }),
+              ...(extras.length > 0 && {
+                extra: Object.fromEntries(
+                  extras.map((field) => [field.name, (values[field.name] ?? '').trim()]),
+                ),
+              }),
             })
             if (result.status === 'signed-in') onSuccess?.(result.session)
             else if (result.status === 'needs-verification') setVerifying(result.email)
           } catch (error) {
-            return toFormErrors(error, ['name', 'email', 'password'])
+            return toFormErrors(error, [...CORE_FIELDS, ...extras.map((field) => field.name)])
           }
         }}
       >
@@ -137,6 +190,24 @@ export function SignUpForm({
         >
           {(field) => <PasswordInput autoComplete="new-password" showStrength {...field} />}
         </FormField>
+        {extras.map((extra) => (
+          <FormField
+            key={extra.name}
+            control={form.control}
+            name={extra.name}
+            label={extra.label}
+            {...(extra.description !== undefined && { description: extra.description })}
+            {...(extra.required && { required: true })}
+          >
+            {(field) => (
+              <Input
+                {...(extra.placeholder && { placeholder: extra.placeholder })}
+                {...(extra.autoComplete && { autoComplete: extra.autoComplete })}
+                {...field}
+              />
+            )}
+          </FormField>
+        ))}
         {terms && (
           <Text size="small" tone="muted">
             {terms}

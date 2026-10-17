@@ -57,18 +57,52 @@ export interface SignUpInput {
   email: string
   password: string
   name?: string | undefined
+  /**
+   * More sign-up fields your server needs, such as an invite code or a workspace name. The
+   * REST adapter sends them alongside `email` and `password` (which they can't override).
+   */
+  extra?: Readonly<Record<string, unknown>> | undefined
 }
+
+/**
+ * Opaque data a server attaches to a sign-in step, such as a 2FA challenge id. The client
+ * sends it back with the code, so a server can tell which sign-in the code completes even
+ * without a cookie (bearer mode).
+ */
+export type AuthChallenge = string | Readonly<Record<string, unknown>>
+
+/** How the second-factor code reaches the user. Changes the wording on the code step. */
+export type SecondFactorMethod = 'totp' | 'email' | 'sms' | (string & {})
 
 /** What happened after a sign-in or sign-up attempt. */
 export type SignInResult =
   | { status: 'signed-in'; session: AuthSession }
   /** The account exists but the email must be confirmed with a code first. */
-  | { status: 'needs-verification'; email: string }
+  | { status: 'needs-verification'; email: string; challenge?: AuthChallenge | undefined }
   /** The password was right; a second factor (authenticator code) is required. */
-  | { status: 'needs-second-factor' }
+  | {
+      status: 'needs-second-factor'
+      challenge?: AuthChallenge | undefined
+      method?: SecondFactorMethod | undefined
+      /** Where an emailed code went, for the step's description. */
+      email?: string | undefined
+    }
   | { status: 'magic-link-sent'; email: string }
   /** The browser is leaving for an OAuth provider or a hosted page. */
   | { status: 'redirecting' }
+
+export interface VerifyEmailInput {
+  email: string
+  code: string
+  /** From the `needs-verification` step. The client fills it in when you leave it out. */
+  challenge?: AuthChallenge | undefined
+}
+
+export interface SecondFactorInput {
+  code: string
+  /** From the `needs-second-factor` step. The client fills it in when you leave it out. */
+  challenge?: AuthChallenge | undefined
+}
 
 /** Which flows an adapter supports. Screens hide what isn't available. */
 export interface AuthCapabilities {
@@ -110,9 +144,11 @@ export interface AuthAdapter {
     password: string
     email?: string | undefined
   }): Promise<void>
-  verifyEmail?(input: { email: string; code: string }): Promise<SignInResult>
+  verifyEmail?(input: VerifyEmailInput): Promise<SignInResult>
   resendVerification?(email: string): Promise<void>
-  verifySecondFactor?(input: { code: string }): Promise<SignInResult>
+  verifySecondFactor?(input: SecondFactorInput): Promise<SignInResult>
+  /** Exchanges the token from a sign-in link for a session. Needs `capabilities.magicLink`. */
+  completeMagicLink?(token: string): Promise<SignInResult>
   switchOrganization?(organizationId: string): Promise<AuthSession>
   updateUser?(patch: Partial<AuthUser>): Promise<AuthSession>
   /** Headers `authFetch` adds to requests, e.g. a bearer token. */

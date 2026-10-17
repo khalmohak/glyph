@@ -14,7 +14,7 @@ export const chartStyles = /* @__PURE__ */ tv({
       '[&_.recharts-layer]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-rectangle]:outline-none',
     ],
     state: 'flex items-center justify-center',
-    skeleton: 'h-full w-full rounded-md',
+    skeleton: 'h-full w-full rounded-lg',
     legend: 'flex flex-wrap items-center gap-x-4 gap-y-1 text-caption text-muted-foreground',
     legendItem: 'inline-flex items-center gap-1.5',
     legendButton: [
@@ -24,7 +24,7 @@ export const chartStyles = /* @__PURE__ */ tv({
     ],
     swatch: 'size-2.5 shrink-0 rounded-[2px]',
     tooltip: [
-      'grid min-w-36 gap-1.5 rounded-md border-border bg-raised px-3 py-2 text-caption text-foreground shadow-lg',
+      'grid min-w-36 gap-1.5 rounded-lg border-border bg-raised px-3 py-2 text-caption text-foreground shadow-lg',
       themedBorder,
     ],
     tooltipLabel: 'font-medium text-foreground',
@@ -34,7 +34,7 @@ export const chartStyles = /* @__PURE__ */ tv({
     tooltipTotal: 'mt-0.5 flex items-center gap-2 border-t border-border pt-1.5',
     center:
       'pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center',
-    table: 'max-h-96 overflow-auto rounded-md border-(length:--glyph-border-width) border-border',
+    table: 'max-h-96 overflow-auto rounded-lg border-(length:--glyph-border-width) border-border',
     srOnly: 'sr-only',
   },
 })

@@ -972,6 +972,7 @@ export function DataTable<T>(inProps: DataTableProps<T>) {
           onRowClick={clickable ? onRowActivate : undefined}
           renderSubRow={renderSubRow}
           idPrefix={idPrefix}
+          label={ariaLabel}
         />
       ) : (
         <div

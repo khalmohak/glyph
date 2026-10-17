@@ -6,7 +6,7 @@ import { speakTime } from './scrubber'
 
 export const waveformStyles = /* @__PURE__ */ tv({
   slots: {
-    root: 'relative w-full cursor-pointer touch-none rounded-md',
+    root: 'relative w-full cursor-pointer touch-none rounded-lg',
     svg: 'block size-full',
     played: 'fill-primary',
     rest: 'fill-faint-foreground',
@@ -134,7 +134,7 @@ export function Waveform(inProps: WaveformProps) {
   }
 
   if (failed) {
-    return <div className={cn('h-14 rounded-md bg-muted', className)} style={{ height }} />
+    return <div className={cn('h-14 rounded-lg bg-muted', className)} style={{ height }} />
   }
   if (!peaks) return <Skeleton className={cn('w-full', className)} style={{ height }} />
 

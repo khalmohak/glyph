@@ -15,6 +15,8 @@ export default defineDoc({
     'protectedLoader',
     'guestLoader',
     'useRedirectAfterSignIn',
+    'AuthRevalidator',
+    'useAuthRevalidation',
     'NEXT_PARAM',
     'safeRedirectPath',
     'signInPathFor',
@@ -40,7 +42,7 @@ export default defineDoc({
       file: 'loaders',
       title: 'With data routers',
       description:
-        'Loaders redirect before anything renders or fetches. Keep RequireAuth in the layout so sign-outs on an open page redirect too.',
+        'Loaders redirect before anything renders or fetches. AuthRevalidator re-runs them when the session ends on an open page (idle timeout, another tab, the server).',
     },
   ],
   notes: [
@@ -48,6 +50,7 @@ export default defineDoc({
     'Only same-origin paths are followed: https://evil.com, //evil.com and javascript: in ?next= fall back to your default.',
     'RequireRole takes roles (any of several) and/or permission; give it a fallback or get a "no access" message.',
     'Guards render a spinner while the session loads; pass loading to change it.',
+    'With loaders, render <AuthRevalidator /> once in your root route (or call useAuthRevalidation()): it re-runs loaders on sign-in and sign-out, so protectedLoader pages redirect after an idle or cross-tab sign-out.',
     'Requires react-router 7 or later.',
   ],
 })

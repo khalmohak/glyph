@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useId, useState } from 'react'
+import { type ReactNode, useContext, useEffect, useId, useState } from 'react'
 import * as R from 'recharts'
 import { useControllableState } from '../../hooks/use-controllable-state'
 import { useMotionSettings } from '../../motion/use-motion-settings'
@@ -7,6 +7,7 @@ import {
   type ChartColorValue,
   ChartFrame,
   type ChartStateProps,
+  ChartViewContext,
   categoryColor,
   currentHidden,
   defaultFormatter,
@@ -258,6 +259,9 @@ export function Gauge({
   const { s, slots } = useChartParts()
   const { animate } = useMotionSettings()
   const id = useId()
+  // Inside a ChartCard the card shows the title; keep it for screen readers only.
+  const inCard = useContext(ChartViewContext) !== null
+  const captionHidden = hideTitle || inCard
   const span = max - min || 1
   const clamped = Math.min(Math.max(value, min), max)
   const share = (clamped - min) / span
@@ -295,7 +299,7 @@ export function Gauge({
       aria-labelledby={`${id}-title`}
       className={s.root({ class: [slots.root, className] })}
     >
-      <figcaption className={hideTitle ? s.srOnly() : s.caption({ class: slots.caption })}>
+      <figcaption className={captionHidden ? s.srOnly() : s.caption({ class: slots.caption })}>
         <span id={`${id}-title`} className={s.title({ class: slots.title })}>
           {title}
         </span>

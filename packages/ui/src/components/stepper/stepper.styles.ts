@@ -6,7 +6,7 @@ export const stepperStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'flex w-full list-none p-0',
     step: 'relative flex min-w-0',
-    trigger: ['flex min-w-0 rounded-md text-left', focusRing],
+    trigger: ['flex min-w-0 rounded-lg text-left', focusRing],
     indicator: [
       'relative z-10 flex size-8 shrink-0 items-center justify-center rounded-pill text-small font-medium tabular-nums [&>svg]:size-4',
       themedBorder,

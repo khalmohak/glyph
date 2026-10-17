@@ -78,7 +78,10 @@ interface Store {
   users: StoredUser[]
   session: { userId: string; expiresAt: number; organizationId?: string; revoked?: boolean } | null
   codes: (MemoryCode & { expiresAt: number })[]
-  pendingSecondFactor: string | null
+  /** Sign-ins waiting for their second factor, by challenge id. */
+  challenges?: { id: string; userId: string; expiresAt: number }[]
+  /** Older persisted stores only. */
+  pendingSecondFactor?: string | null
 }
 
 const CODE_TTL = 15 * 60_000
@@ -119,7 +122,7 @@ export function memoryAdapter(options: MemoryAdapterOptions = {}): MemoryAdapter
     })),
     session: null,
     codes: [],
-    pendingSecondFactor: null,
+    challenges: [],
   })
 
   const webStore = () => {
@@ -201,7 +204,7 @@ export function memoryAdapter(options: MemoryAdapterOptions = {}): MemoryAdapter
       expiresAt: Date.now() + sessionDuration,
       ...(user?.organizations?.[0] && { organizationId: user.organizations[0].id }),
     }
-    store.pendingSecondFactor = null
+    store.challenges = (store.challenges ?? []).filter((c) => c.userId !== userId)
     write(store)
     return { status: 'signed-in', session: sessionFor(store) as AuthSession }
   }
@@ -258,10 +261,14 @@ export function memoryAdapter(options: MemoryAdapterOptions = {}): MemoryAdapter
         return { status: 'needs-verification', email }
       }
       if (user.twoFactor) {
-        store.pendingSecondFactor = user.id as string
+        const challenge = `ch_${randomToken().slice(0, 12)}`
+        store.challenges = [
+          ...(store.challenges ?? []).filter((c) => c.expiresAt > Date.now()),
+          { id: challenge, userId: user.id as string, expiresAt: Date.now() + CODE_TTL },
+        ]
         sendCode(store, 'two-factor', email)
         write(store)
-        return { status: 'needs-second-factor' }
+        return { status: 'needs-second-factor', challenge, method: 'email', email }
       }
       return startSession(store, user.id as string)
     },
@@ -357,11 +364,14 @@ export function memoryAdapter(options: MemoryAdapterOptions = {}): MemoryAdapter
       sendCode(store, 'verify-email', email.trim().toLowerCase())
       write(store)
     },
-    async verifySecondFactor({ code }) {
+    async verifySecondFactor({ code, challenge }) {
       await delay('verifySecondFactor')
       const store = read()
-      const userId = store.pendingSecondFactor
-      const user = store.users.find((u) => u.id === userId)
+      const live = (store.challenges ?? []).filter((c) => c.expiresAt > Date.now())
+      // Each sign-in has its own challenge; a code can only finish the sign-in it belongs to.
+      const pending =
+        typeof challenge === 'string' ? live.find((c) => c.id === challenge) : live.at(-1)
+      const user = store.users.find((u) => u.id === pending?.userId)
       if (!user)
         throw new AuthError('Sign in again to continue.', { code: 'session-expired', status: 401 })
       const found = takeCode(store, 'two-factor', (c) => c.email === user.email && c.code === code)

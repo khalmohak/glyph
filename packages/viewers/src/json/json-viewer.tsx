@@ -179,7 +179,7 @@ function JsonError({ error, text }: { error: JsonParseError; text: string }) {
             {error.message}
           </span>
           {line !== undefined && (
-            <code className="block overflow-x-auto rounded-md bg-muted px-2 py-1 text-left font-mono text-caption whitespace-pre text-foreground">
+            <code className="block overflow-x-auto rounded-lg bg-muted px-2 py-1 text-left font-mono text-caption whitespace-pre text-foreground">
               {line}
               {'\n'}
               {`${' '.repeat(Math.max(0, (error.column ?? 1) - 1))}^`}

@@ -3,6 +3,7 @@ import {
   AuthLayout,
   AuthNotice,
   ForgotPasswordForm,
+  MagicLinkCallback,
   ResetPasswordForm,
   SignInForm,
   SignUpForm,
@@ -63,8 +64,25 @@ export function SignUpPage() {
         signInHref="/sign-in"
         providers={[]}
         terms="By creating an account you agree to the demo’s imaginary terms."
+        extraFields={[
+          {
+            name: 'workspace',
+            label: 'Workspace name',
+            placeholder: 'Acme Inc.',
+            autoComplete: 'organization',
+          },
+        ]}
         onSuccess={continueToApp}
       />
+    </Frame>
+  )
+}
+
+export function MagicLinkPage() {
+  const continueToApp = useRedirectAfterSignIn('/app')
+  return (
+    <Frame>
+      <MagicLinkCallback signInHref="/sign-in" onSuccess={continueToApp} />
     </Frame>
   )
 }

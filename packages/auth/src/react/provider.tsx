@@ -68,6 +68,7 @@ export type UseAuthResult = AuthState &
     | 'verifyEmail'
     | 'resendVerification'
     | 'verifySecondFactor'
+    | 'completeMagicLink'
     | 'switchOrganization'
     | 'updateUser'
     | 'fetch'
@@ -106,6 +107,7 @@ export function useAuth(): UseAuthResult {
       verifyEmail: client.verifyEmail,
       resendVerification: client.resendVerification,
       verifySecondFactor: client.verifySecondFactor,
+      completeMagicLink: client.completeMagicLink,
       switchOrganization: client.switchOrganization,
       updateUser: client.updateUser,
       fetch: client.fetch,

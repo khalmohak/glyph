@@ -16,6 +16,7 @@ export default defineDoc({
     'useTableUrlState',
     'getFilterList',
     'parseTableSearch',
+    'tableSearch',
     'writeTableSearch',
     'historyAdapter',
     'editableCell',
@@ -77,6 +78,7 @@ export default defineDoc({
     },
   ],
   notes: [
+    'URL state format: page (1-based) and size, sort=column or column.desc (comma-separated for several), q for search, one f.<column> parameter per filter value (f.status=open&f.status=pending), and hide=col,col. Build links with tableSearch(state); a prefix keeps several tables apart.',
     'Columns are typed from your row type via createColumnHelper<T>(). Set meta: { align: "right" } on numeric columns.',
     'Requires @tanstack/react-table version 8 as a peer dependency (install @tanstack/react-table@8; version 9 is not supported yet).',
     'Pass columns to useTableUrlState so filters decode by type: a shared link with one status still gives a multi filter an array. In server code, getFilterList(state.columnFilters, "status") always returns an array.',

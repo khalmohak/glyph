@@ -1,8 +1,8 @@
 import { AuthCard } from '@glyphui/blocks'
 import { Button, InputOTP, REGEXP_ONLY_DIGITS, Text } from '@glyphui/ui'
 import { Form, FormError, FormField, FormSubmit, useForm } from '@glyphui/ui/form'
-import { useRef } from 'react'
-import type { AuthSession } from '../core/types'
+import { type ReactNode, useRef } from 'react'
+import type { AuthSession, SecondFactorMethod } from '../core/types'
 import { useAuth } from '../react/provider'
 import { digits, fields, required } from './schema'
 import { type AuthScreenProps, toFormErrors, useCooldown } from './shared'
@@ -136,14 +136,38 @@ export function VerifyEmailForm({
 export interface TwoFactorFormProps extends AuthScreenProps {
   onSuccess?: (session: AuthSession) => void
   onBack?: () => void
+  /**
+   * How the code reaches the user, usually from the server's `needs-second-factor` step.
+   * Sets the default description. Default `totp` (an authenticator app).
+   */
+  method?: SecondFactorMethod | undefined
+  /** Where an emailed code went. */
+  email?: string | undefined
 }
 
-/** The second step of sign-in: a code from an authenticator app (or email, per your backend). */
+/** The default wording for each way a second-factor code can arrive. */
+export function secondFactorDescription(method?: SecondFactorMethod, email?: string): ReactNode {
+  if (method === 'email')
+    return email ? (
+      <>
+        Enter the {CODE_LENGTH}-digit code we emailed to{' '}
+        <span className="font-medium text-foreground">{email}</span>.
+      </>
+    ) : (
+      `Enter the ${CODE_LENGTH}-digit code we emailed you.`
+    )
+  if (method === 'sms') return `Enter the ${CODE_LENGTH}-digit code we texted to your phone.`
+  return `Enter the ${CODE_LENGTH}-digit code from your authenticator app.`
+}
+
+/** The second step of sign-in: a code from an authenticator app, an email or a text. */
 export function TwoFactorForm({
   onSuccess,
   onBack,
+  method,
+  email,
   title = 'Two-step verification',
-  description = 'Enter the 6-digit code from your authenticator app.',
+  description = secondFactorDescription(method, email),
   headingLevel,
   footer,
   className,

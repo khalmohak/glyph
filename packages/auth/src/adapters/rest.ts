@@ -2,8 +2,10 @@ import { AuthError, type AuthErrorCode } from '../core/errors'
 import type {
   AuthAdapter,
   AuthCapabilities,
+  AuthChallenge,
   AuthSession,
   OAuthProvider,
+  SecondFactorMethod,
   SignInInput,
   SignInResult,
 } from '../core/types'
@@ -19,8 +21,12 @@ export interface RestEndpoints {
   resetPassword: string
   verify: string
   resendVerification: string
+  /** POST `{ code, challenge? }`. */
   twoFactor: string
+  /** POST `{ email }`: emails a sign-in link. */
   magicLink: string
+  /** POST `{ token }` from the link: answers like sign-in (session, or tokens in bearer mode). */
+  magicLinkVerify: string
   /** POST `{ organizationId }`. */
   organization: string
   /** PATCH with the changed user fields. */
@@ -39,6 +45,7 @@ export const defaultEndpoints: RestEndpoints = {
   resendVerification: '/auth/verify/resend',
   twoFactor: '/auth/two-factor',
   magicLink: '/auth/magic-link',
+  magicLinkVerify: '/auth/magic-link/verify',
   organization: '/auth/organization',
   user: '/auth/user',
 }
@@ -210,7 +217,9 @@ const codeByStatus: Record<number, AuthErrorCode> = {
  * Connects Glyph to your own auth API. The server contract:
  *
  * - Success: `200 { user, expiresAt?, roles?, permissions?, organizations?, accessToken?, refreshToken? }`
- * - A further step: `202 { status: 'needs-verification' | 'needs-second-factor' | 'magic-link-sent', email? }`
+ * - A further step: `202 { status: 'needs-verification' | 'needs-second-factor' | 'magic-link-sent', email?, challenge?, method? }`.
+ *   `challenge` (any JSON) comes back in the code request, so the server knows which sign-in
+ *   it completes without a cookie; `method` (`totp` | `email` | `sms`) words the code step.
  * - Errors: `4xx { message?, code?, errors?: { email?: string, password?: string, ... } }`
  * - `GET session` returns 401 when signed out.
  */
@@ -339,9 +348,17 @@ export function restAdapter(options: RestAdapterOptions = {}): AuthAdapter {
     if (status === 202 || typeof data.status === 'string') {
       const step = data.status as SignInResult['status']
       const stepEmail = (data.email as string | undefined) ?? email ?? ''
-      if (step === 'needs-verification') return { status: step, email: stepEmail }
+      const challenge = data.challenge as AuthChallenge | undefined
+      const withChallenge = challenge === undefined || challenge === null ? {} : { challenge }
+      if (step === 'needs-verification') return { status: step, email: stepEmail, ...withChallenge }
       if (step === 'magic-link-sent') return { status: step, email: stepEmail }
-      if (step === 'needs-second-factor') return { status: step }
+      if (step === 'needs-second-factor')
+        return {
+          status: step,
+          ...withChallenge,
+          ...(typeof data.method === 'string' && { method: data.method as SecondFactorMethod }),
+          ...(typeof data.email === 'string' && { email: data.email }),
+        }
     }
     saveTokens(data)
     // Servers that answer `204` and set a cookie: read the user from the session endpoint.
@@ -454,8 +471,9 @@ export function restAdapter(options: RestAdapterOptions = {}): AuthAdapter {
       })
       return toResult(status, data, input.email)
     },
-    async signUp(input) {
-      const { status, data } = await request(endpoints.signUp, { body: input })
+    async signUp({ extra, ...input }) {
+      // Extra fields travel next to the core ones, which they can't override.
+      const { status, data } = await request(endpoints.signUp, { body: { ...extra, ...input } })
       return toResult(status, data, input.email)
     },
     async signOut() {
@@ -487,6 +505,13 @@ export function restAdapter(options: RestAdapterOptions = {}): AuthAdapter {
     },
     async verifySecondFactor(input) {
       const { status, data } = await request(endpoints.twoFactor, { body: input })
+      return toResult(status, data)
+    },
+    async completeMagicLink(token) {
+      const { status, data } = await request(endpoints.magicLinkVerify, {
+        body: { token },
+        context: 'sign-in',
+      })
       return toResult(status, data)
     },
     async switchOrganization(organizationId) {
