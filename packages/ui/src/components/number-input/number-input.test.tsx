@@ -54,4 +54,44 @@ describe('NumberInput', () => {
     await userEvent.tab()
     expect(onValueChange).toHaveBeenLastCalledWith(null)
   })
+
+  it('parses the locale decimal comma and grouping', async () => {
+    const onValueChange = vi.fn()
+    render(<NumberInput aria-label="Betrag" locale="de-DE" onValueChange={onValueChange} />)
+    const input = screen.getByRole('spinbutton', { name: 'Betrag' })
+    await userEvent.type(input, '1.234,5')
+    await userEvent.tab()
+    expect(onValueChange).toHaveBeenLastCalledWith(1234.5)
+    await userEvent.clear(input)
+    await userEvent.type(input, '0,25')
+    await userEvent.tab()
+    expect(onValueChange).toHaveBeenLastCalledWith(0.25)
+  })
+
+  it('keeps the raw number while focused after stepping', async () => {
+    render(
+      <NumberInput
+        aria-label="Budget"
+        defaultValue={1}
+        locale="en-US"
+        formatOptions={{ style: 'currency', currency: 'USD' }}
+      />,
+    )
+    const input = screen.getByRole('spinbutton', { name: 'Budget' })
+    expect(input).toHaveValue('$1.00')
+    await userEvent.click(input)
+    await userEvent.keyboard('{ArrowUp}')
+    expect(input).toHaveValue('2')
+    await userEvent.keyboard('5')
+    await userEvent.tab()
+    expect(input).toHaveValue('$25.00')
+  })
+
+  it('does not report a change when blurred without editing', async () => {
+    const onValueChange = vi.fn()
+    render(<NumberInput aria-label="Seats" defaultValue={3} onValueChange={onValueChange} />)
+    await userEvent.click(screen.getByRole('spinbutton', { name: 'Seats' }))
+    await userEvent.tab()
+    expect(onValueChange).not.toHaveBeenCalled()
+  })
 })

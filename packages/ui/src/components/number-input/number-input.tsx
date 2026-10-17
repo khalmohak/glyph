@@ -1,4 +1,4 @@
-import { type ComponentProps, type KeyboardEvent, type ReactNode, useState } from 'react'
+import { type ComponentProps, type KeyboardEvent, type ReactNode, useRef, useState } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { useControllableState } from '../../hooks/use-controllable-state'
 import { useFieldControl } from '../field/field-context'
@@ -35,9 +35,22 @@ function clamp(value: number, min?: number, max?: number) {
   return Math.min(max ?? Number.POSITIVE_INFINITY, Math.max(min ?? Number.NEGATIVE_INFINITY, value))
 }
 
-/** Parses user text leniently: keeps digits, one leading minus and the decimal point. */
-function parse(text: string): number | null {
-  const cleaned = text.replace(/[^\d.-]/g, '').replace(/(?!^)-/g, '')
+/** The decimal separator of a locale: `.` in en-US, `,` in de-DE. */
+function decimalSeparator(locale?: string): string {
+  const parts = new Intl.NumberFormat(locale).formatToParts(1.5)
+  return parts.find((part) => part.type === 'decimal')?.value ?? '.'
+}
+
+/**
+ * Parses user text leniently: keeps digits, one leading minus and the locale's decimal
+ * separator, so grouping, currency symbols and units are ignored ("1.234,5" in de-DE).
+ */
+function parse(text: string, decimal: string): number | null {
+  const escaped = decimal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const cleaned = text
+    .replace(new RegExp(`[^\\d${escaped}-]`, 'g'), '')
+    .replace(/(?!^)-/g, '')
+    .replace(decimal, '.')
   if (cleaned === '' || cleaned === '-' || cleaned === '.') return null
   const n = Number(cleaned)
   return Number.isFinite(n) ? n : null
@@ -82,7 +95,13 @@ export function NumberInput(inProps: NumberInputProps) {
     defaultValue,
     onChange: onValueChange,
   })
+  // Text being edited. Set while the field has focus, so the raw number shows instead of
+  // the formatted one.
   const [draft, setDraft] = useState<string | null>(null)
+  const focused = useRef(false)
+  const decimal = decimalSeparator(locale)
+  const raw = (n: number | null | undefined) =>
+    n === null || n === undefined ? '' : String(n).replace('.', decimal)
   const s = numberInputStyles({ size })
   const invalid = rest['aria-invalid'] === true || rest['aria-invalid'] === 'true'
 
@@ -94,14 +113,16 @@ export function NumberInput(inProps: NumberInputProps) {
         ? new Intl.NumberFormat(locale, formatOptions).format(value)
         : String(value))
 
+  /** Applies a value and keeps the field's text in sync: raw while focused, formatted after. */
   const commit = (next: number | null) => {
-    setValue(next === null ? null : roundToStep(clamp(next, min, max), step))
+    const resolved = next === null ? null : roundToStep(clamp(next, min, max), step)
+    if (resolved !== (value ?? null)) setValue(resolved)
+    setDraft(focused.current ? raw(resolved) : null)
   }
 
   const stepBy = (direction: 1 | -1, multiplier = 1) => {
-    const base = draft !== null ? parse(draft) : value
+    const base = draft !== null ? parse(draft, decimal) : value
     commit((base ?? min ?? 0) + direction * step * multiplier)
-    setDraft(null)
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -117,14 +138,11 @@ export function NumberInput(inProps: NumberInputProps) {
     } else if (event.key === 'Home' && min !== undefined) {
       event.preventDefault()
       commit(min)
-      setDraft(null)
     } else if (event.key === 'End' && max !== undefined) {
       event.preventDefault()
       commit(max)
-      setDraft(null)
     } else if (event.key === 'Enter' && draft !== null) {
-      commit(parse(draft))
-      setDraft(null)
+      commit(parse(draft, decimal))
     }
   }
 
@@ -151,12 +169,14 @@ export function NumberInput(inProps: NumberInputProps) {
         value={display}
         className={s.input({ class: [slots.input, inputClassName] })}
         onFocus={(event) => {
-          setDraft(value === null || value === undefined ? '' : String(value))
+          focused.current = true
+          setDraft(raw(value))
           onFocus?.(event)
         }}
         onChange={(event) => setDraft(event.target.value)}
         onBlur={(event) => {
-          if (draft !== null) commit(parse(draft))
+          focused.current = false
+          if (draft !== null) commit(parse(draft, decimal))
           setDraft(null)
           onBlur?.(event)
         }}

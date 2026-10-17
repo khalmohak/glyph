@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { Field } from '../field'
@@ -43,10 +43,35 @@ describe('TagInput', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('already added')
   })
 
-  it('stops at maxTags', async () => {
-    render(<TagInput aria-label="Tags" defaultValue={['one']} maxTags={2} />)
+  it('stops at maxTags but keeps focus so the last tag can be removed', async () => {
+    const onValueChange = vi.fn()
+    render(
+      <TagInput
+        aria-label="Tags"
+        defaultValue={['one']}
+        maxTags={2}
+        onValueChange={onValueChange}
+      />,
+    )
     const input = screen.getByRole('textbox', { name: 'Tags' })
     await userEvent.type(input, 'two{Enter}')
-    expect(input).toBeDisabled()
+    expect(input).toHaveFocus()
+    expect(input).toHaveAttribute('readonly')
+    await userEvent.keyboard('three')
+    expect(input).toHaveValue('')
+    await userEvent.keyboard('{Backspace}')
+    expect(onValueChange).toHaveBeenLastCalledWith(['one'])
+    expect(input).not.toHaveAttribute('readonly')
+  })
+
+  it('does not commit while an IME composition is in progress', () => {
+    const onValueChange = vi.fn()
+    render(<TagInput aria-label="Tags" onValueChange={onValueChange} />)
+    const input = screen.getByRole('textbox', { name: 'Tags' })
+    fireEvent.change(input, { target: { value: 'にほ' } })
+    fireEvent.keyDown(input, { key: 'Enter', isComposing: true })
+    expect(onValueChange).not.toHaveBeenCalled()
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(onValueChange).toHaveBeenLastCalledWith(['にほ'])
   })
 })

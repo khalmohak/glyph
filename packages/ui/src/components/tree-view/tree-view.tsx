@@ -79,6 +79,7 @@ export function TreeView(inProps: TreeViewProps) {
     onSelect,
     size,
     className,
+    onKeyDown: userKeyDown,
     ...rest
   } = props
 
@@ -129,6 +130,8 @@ export function TreeView(inProps: TreeViewProps) {
   )
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    userKeyDown?.(event)
+    if (event.defaultPrevented) return
     const index = visible.findIndex((v) => v.node.id === tabbableId)
     const current = visible[index]
     if (!current) return

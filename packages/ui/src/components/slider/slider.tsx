@@ -1,6 +1,7 @@
 import { Slider as SliderPrimitive } from 'radix-ui'
 import { type ReactNode, useContext } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
+import { useControllableState } from '../../hooks/use-controllable-state'
 import { FieldContext, useFieldControl } from '../field/field-context'
 import { sliderStyles } from './slider.styles'
 
@@ -72,7 +73,12 @@ export function Slider<V extends SliderValue = number>(inProps: SliderProps<V>) 
   const labelledBy = ariaLabelledBy ?? (ariaLabel ? undefined : field?.labelId)
   const isRange = Array.isArray(value ?? defaultValue)
   const fromArray = (next: number[]) => (isRange ? [next[0], next[1]] : next[0]) as V
-  const current = toArray(value) ?? toArray(defaultValue) ?? [min]
+  // Tracked here too when uncontrolled, so the shown values follow the thumbs.
+  const [current, setCurrent] = useControllableState<number[]>({
+    value: toArray(value),
+    defaultValue: toArray(defaultValue) ?? [min],
+    onChange: onValueChange && ((next) => onValueChange(fromArray(next))),
+  })
   const s = sliderStyles({ showValue: Boolean(showValue) })
   const format = typeof showValue === 'function' ? showValue : (n: number) => n
 
@@ -86,11 +92,8 @@ export function Slider<V extends SliderValue = number>(inProps: SliderProps<V>) 
         disabled={disabled}
         name={name}
         {...(minStepsBetweenThumbs !== undefined && { minStepsBetweenThumbs })}
-        {...(value !== undefined && { value: toArray(value) })}
-        {...(defaultValue !== undefined && { defaultValue: toArray(defaultValue) })}
-        {...(onValueChange && {
-          onValueChange: (next: number[]) => onValueChange(fromArray(next)),
-        })}
+        value={current}
+        onValueChange={setCurrent}
         {...(onValueCommit && {
           onValueCommit: (next: number[]) => onValueCommit(fromArray(next)),
         })}

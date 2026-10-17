@@ -280,8 +280,9 @@ export function FileUpload(inProps: FileUploadProps) {
 
       {rejections.length > 0 && (
         <ul id={rejectionsId} role="alert" className={s.rejections({ class: slots.rejections })}>
-          {rejections.map((r) => (
-            <li key={`${r.file.name}-${r.reason}`}>{r.message}</li>
+          {rejections.map((r, index) => (
+            // Two files can share a name and a reason; the list is replaced, never reordered.
+            <li key={index}>{r.message}</li>
           ))}
         </ul>
       )}

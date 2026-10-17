@@ -76,6 +76,18 @@ export function ColorModeProvider({
     return () => query.removeEventListener('change', onChange)
   }, [])
 
+  // Another tab changed the mode: follow it, so open tabs don't disagree.
+  useEffect(() => {
+    if (!storageKey) return
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== storageKey) return
+      const next = event.newValue
+      if (next === 'light' || next === 'dark' || next === 'system') setModeState(next)
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [storageKey])
+
   const resolvedMode = mode === 'system' ? system : mode
 
   useEffect(() => {

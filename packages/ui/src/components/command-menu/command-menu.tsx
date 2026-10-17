@@ -206,6 +206,8 @@ export function useCommandMenuShortcut(
 ): void {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      // Autofill fires keydown events without a `key`; holding the shortcut shouldn't flicker.
+      if (typeof event.key !== 'string' || event.repeat) return
       if (event.key.toLowerCase() === key.toLowerCase() && (event.metaKey || event.ctrlKey)) {
         event.preventDefault()
         setOpen((open) => !open)
