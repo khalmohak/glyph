@@ -1,6 +1,6 @@
 {
   "name": "@glyphui/tokens",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Framework-agnostic theme engine for Glyph: token schema, defineTheme, CSS generation and presets.",
   "license": "MIT",
   "author": "Mohak Gupta (https://github.com/khalmohak)",
