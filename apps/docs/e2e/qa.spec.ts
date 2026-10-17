@@ -50,18 +50,6 @@ const knownIssues: { kind: string; detail: string; reason: string }[] = [
     detail: 'data-slot=input-otp>',
     reason: 'The real input is invisible; the active slot shows focus with its own ring.',
   },
-  {
-    kind: 'focus-invisible',
-    detail: 'data-slot=tabs-content',
-    reason:
-      'Reported to @glyphui/ui: TabsContent (Radix gives it tabIndex=0) has outline-none and no focus-visible ring. Remove once fixed.',
-  },
-  {
-    kind: 'example-overflow',
-    detail: 'input-otp/grouped <div data-slot=input-otp-group>',
-    reason:
-      'Reported to @glyphui/ui: two groups of three fixed-size slots are wider than a 390px preview, so it scrolls. Remove once slots shrink on phones.',
-  },
 ]
 
 const isKnown = (f: Finding) =>

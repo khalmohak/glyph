@@ -24,4 +24,19 @@ export default defineDoc({
     'Search matches the label and any keywords you add to an option.',
     'Pass name to submit the value with a native form.',
   ],
+  a11y: {
+    keyboard: [
+      {
+        keys: 'Enter or Space',
+        action: 'On the trigger: opens the list with focus in the search box.',
+      },
+      { keys: 'Typing', action: 'Filters the options.' },
+      { keys: 'Arrow Down or Arrow Up', action: 'Moves the highlighted option.' },
+      { keys: 'Enter', action: 'Selects the highlighted option (toggles it when multiple).' },
+      { keys: 'Esc', action: 'Closes the list and returns focus to the trigger.' },
+    ],
+    notes: [
+      'The list is a listbox; the highlighted option is announced through aria-activedescendant.',
+    ],
+  },
 })

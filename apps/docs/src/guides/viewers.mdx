@@ -1,0 +1,95 @@
+---
+title: File viewers
+description: PDF, CSV, spreadsheets, JSON, code, Markdown, diffs and media.
+order: 8
+section: Building apps
+---
+
+`@glyphui/viewers` shows files inside your app, themed like the rest of it in light and dark: PDFs, CSV and Excel files, JSON, source code, Markdown, diffs, images, video and audio. Each viewer is its own entry point, and the heavy library behind it is an optional peer dependency, so you only ship what you use.
+
+<Install packages="@glyphui/viewers" />
+
+```css title="src/index.css"
+@import "tailwindcss";
+@import "@glyphui/ui/styles.css";
+@import "@glyphui/viewers/styles.css";
+```
+
+## Pick your viewers
+
+| Import | Shows | Also install |
+|---|---|---|
+| `@glyphui/viewers/pdf` | `PdfViewer` | `pdfjs-dist` |
+| `@glyphui/viewers/csv` | `CsvViewer` | `papaparse @tanstack/react-table@8 @tanstack/react-virtual` |
+| `@glyphui/viewers/spreadsheet` | `SpreadsheetViewer` (.xlsx) | `read-excel-file @tanstack/react-table@8 @tanstack/react-virtual` |
+| `@glyphui/viewers/json` | `JsonViewer` | Nothing |
+| `@glyphui/viewers/code` | `CodeViewer` | `shiki` |
+| `@glyphui/viewers/markdown` | `MarkdownViewer` | `react-markdown remark-gfm shiki` |
+| `@glyphui/viewers/diff` | `DiffViewer` | `diff` |
+| `@glyphui/viewers/media` | `ImageViewer`, `VideoPlayer`, `AudioPlayer`, `Waveform` | Nothing |
+| `@glyphui/viewers` | `FilePreview`, `FilePreviewDialog` | The viewers you allow |
+
+Every viewer takes a `source`: a URL, a `File` or `Blob` (for example from `FileUpload`), or bytes. Most also take the content directly (`content`, `code` or `data`).
+
+## PDF
+
+<Example id="pdf-viewer/basic" />
+
+`PdfViewer` has page thumbnails, zoom (fit width, fit page or a percentage), rotation, search with highlights, selectable text, download, print and fullscreen. Only pages near the visible area render, so long documents stay fast.
+
+pdf.js parses files in a Web Worker. By default the worker loads from jsDelivr, matching your installed `pdfjs-dist` version, so it works in Vite, webpack and Next.js without setup. To serve the worker from your own site:
+
+```ts title="src/pdf-worker.ts" check
+import { setPdfWorker } from '@glyphui/viewers/pdf'
+import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
+
+// Vite. With webpack 5 or Next.js:
+// setPdfWorker(new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url))
+setPdfWorker(workerSrc)
+```
+
+## CSV and spreadsheets
+
+`CsvViewer` detects the delimiter and header row, infers each column's type (number, date, yes/no or text), and shows the rows in a [DataTable](/docs/data-tables) with search, filters, column controls and CSV export of the filtered rows. Files of 1 MB or more parse in a worker and render virtualized, so 50,000 rows scroll smoothly.
+
+<Example id="csv-viewer/basic" />
+
+`SpreadsheetViewer` does the same for `.xlsx` files, with a tab per sheet.
+
+## Any file
+
+`FilePreview` picks the right viewer from a file's type or extension. Images, video, audio, JSON and plain text work without setup; heavier viewers load only if you pass their loader, which keeps the others out of your bundle:
+
+```tsx title="src/attachment.tsx" check
+import { FilePreview, type ViewerLoaders } from '@glyphui/viewers'
+
+const loaders: ViewerLoaders = {
+  pdf: () => import('@glyphui/viewers/pdf'),
+  csv: () => import('@glyphui/viewers/csv'),
+}
+
+export function Attachment({ file }: { file: File }) {
+  return <FilePreview file={file} loaders={loaders} height={560} />
+}
+```
+
+Files without a matching viewer show their name, size and a download button. `FilePreviewDialog` shows the same preview full-screen, for attachment lists:
+
+<Example id="file-preview/attachments" />
+
+## Code, JSON, Markdown and diffs
+
+- `CodeViewer` highlights code with your theme's colors (shiki, loading one language at a time), with line numbers, highlighted lines, wrapping and copy.
+- `JsonViewer` is a keyboard-navigable tree with search, expand to any depth, copy a value or its JSONPath, and a raw view. Huge documents stay fast.
+- `MarkdownViewer` renders GitHub-flavored Markdown with your theme's typography. It's safe by default: raw HTML isn't rendered, and `javascript:` links are removed.
+- `DiffViewer` shows changes unified or side by side, with changed words highlighted and unchanged lines folded. Line-ending differences between operating systems are ignored.
+
+<Example id="json-viewer/basic" />
+
+## Images and media
+
+`ImageViewer` zooms with the wheel, pinch or buttons, pans by dragging, and rotates. `VideoPlayer` and `AudioPlayer` replace the browser's controls with themed ones: scrubbing with the buffered range, speed, captions, fullscreen and keyboard shortcuts. `Waveform` draws an audio file you can seek on.
+
+## Bundle size
+
+Each viewer's own code is under 9 kB gzipped. The libraries behind them aren't: pdf.js alone is about 130 kB plus its worker. Load viewers where they're used, with `FilePreview` loaders or `React.lazy`, rather than in your app's entry.

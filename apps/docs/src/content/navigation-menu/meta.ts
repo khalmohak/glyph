@@ -34,4 +34,16 @@ export default defineDoc({
     'For app navigation use Sidebar; for a simple site header use Navbar. NavigationMenu is for headers with rich dropdown panels.',
     'Mark the current page with active on NavigationMenuLink; it sets aria-current="page".',
   ],
+  a11y: {
+    keyboard: [
+      { keys: 'Space or Enter', action: 'On a trigger: opens its panel.' },
+      { keys: 'Arrow Left or Arrow Right', action: 'Moves between top-level items.' },
+      { keys: 'Arrow Down', action: 'Moves into the open panel.' },
+      { keys: 'Tab', action: 'Moves through links in the panel.' },
+      { keys: 'Esc', action: 'Closes the panel and returns focus to its trigger.' },
+    ],
+    notes: [
+      'The current page\'s link gets aria-current="page" automatically when a router is connected.',
+    ],
+  },
 })

@@ -10,7 +10,7 @@ import { HighlightedCode } from './snippet'
 // discarded, so each retry made a fresh lazy component that suspended again, forever.
 const previews = new Map<string, LazyExoticComponent<ComponentType>>()
 
-function previewFor(slug: string, file: string) {
+export function previewFor(slug: string, file: string) {
   const key = `${slug}/${file}`
   let preview = previews.get(key)
   if (!preview) {

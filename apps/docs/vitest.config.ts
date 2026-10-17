@@ -5,6 +5,7 @@ export default defineConfig({
   resolve: { conditions: ['@glyphui/source', ...defaultClientConditions] },
   // Server-rendering tests run in the node environment, which resolves with SSR conditions.
   ssr: { resolve: { conditions: ['@glyphui/source', ...defaultServerConditions] } },
-  // e2e/ holds Playwright specs, run by `pnpm e2e`.
-  test: { environment: 'jsdom', exclude: [...configDefaults.exclude, 'e2e/**'] },
+  // e2e/ holds Playwright specs, run by `pnpm e2e`. .guide-check/ holds guide code that
+  // src/guides.test.ts type-checks; it isn't a test suite of its own.
+  test: { environment: 'jsdom', exclude: [...configDefaults.exclude, 'e2e/**', '.guide-check/**'] },
 })

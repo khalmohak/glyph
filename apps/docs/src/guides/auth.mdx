@@ -1,0 +1,223 @@
+---
+title: Authentication
+description: Sessions, protected routes and sign-in screens against your own API.
+order: 7
+section: Building apps
+---
+
+`@glyphui/auth` handles the client side of authentication: the session and its refresh, route protection with redirect-back, roles and permissions, and ready screens for sign-in, sign-up, password reset, email codes and two-factor sign-in. Your server stays the authority; Glyph talks to it through an adapter.
+
+<Install packages="@glyphui/auth @glyphui/blocks react-hook-form @hookform/resolvers react-router" />
+
+```css title="src/index.css"
+@import "tailwindcss";
+@import "@glyphui/ui/styles.css";
+@import "@glyphui/blocks/styles.css";
+@import "@glyphui/auth/styles.css";
+```
+
+## How it fits together
+
+| Piece | Job |
+|---|---|
+| `createAuthClient(adapter)` | One client per app. It holds the session, refreshes it, syncs tabs and wraps `fetch`. |
+| Adapters | Talk to your backend: `/rest` (your API), `/firebase`, `/clerk`, `/memory` (demos and tests). |
+| `AuthProvider` and `useAuth()` | The client in React: `status`, `user`, `signIn`, `signOut`, `can`, `fetch` and more. |
+| `/react-router` | `RequireAuth`, `GuestOnly`, `RequireRole`, and loaders that redirect before render. |
+| `/ui` | `SignInForm`, `SignUpForm`, reset and code screens, `UserMenu`, session dialogs. |
+
+## Set up
+
+Create the client once. Route loaders and `AuthProvider` share it:
+
+```tsx title="src/auth.ts" check
+import { createAuthClient } from '@glyphui/auth'
+import { restAdapter } from '@glyphui/auth/rest'
+
+export const auth = createAuthClient(
+  restAdapter({
+    baseUrl: '/api',
+    // Your server sets an httpOnly cookie; a readable CSRF cookie is echoed on writes.
+    csrf: { header: 'X-CSRF-Token', cookie: 'csrf_token' },
+  }),
+  { idleTimeout: 30 * 60_000 }, // optional: sign out after 30 idle minutes
+)
+```
+
+Then the providers, outermost first: Glyph, auth, the router.
+
+```tsx title="src/main.tsx" check
+import { AuthProvider } from '@glyphui/auth'
+import { AuthRevalidator, guestLoader, protectedLoader } from '@glyphui/auth/react-router'
+import { SessionExpiredDialog } from '@glyphui/auth/ui'
+import { GlyphProvider, LoadingState } from '@glyphui/ui'
+import { reactRouter } from '@glyphui/ui/react-router'
+import { createRoot } from 'react-dom/client'
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router'
+import { auth } from './auth'
+import { AppLayout, SignInPage } from './pages'
+
+const router = createBrowserRouter([
+  {
+    element: (
+      <>
+        <AuthRevalidator />
+        <Outlet />
+      </>
+    ),
+    hydrateFallbackElement: <LoadingState label="Loading" />,
+    children: [
+      { path: 'sign-in', loader: guestLoader(auth, { redirectTo: '/app' }), element: <SignInPage /> },
+      { path: 'app', loader: protectedLoader(auth), element: <AppLayout /> },
+    ],
+  },
+])
+
+createRoot(document.getElementById('root') as HTMLElement).render(
+  <GlyphProvider router={reactRouter} toaster>
+    <AuthProvider client={auth}>
+      <RouterProvider router={router} />
+      <SessionExpiredDialog />
+    </AuthProvider>
+  </GlyphProvider>,
+)
+```
+
+- `protectedLoader` sends signed-out visitors to `/sign-in?next=/where/they/were` before the page renders.
+- `guestLoader` sends signed-in visitors away from the sign-in page.
+- `AuthRevalidator` re-runs loaders when the session changes, so a sign-out in another tab or after the idle timeout leaves protected pages.
+- `SessionExpiredDialog` asks for the password again when the session expires mid-task, without leaving the page.
+
+## Type your user
+
+Declare your user's shape once; `useAuth().user`, guards and screens follow it:
+
+```ts title="src/auth-types.ts" check
+declare module '@glyphui/auth' {
+  interface Register {
+    user: { id: string; email: string; name: string; plan: 'free' | 'pro' }
+  }
+}
+
+export {}
+```
+
+## Sign-in and sign-up pages
+
+The screens hide what your backend doesn't support, so set the adapter's `capabilities` to match your server (OAuth providers, magic links, organizations).
+
+```tsx title="src/pages.tsx" check
+import { RequireAuth, useRedirectAfterSignIn } from '@glyphui/auth/react-router'
+import { AuthLayout, SignInForm, UserMenu } from '@glyphui/auth/ui'
+import { Outlet } from 'react-router'
+
+export function SignInPage() {
+  // Back to ?next= after signing in. Only same-origin paths are followed.
+  const continueToApp = useRedirectAfterSignIn('/app')
+  return (
+    <AuthLayout>
+      <SignInForm signUpHref="/sign-up" forgotPasswordHref="/forgot-password" onSuccess={continueToApp} />
+    </AuthLayout>
+  )
+}
+
+export function AppLayout() {
+  return (
+    <RequireAuth>
+      <header className="flex justify-end p-4">
+        <UserMenu />
+      </header>
+      <Outlet />
+    </RequireAuth>
+  )
+}
+```
+
+`SignInForm` covers the whole flow: password, OAuth buttons, email links, then any email-verification or two-factor step the server asks for. `SignUpForm` takes `extraFields` for things like an invite code or workspace name; they're validated with the form and sent with the request.
+
+## Your REST API
+
+`restAdapter` expects these endpoints under `baseUrl`; rename any of them with `endpoints`.
+
+| Endpoint | Body | Returns |
+|---|---|---|
+| `GET /auth/session` | | `200 { user, … }`, or `200 { user: null }` when signed out |
+| `POST /auth/sign-in` | `{ email, password }` | `200` with the session, or `202` for a next step |
+| `POST /auth/sign-up` | `{ email, password, name?, …extra }` | Like sign-in |
+| `POST /auth/sign-out` | `{ refreshToken }` in bearer mode | `204` |
+| `POST /auth/refresh` | `{ refreshToken }` in bearer mode | The new tokens or session |
+| `POST /auth/password/forgot` | `{ email }` | `2xx`, whether or not the account exists |
+| `POST /auth/password/reset` | `{ token, password }`, plus `{ email }` for codes | `2xx` |
+| `POST /auth/verify` | `{ email, code, challenge? }` | Like sign-in |
+| `POST /auth/verify/resend` | `{ email }` | `2xx` |
+| `POST /auth/two-factor` | `{ code, challenge }` | Like sign-in |
+| `POST /auth/magic-link` | `{ email }` | `202 { status: 'magic-link-sent' }` |
+| `POST /auth/magic-link/verify` | `{ token }` | Like sign-in |
+| `POST /auth/organization` | `{ organizationId }` | The session for that organization |
+| `PATCH /auth/user` | Profile fields | The updated session |
+
+A session is `{ user, expiresAt?, roles?, permissions?, organizations?, activeOrganizationId? }`, plus `accessToken` and `refreshToken` in bearer mode. Your API returns another shape? Map it with `mapSession`.
+
+- **Errors.** A JSON body with `message` shows above the form; `errors: { email: '…' }` shows next to the matching fields. Without a message, each status gets a friendly default, and `429` honors `Retry-After`.
+- **Next steps.** Answer `202 { status: 'needs-verification' }` or `202 { status: 'needs-second-factor', challenge, method }` and the screens show the code form. The `challenge` comes back with the code, so your server knows which sign-in it completes; `method` (`totp`, `email`, `sms`) sets the wording.
+- **Reset codes.** For code-based resets, check the code against the given `email` only.
+
+Signed-out session checks should return `200 { user: null }`: a 401 works too, but browsers log every 401 as a console error.
+
+## Cookies or bearer tokens
+
+| | Cookie mode (default) | Bearer mode |
+|---|---|---|
+| Where the session lives | An httpOnly cookie your server sets; JavaScript can't read it | `accessToken` and `refreshToken` in storage you choose |
+| Best for | API on the same site as the app | API on another domain |
+| Extra work | A CSRF header on writes (`csrf` option) | Refresh-token rotation and CORS on your server |
+
+In bearer mode, `storage: 'local'` (the default) survives reloads and syncs tabs, `'session'` lasts per tab, and `'memory'` keeps tokens out of web storage at the cost of signing in again after a reload. Rotate refresh tokens on every refresh and revoke the whole token family if an old one is reused; the client never sends two refreshes at once, even across tabs. A separate API origin must answer CORS preflights and allow the `Authorization` header.
+
+## Sessions
+
+- The session is re-checked when the tab regains focus and every 5 minutes (`refreshInterval`), and refreshed shortly before `expiresAt`.
+- Signing in or out in one tab updates every other tab.
+- `idleTimeout` signs people out after inactivity in all tabs; `IdleWarningDialog` warns them first.
+- `fetch` from `useAuth()` sends the session to your API. On a 401 it refreshes once and retries; if that fails, `SessionExpiredDialog` takes over.
+
+```tsx title="src/use-invoices.ts" check
+import { useAuth } from '@glyphui/auth'
+import { useEffect, useState } from 'react'
+
+export function useInvoices() {
+  const { fetch } = useAuth()
+  const [invoices, setInvoices] = useState<{ id: string; total: number }[]>([])
+  useEffect(() => {
+    fetch('/api/invoices')
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setInvoices)
+  }, [fetch])
+  return invoices
+}
+```
+
+## Roles and permissions
+
+```tsx title="src/billing-button.tsx" check
+import { Can, useCan } from '@glyphui/auth'
+import { Button } from '@glyphui/ui'
+
+export function BillingButton() {
+  const canExport = useCan('invoices:export')
+  return (
+    <Can permission="billing:manage" fallback={null}>
+      <Button disabled={!canExport}>Manage billing</Button>
+    </Can>
+  )
+}
+```
+
+`RequireRole` does the same for routes, with a "no access" page by default. These only shape the UI: your API must check the same permissions on every request.
+
+## Firebase and Clerk
+
+- `@glyphui/auth/firebase` wraps Firebase Authentication: email and password, OAuth providers, and the reset and verification emails Firebase sends.
+- `@glyphui/auth/clerk` renders `<ClerkAuthBridge>` inside `<ClerkProvider>`, so Glyph's guards, `UserMenu` and dialogs work on a Clerk session. Passkeys, enterprise SSO and CAPTCHA stay with Clerk's own components.
+
+Their pages have setup code: [Firebase](/components/auth-firebase), [Clerk](/components/auth-clerk). For prototypes and tests, [`memoryAdapter`](/components/auth-memory) is a complete backend in the browser.

@@ -1,6 +1,7 @@
 import { type ReactNode, useId, useMemo } from 'react'
 import * as R from 'recharts'
 import { useControllableState } from '../../hooks/use-controllable-state'
+import { useFontsVersion } from '../../hooks/use-fonts-version'
 import {
   type ChartColorValue,
   ChartFrame,
@@ -124,6 +125,8 @@ export function useCartesian<T extends object, S extends ChartSeries<T>>(
   props: Omit<CartesianChartProps<T>, 'series'> & { series: readonly S[] },
 ) {
   const { data, index, series, valueFormatter = defaultFormatter } = props
+  // The y axis is sized from measured label text; re-render once web fonts have loaded.
+  useFontsVersion()
   const [hidden, setHidden] = useControllableState<readonly Key<T>[]>({
     value: props.hiddenSeries,
     defaultValue: props.defaultHiddenSeries ?? [],

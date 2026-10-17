@@ -24,4 +24,12 @@ export default defineDoc({
     'Touch and screen-reader users may never see a hover card. Keep it a preview of information that is also available on the linked page.',
     'Use Tooltip for a short text label and Popover for interactive content opened by click.',
   ],
+  a11y: {
+    keyboard: [
+      { keys: 'Tab', action: 'Focusing the trigger opens the card; moving focus away closes it.' },
+    ],
+    notes: [
+      'Keep hover cards to previews: everything in them should also be reachable from the link itself.',
+    ],
+  },
 })

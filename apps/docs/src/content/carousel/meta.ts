@@ -31,4 +31,17 @@ export default defineDoc({
     'Uses the WAI-ARIA carousel pattern: the region is labelled and each slide announces “n of total”.',
     'Pass setApi to build custom controls on the Embla API.',
   ],
+  a11y: {
+    keyboard: [
+      {
+        keys: 'Arrow Left or Arrow Right',
+        action: 'Previous or next slide (Arrow Up or Down when vertical).',
+      },
+      { keys: 'Tab', action: 'Reaches the Previous and Next buttons.' },
+    ],
+    notes: [
+      'Arrow keys are left alone inside inputs and other editable elements in a slide.',
+      'Slides are grouped and labelled "N of M" for screen readers.',
+    ],
+  },
 })

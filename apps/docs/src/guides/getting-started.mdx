@@ -1,0 +1,159 @@
+---
+title: Getting started
+description: Install Glyph, add a theme file, and wrap your app.
+order: 1
+section: Foundations
+---
+
+Glyph needs React 19 and Tailwind CSS 4.1 or later. This guide uses Vite; the [Next.js section](#nextjs) covers the differences for server rendering.
+
+## Install
+
+<Install packages="@glyphui/ui" />
+
+Add the other packages only for what you use:
+
+| Package | For | Also install |
+|---|---|---|
+| `@glyphui/blocks` | Page sections: Hero, Pricing, FAQ, AuthCard and more | |
+| `@glyphui/ui/form` | Schema-validated forms | `react-hook-form @hookform/resolvers` and a validator such as `zod` |
+| `@glyphui/ui/data-table` | Tables with server mode and URL state | `@tanstack/react-table@8` |
+| `@glyphui/ui/chart` | Charts colored by your theme | `recharts` |
+| `@glyphui/auth` | Sessions, protected routes, sign-in screens | `react-router` for the route guards |
+| `@glyphui/viewers` | PDF, CSV, JSON, code, media and more | Depends on the viewer; see [File viewers](/docs/viewers) |
+
+Every `@glyphui/*` package is released under one version number. Keep them on the same version: `blocks`, `auth` and `viewers` use your app's `@glyphui/ui` as a peer dependency rather than bringing their own copy.
+
+## Import the styles
+
+In your main CSS file, in this order:
+
+```css title="src/index.css"
+@import "@glyphui/ui/fonts.css";       /* Geist and Geist Mono, used by the default theme */
+@import "tailwindcss";
+@import "@glyphui/ui/styles.css";
+@import "@glyphui/blocks/styles.css";  /* only with @glyphui/blocks */
+@import "@glyphui/auth/styles.css";    /* only with @glyphui/auth screens */
+@import "@glyphui/viewers/styles.css"; /* only with @glyphui/viewers */
+```
+
+Each Glyph stylesheet tells Tailwind which classes its components use. Leave one out and those components render partly unstyled; in development they warn in the console. Skip `fonts.css` when your theme uses other fonts, and load those instead.
+
+## Prevent the dark-mode flash
+
+The color mode has to be set before React loads, or dark-mode visitors see a light page for a moment. With Vite, add the plugin:
+
+```ts title="vite.config.ts" check
+import { glyphColorMode } from '@glyphui/ui/vite'
+import tailwindcss from '@tailwindcss/vite'
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: [react(), tailwindcss(), glyphColorMode({ defaultMode: 'system' })],
+})
+```
+
+Pass the same `defaultMode` and `storageKey` as `GlyphProvider`. With server rendering, render `<ColorModeScript />` in the document head instead.
+
+## Create your theme
+
+Start from a preset and override what differs. Everything is type-checked, including per-component defaults.
+
+```ts title="src/glyph.theme.ts" check
+import { defineTheme, presets } from '@glyphui/ui'
+
+export default defineTheme({
+  name: 'acme',
+  extends: presets.glyph, // glyph · brutalist · editorial · playful
+  colors: { dark: { primary: 'oklch(70% 0.19 45)' } },
+  radius: { md: '6px' },
+  components: { Button: { defaultVariants: { size: 'lg' } } },
+})
+```
+
+[Theming](/docs/theming) covers every option, and the [theme studio](/themes) builds a theme file on live components.
+
+## Wrap your app
+
+`GlyphProvider` goes outermost, once. Give it your theme and, with React Router, `reactRouter`:
+
+```tsx title="src/main.tsx" check
+import { GlyphProvider } from '@glyphui/ui'
+import { reactRouter } from '@glyphui/ui/react-router'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { createBrowserRouter, RouterProvider } from 'react-router'
+import { App } from './app'
+import theme from './glyph.theme'
+import './index.css'
+
+const router = createBrowserRouter([{ path: '/', element: <App /> }])
+
+createRoot(document.getElementById('root') as HTMLElement).render(
+  <StrictMode>
+    <GlyphProvider theme={theme} defaultMode="system" router={reactRouter} toaster>
+      <RouterProvider router={router} />
+    </GlyphProvider>
+  </StrictMode>,
+)
+```
+
+- `router` makes every Glyph link navigate client-side and marks the current Sidebar, Navbar and NavigationMenu item. Other routers are in [Routing](/docs/routing).
+- `toaster` mounts the toast container, so `toast()` works anywhere. `useConfirm()` needs no setup.
+
+Now use a component:
+
+```tsx title="src/app.tsx" check
+import { Button, toast } from '@glyphui/ui'
+
+export function App() {
+  return <Button onClick={() => toast.success('Glyph is working')}>Say hello</Button>
+}
+```
+
+## Next.js
+
+Glyph's components are client components, and every built file starts with `'use client'`, so they work inside the App Router's server components. Put the providers in a client component and the color-mode script in the document head:
+
+```tsx title="app/providers.tsx"
+'use client'
+import { GlyphProvider } from '@glyphui/ui'
+import theme from '../glyph.theme'
+import { nextRouter } from './glyph-router'
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <GlyphProvider theme={theme} defaultMode="system" router={nextRouter} toaster>
+      {children}
+    </GlyphProvider>
+  )
+}
+```
+
+```tsx title="app/layout.tsx"
+import { ColorModeScript } from '@glyphui/ui'
+import { Providers } from './providers'
+import './globals.css'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <ColorModeScript defaultMode="system" />
+      </head>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  )
+}
+```
+
+`suppressHydrationWarning` is needed because the script sets `data-mode` on `<html>` before React hydrates. The `nextRouter` object is in [Routing](/docs/routing#nextjs).
+
+## Next steps
+
+- [Theming](/docs/theming): colors, type, shape and component recipes in one file.
+- [Forms](/docs/forms) and [Data tables](/docs/data-tables): the two patterns most apps need first.
+- [All components](/components), each with live examples and props.

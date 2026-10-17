@@ -1,5 +1,5 @@
 {
   "extends": "@glyphui/tsconfig/app.json",
-  "compilerOptions": { "types": ["vite/client", "node"] },
+  "compilerOptions": { "types": ["vite/client", "node", "mdx"] },
   "include": ["src", "vite.config.ts", "vitest.config.ts", "plugins", "e2e", "playwright.config.ts"]
 }

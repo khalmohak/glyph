@@ -31,4 +31,12 @@ export default defineDoc({
     'Opens on click, closes on Escape or an outside click, and returns focus to the trigger.',
     'For a hint on hover, use Tooltip. For a list of actions, use DropdownMenu.',
   ],
+  a11y: {
+    keyboard: [
+      { keys: 'Space or Enter', action: 'On the trigger: opens or closes it.' },
+      { keys: 'Tab', action: 'Moves through the content.' },
+      { keys: 'Esc', action: 'Closes it and returns focus to the trigger.' },
+    ],
+    notes: ['The trigger gets aria-expanded and aria-controls; the content is a dialog.'],
+  },
 })

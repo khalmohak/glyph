@@ -19,4 +19,14 @@ export default defineDoc({
     'The child must be focusable (a button or link) so keyboard users see the hint too.',
     'Never put essential information only in a tooltip; touch screens cannot hover.',
   ],
+  a11y: {
+    keyboard: [
+      { keys: 'Tab', action: 'Focusing the trigger shows the tooltip.' },
+      { keys: 'Esc', action: 'Hides it.' },
+    ],
+    notes: [
+      "The tooltip text becomes the trigger's description, so screen readers read it after the name.",
+      "Tooltips can't hold interactive content; use a Popover for that.",
+    ],
+  },
 })

@@ -22,3 +22,6 @@ npm-token.txt
 
 # Claude Code agent worktrees
 .claude/worktrees/
+
+# Type-checked guide snippets (written by src/guides.test.ts)
+apps/docs/.guide-check/

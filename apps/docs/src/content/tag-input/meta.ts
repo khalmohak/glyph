@@ -24,4 +24,14 @@ export default defineDoc({
     'Backspace in an empty input removes the last tag.',
     'Each remove button is labelled “Remove <tag>” for screen readers.',
   ],
+  a11y: {
+    keyboard: [
+      { keys: 'Enter or ,', action: 'Adds the typed tag.' },
+      { keys: 'Backspace', action: 'On an empty input: removes the last tag.' },
+    ],
+    notes: [
+      "Each tag's remove button is labelled with the tag's text.",
+      'When full, the input becomes read-only rather than disabled, so it stays focusable.',
+    ],
+  },
 })

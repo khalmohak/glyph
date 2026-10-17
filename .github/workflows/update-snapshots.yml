@@ -28,7 +28,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm -C apps/docs build
+      # Through turbo so the packages build first (the docs measure their gzip sizes).
+      - run: pnpm turbo run build --filter=docs
       - name: Regenerate baselines
         run: pnpm -C apps/docs exec playwright test --project=visual --update-snapshots
       - name: Commit changed baselines

@@ -1,8 +1,10 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
+import { gzipSync } from 'node:zlib'
 import { withCustomConfig } from 'react-docgen-typescript'
 import { codeToHtml, createCssVariablesTheme } from 'shiki'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
+import { staticRoutes } from '../src/lib/site'
 
 /**
  * Build-time data for the docs:
@@ -15,6 +17,7 @@ import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 
 const PROPS_ID = 'virtual:glyph-props'
 const EXAMPLES_ID = 'virtual:glyph-examples'
+const SIZES_ID = 'virtual:glyph-sizes'
 
 const theme = createCssVariablesTheme({
   name: 'glyph',
@@ -63,6 +66,18 @@ function extractProps(root: string): Record<string, PropDoc[]> {
   return out
 }
 
+/** Props of every package's components. ui last, so its names win on a clash. */
+export function extractAllProps(): Record<string, PropDoc[]> {
+  const packages = resolve(__dirname, '../../../packages')
+  return Object.assign(
+    {},
+    extractProps(join(packages, 'auth')),
+    extractProps(join(packages, 'blocks')),
+    extractProps(join(packages, 'viewers')),
+    extractProps(join(packages, 'ui')),
+  )
+}
+
 async function highlightExamples(
   contentRoot: string,
 ): Promise<Record<string, { code: string; html: string }>> {
@@ -82,6 +97,119 @@ async function highlightExamples(
   return Object.fromEntries(entries)
 }
 
+/**
+ * `virtual:glyph-sizes`: gzipped bytes of each component imported on its own from the built
+ * package (`export { Button } from '@glyphui/ui'`), with peer dependencies and other Glyph
+ * packages left out, the way scripts/size.mjs measures entries. Results are cached on disk by
+ * the built file's modification time; when packages aren't built, sizes are simply missing.
+ */
+interface SizeTarget {
+  slug: string
+  pkg: string
+  file: string
+  name: string
+}
+
+function sizeTargets(contentRoot: string, repoRoot: string): SizeTarget[] {
+  const targets: SizeTarget[] = []
+  for (const dir of readdirSync(contentRoot, { withFileTypes: true })) {
+    const meta = join(contentRoot, dir.name, 'meta.ts')
+    if (!dir.isDirectory() || !existsSync(meta)) continue
+    const src = readFileSync(meta, 'utf8')
+    if (/status:\s*'planned'/.test(src)) continue
+    const entry = src.match(/entry:\s*'([^']+)'/)?.[1] ?? '@glyphui/ui'
+    const propsOf = src.match(/propsOf:\s*'([^']+)'/)?.[1]?.replace(/Props$/, '')
+    const exportList = [
+      ...(src.match(/exports:\s*\[([^\]]*)\]/)?.[1] ?? '').matchAll(/'([^']+)'/g),
+    ].map((m) => m[1] as string)
+    const name = propsOf ?? exportList.find((e) => /^[A-Z]/.test(e)) ?? exportList[0]
+    if (!name) continue
+    const [, pkg, sub] = entry.match(/^@glyphui\/([^/]+)(?:\/(.+))?$/) ?? []
+    if (!pkg) continue
+    const pkgDir = join(repoRoot, 'packages', pkg)
+    const json = JSON.parse(readFileSync(join(pkgDir, 'package.json'), 'utf8'))
+    const target = json.exports?.[sub ? `./${sub}` : '.']
+    const rel = typeof target === 'string' ? target : (target?.import ?? target?.default)
+    if (typeof rel !== 'string') continue
+    targets.push({ slug: dir.name, pkg, file: join(pkgDir, rel), name })
+  }
+  return targets
+}
+
+function externalsOf(repoRoot: string, pkg: string): string[] {
+  const read = (name: string) =>
+    JSON.parse(readFileSync(join(repoRoot, 'packages', name, 'package.json'), 'utf8'))
+  const json = read(pkg)
+  const shared = pkg === 'ui' ? [] : Object.keys(read('ui').dependencies ?? {})
+  return [
+    ...Object.keys(json.peerDependencies ?? {}),
+    ...Object.keys(json.dependencies ?? {}).filter(
+      (d) => d.startsWith('@glyphui/') || shared.includes(d),
+    ),
+    'react/jsx-runtime',
+  ]
+}
+
+async function componentSizes(
+  contentRoot: string,
+  repoRoot: string,
+  cacheFile: string,
+): Promise<Record<string, number>> {
+  const cache: Record<string, { key: string; bytes: number }> = existsSync(cacheFile)
+    ? JSON.parse(readFileSync(cacheFile, 'utf8'))
+    : {}
+  let bundler: typeof import('rolldown').rolldown
+  try {
+    bundler = (await import('rolldown')).rolldown
+  } catch {
+    return {}
+  }
+  const targets = sizeTargets(contentRoot, repoRoot).filter((t) => existsSync(t.file))
+  const out: Record<string, number> = {}
+  const scratch = join(cacheFile, '..', 'entries')
+  mkdirSync(scratch, { recursive: true })
+  const measure = async (t: SizeTarget) => {
+    const key = `${t.file}#${t.name}@${statSync(t.file).mtimeMs}`
+    const hit = cache[t.slug]
+    if (hit?.key === key) {
+      out[t.slug] = hit.bytes
+      return
+    }
+    try {
+      const input = join(scratch, `${t.slug}.mjs`)
+      writeFileSync(input, `export { ${t.name} } from ${JSON.stringify(t.file)}`)
+      const deps = externalsOf(repoRoot, t.pkg)
+      const bundle = await bundler({
+        input,
+        platform: 'browser',
+        external: (id) => deps.some((d) => id === d || id.startsWith(`${d}/`)),
+        transform: { define: { 'process.env.NODE_ENV': '"production"' } },
+        logLevel: 'silent',
+      })
+      const { output } = await bundle.generate({ format: 'esm', minify: true })
+      await bundle.close()
+      // Up-front code only: lazily imported chunks load later, when used.
+      const code = output
+        .filter((o) => o.type === 'chunk' && !o.isDynamicEntry)
+        .map((o) => (o as { code: string }).code)
+        .join('\n')
+      const bytes = gzipSync(code, { level: 9 }).length
+      out[t.slug] = bytes
+      cache[t.slug] = { key, bytes }
+    } catch {
+      // A component that can't be bundled on its own just gets no size badge.
+    }
+  }
+  const queue = [...targets]
+  await Promise.all(
+    Array.from({ length: 4 }, async () => {
+      for (let t = queue.shift(); t; t = queue.shift()) await measure(t)
+    }),
+  )
+  writeFileSync(cacheFile, JSON.stringify(cache))
+  return out
+}
+
 interface RouteMeta {
   path: string
   title: string
@@ -96,18 +224,12 @@ const SITE_DESCRIPTION =
 function routeMetas(contentRoot: string): RouteMeta[] {
   const field = (src: string, key: string) =>
     src.match(new RegExp(`${key}:\\s*(?:\\n\\s*)?(['"\`])((?:\\\\.|(?!\\1).)*)\\1`))?.[2]
-  const routes: RouteMeta[] = [
-    {
-      path: 'components',
-      title: `Components · ${SITE}`,
-      description: 'Every Glyph component, its status, and the roadmap.',
-    },
-    {
-      path: 'getting-started',
-      title: `Getting started · ${SITE}`,
-      description: 'Install Glyph, add a theme file, and wrap your app.',
-    },
-  ]
+  // Static sections and guides come from the site map; component pages from content/.
+  const routes: RouteMeta[] = staticRoutes.map(({ path, title, description }) => ({
+    path,
+    title,
+    description,
+  }))
   for (const dir of readdirSync(contentRoot, { withFileTypes: true })) {
     const meta = join(contentRoot, dir.name, 'meta.ts')
     if (!dir.isDirectory() || !existsSync(meta)) continue
@@ -138,6 +260,20 @@ export function docsData(): Plugin {
   const sources = [uiRoot, viewersRoot]
   const contentRoot = resolve(__dirname, '../src/content')
   let props: Record<string, PropDoc[]> | null = null
+  let sizes: Promise<Record<string, number>> | null = null
+  const repoRoot = resolve(__dirname, '../../..')
+  const sizesCache = resolve(__dirname, '../node_modules/.cache/glyph-docs/sizes.json')
+  const loadSizes = () => {
+    if (process.env.DOCS_SIZES === '0') return Promise.resolve({})
+    mkdirSync(join(sizesCache, '..'), { recursive: true })
+    sizes ??= componentSizes(contentRoot, repoRoot, sizesCache)
+    return sizes
+  }
+  const cachedSizes = (): Record<string, number> => {
+    if (!existsSync(sizesCache)) return {}
+    const cache = JSON.parse(readFileSync(sizesCache, 'utf8')) as Record<string, { bytes: number }>
+    return Object.fromEntries(Object.entries(cache).map(([slug, v]) => [slug, v.bytes]))
+  }
   let server: ViteDevServer | undefined
   let config: ResolvedConfig | undefined
 
@@ -181,19 +317,19 @@ export function docsData(): Plugin {
       })
     },
     resolveId(id) {
-      if (id === PROPS_ID || id === EXAMPLES_ID) return `\0${id}`
+      if (id === PROPS_ID || id === EXAMPLES_ID || id === SIZES_ID) return `\0${id}`
     },
     async load(id) {
       if (id === `\0${PROPS_ID}`) {
-        // Components from every package: ui first, so its names win on a clash.
-        props ??= Object.assign(
-          {},
-          extractProps(resolve(__dirname, '../../../packages/auth')),
-          extractProps(resolve(__dirname, '../../../packages/blocks')),
-          extractProps(viewersRoot),
-          extractProps(uiRoot),
-        )
+        props ??= extractAllProps()
         return `export default ${JSON.stringify(props)}`
+      }
+      if (id === `\0${SIZES_ID}`) {
+        // Builds wait for fresh numbers; dev serves the cache and measures in the background.
+        if (config?.command === 'build')
+          return `export default ${JSON.stringify(await loadSizes())}`
+        if (!sizes) void loadSizes().then(() => invalidate(SIZES_ID))
+        return `export default ${JSON.stringify(cachedSizes())}`
       }
       if (id === `\0${EXAMPLES_ID}`) {
         return `export default ${JSON.stringify(await highlightExamples(contentRoot))}`

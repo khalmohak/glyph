@@ -42,4 +42,20 @@ export default defineDoc({
     'The footer sits outside the body, so a FormSubmit there needs form={form}; a plain submit button needs onSubmit on the Modal.',
     'Set closeOnOverlayClick={false} for forms where a stray click would lose input; Escape still closes.',
   ],
+  a11y: {
+    keyboard: [
+      { keys: 'Space or Enter', action: 'On the trigger: opens it and moves focus inside.' },
+      {
+        keys: 'Tab',
+        action: 'Moves to the next focusable element inside; focus stays trapped while it is open.',
+      },
+      { keys: 'Shift + Tab', action: 'Moves to the previous focusable element inside.' },
+      { keys: 'Esc', action: 'Closes it and returns focus to the trigger.' },
+    ],
+    notes: [
+      "The title prop is required: it becomes the dialog's accessible name.",
+      'Without a description, aria-describedby is left off instead of pointing at nothing.',
+      'closeOnOverlayClick={false} keeps Esc and the close button working.',
+    ],
+  },
 })

@@ -1,0 +1,153 @@
+---
+title: Theming
+description: 'One typed theme file: colors, type, shape, depth, motion and component recipes.'
+order: 2
+section: Foundations
+---
+
+A Glyph theme is one TypeScript file. It decides every color, the type scale, corner radius, shadows, border width, motion and control height, plus defaults and extra classes for individual components. Components never hardcode a color or size, so changing the theme changes the whole app.
+
+## A theme file
+
+Start from one of the four presets with `extends` and override only what differs:
+
+```ts title="src/glyph.theme.ts" check
+import { defineTheme, presets } from '@glyphui/ui'
+
+export default defineTheme({
+  name: 'acme',
+  extends: presets.glyph,
+  colors: {
+    light: { primary: 'oklch(55% 0.2 30)' },
+    dark: { primary: 'oklch(70% 0.19 45)' },
+  },
+  radius: { md: '6px', lg: '10px' },
+  font: { sans: '"Inter Variable", system-ui, sans-serif' },
+  motion: { level: 'subtle' },
+  control: { md: '38px' },
+  components: {
+    Button: { defaultVariants: { size: 'lg' }, className: { base: 'tracking-tight' } },
+    Card: { className: { root: 'shadow-md' } },
+  },
+})
+```
+
+Pass it to `<GlyphProvider theme={theme}>`. Without `extends`, a theme must set every token; TypeScript lists what's missing.
+
+| Key | What it sets |
+|---|---|
+| `colors.light`, `colors.dark` | Every color token, separately per mode |
+| `radius` | `xs`, `sm`, `md`, `lg`, `xl`, `pill` |
+| `shadow` | `xs` to `lg`, once or per mode |
+| `font` | `sans`, `display`, `serif`, `mono`, plus OpenType `features` |
+| `text` | Nine steps from `display` to `caption`, each with size, line height, tracking and weight |
+| `border.width` | The width of every themed border |
+| `motion` | Durations, easings, the motion level and the spring; see [Motion](/docs/motion) |
+| `control` | Heights of buttons, inputs and selects (`sm`, `md`, `lg`): the theme's density |
+| `components` | Per-component `defaultVariants` and `className` slots, typed per component |
+
+## Color tokens
+
+Colors are semantic: you set what `primary` or `muted-foreground` means, and components use the role, not a hue.
+
+| Tokens | Used for |
+|---|---|
+| `background`, `foreground`, `subtle`, `surface`, `raised`, `muted` | Page, cards and raised layers |
+| `muted-foreground`, `faint-foreground` | Secondary and tertiary text |
+| `border`, `border-strong`, `input`, `ring` | Lines, field borders and focus rings |
+| `primary`, `secondary`, `success`, `warning`, `danger`, `info` | Fills, each with a `-foreground` for text on it |
+| `primary-text`, `success-text`, `warning-text`, `danger-text`, `info-text` | The same tones as readable text |
+| `overlay` | Behind dialogs and sheets |
+| `chart-1` to `chart-5` | Series in charts, in order |
+
+Change a fill like `primary` without its `-foreground` and `defineTheme` picks white or dark text, whichever is readable on it. The `*-text` tokens are derived the same way: links, field errors and tinted badges stay at WCAG AA contrast even when you pick a light brand color. Set any of them explicitly to opt out.
+
+## Check contrast
+
+In development, `GlyphProvider` warns in the console when the active theme still fails WCAG contrast somewhere. `auditContrast` lists every failing pair, so you can test it:
+
+```ts title="src/glyph.theme.test.ts" check
+import { auditContrast } from '@glyphui/ui'
+import { expect, it } from 'vitest'
+import theme from './glyph.theme'
+
+it('meets WCAG AA in light and dark', () => {
+  expect(auditContrast(theme)).toEqual([])
+})
+```
+
+Each issue names the mode, the two tokens, the ratio found and the ratio required.
+
+## Component recipes
+
+`components` sets defaults and classes for one component everywhere. The keys are typed from each component's styles: a Button size or Card slot that doesn't exist is a compile error.
+
+- `defaultVariants` changes props' defaults, such as every Button being `lg`.
+- `className` adds classes to named parts (slots) of a component. Each component page lists its slots under Theming.
+
+A `className` passed to one component instance always wins over the theme.
+
+## Tokens in your own markup
+
+The tokens are Tailwind utilities, so your own components follow the theme too:
+
+```tsx title="src/plan-badge.tsx" check
+export function PlanBadge({ plan }: { plan: string }) {
+  return (
+    <span className="rounded-pill border border-border bg-muted px-2 py-0.5 text-caption text-muted-foreground">
+      {plan}
+    </span>
+  )
+}
+```
+
+Colors are `bg-*`, `text-*` and `border-*` with token names (`bg-primary`, `text-danger-text`). Type steps are `text-h2`, `text-small`; fonts are `font-display`, `font-mono`; shapes are `rounded-lg` and `shadow-md`. Raw values are CSS variables: `var(--glyph-primary)`.
+
+## Dark mode
+
+Every theme has both modes. `useColorMode()` reads and changes the visitor's choice:
+
+```tsx title="src/mode-toggle.tsx" check
+import { SegmentedControl, useColorMode } from '@glyphui/ui'
+
+export function ModeToggle() {
+  const { mode, setMode } = useColorMode()
+  return (
+    <SegmentedControl
+      aria-label="Color mode"
+      value={mode}
+      onValueChange={setMode}
+      options={[
+        { value: 'light', label: 'Light' },
+        { value: 'dark', label: 'Dark' },
+        { value: 'system', label: 'System' },
+      ]}
+    />
+  )
+}
+```
+
+The choice is stored in `localStorage` (`storageKey` on the provider, `null` to turn storage off) and kept in sync across tabs. `resolvedMode` is what's on screen: `system` resolved against the OS setting. To avoid a light flash on load, add the [Vite plugin or ColorModeScript](/docs/getting-started#prevent-the-dark-mode-flash).
+
+## Several themes on one page
+
+`ThemeScope` renders part of the page with another theme, for previews, embedded widgets or a white-labelled area:
+
+<Example id="theme/theme-scope" />
+
+Pass `mode` to force light or dark inside the scope. Dialogs, menus and popovers render at the end of the document, outside the scope, so they use the page's theme; wrap their content in its own `ThemeScope` to theme them too.
+
+## Themes from data
+
+Themes are plain objects, so they can come from a database for per-customer branding: pass the parsed object to `defineTheme` with `extends`. Values are escaped when written to CSS, so a value containing `;`, braces or `</style>` can't break out of its declaration. Still validate tenant input: an unreadable color passes escaping but fails contrast, which `auditContrast` catches.
+
+## The four presets
+
+| Preset | Character |
+|---|---|
+| `glyph` | Precise and dark-first, Geist, an electric-blue accent, layered soft shadows |
+| `brutalist` | Zero radius, heavy borders, hard offset shadows, loud color, snappy motion |
+| `editorial` | Serif display type, warm paper neutrals, hairlines instead of shadows |
+| `playful` | Pill shapes, pastel color, chunky type, springy motion |
+
+Try them on this site with the theme picker in the header, or design your own in the [theme studio](/themes).

@@ -17,6 +17,103 @@ test.describe('Docs navigation', () => {
       await expect(page.getByRole('heading', { level: 1, name })).toBeVisible()
     }
   })
+
+  test('reaches every section from the header', async ({ page }) => {
+    await open(page, '/')
+    const header = page.getByRole('navigation', { name: 'Main' })
+    for (const [link, heading] of [
+      ['Docs', 'Build with Glyph'],
+      ['Components', 'Components'],
+      ['Blocks', 'Page sections, ready to drop in'],
+      ['Themes', 'Design your theme'],
+      ['Templates', 'Real apps, built only with Glyph'],
+    ] as const) {
+      await header.getByRole('link', { name: link, exact: true }).click()
+      await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible()
+      await expect(header.getByRole('link', { name: link, exact: true })).toHaveAttribute(
+        'aria-current',
+        'page',
+      )
+    }
+  })
+
+  test('guides link through to component pages', async ({ page }) => {
+    await open(page, '/docs/auth/')
+    await expect(page.getByRole('heading', { level: 1, name: 'Authentication' })).toBeVisible()
+    await page.getByRole('link', { name: 'Firebase', exact: true }).click()
+    await expect(page.getByRole('heading', { level: 1, name: /Firebase/ })).toBeVisible()
+  })
+})
+
+test.describe('Gallery', () => {
+  test('filters by search, status and category, kept in the URL', async ({ page }) => {
+    await open(page, '/components/')
+    const search = page.getByRole('searchbox', { name: 'Search components' })
+    await search.fill('date')
+    await expect(page).toHaveURL(/[?&]q=date/)
+    const cards = page.getByRole('main').getByRole('listitem')
+    await expect(cards.getByRole('link', { name: /^DatePicker:/ })).toBeVisible()
+    await expect(cards.getByRole('link', { name: /^Button:/ })).toHaveCount(0)
+
+    await search.fill('zzzz')
+    await expect(page.getByText('No components match')).toBeVisible()
+    await page.getByRole('button', { name: 'Clear filters' }).first().click()
+    await expect(search).toHaveValue('')
+
+    await page
+      .getByRole('radiogroup', { name: 'Category' })
+      .getByRole('radio', { name: 'Viewers' })
+      .click()
+    await expect(page).toHaveURL(/category=Viewers/)
+    await expect(cards.getByRole('link', { name: /^PdfViewer:/ })).toBeVisible()
+    await expect(cards.getByRole('link', { name: /^Button:/ })).toHaveCount(0)
+
+    // A shared link restores the same view.
+    await page.reload()
+    await expect(
+      page.getByRole('radiogroup', { name: 'Category' }).getByRole('radio', { name: 'Viewers' }),
+    ).toHaveAttribute('aria-checked', 'true')
+    await cards.getByRole('link', { name: /^PdfViewer:/ }).click()
+    await expect(page.getByRole('heading', { level: 1, name: 'PdfViewer' })).toBeVisible()
+  })
+
+  test('renders live previews as cards scroll into view', async ({ page }) => {
+    await open(page, '/components/?category=Actions')
+    const preview = page.locator('[data-preview]').first()
+    await expect(preview).toBeAttached()
+    // Previews are aria-hidden (the card carries the name), so query the DOM, not roles.
+    await expect(preview.locator('button').first()).toBeAttached()
+  })
+})
+
+test.describe('Home', () => {
+  test('restyles the live mock, and can apply that theme to the whole site', async ({ page }) => {
+    await open(page, '/')
+    const mock = page
+      .locator('[data-glyph-theme]')
+      .filter({ has: page.getByText('Ledgerline') })
+      .first()
+    await expect(mock).toHaveAttribute('data-glyph-theme', 'glyph')
+    await page
+      .getByRole('radiogroup', { name: 'Preview theme' })
+      .getByRole('radio', { name: 'Brutalist' })
+      .click()
+    await expect(mock).toHaveAttribute('data-glyph-theme', 'brutalist')
+
+    await page.getByRole('button', { name: 'Use Brutalist for the whole site' }).click()
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem('glyph-docs-theme')))
+      .toBe('brutalist')
+  })
+
+  test('the mock is interactive: its modal opens and creates an invoice', async ({ page }) => {
+    await open(page, '/')
+    await page.getByRole('button', { name: 'New invoice' }).click()
+    const dialog = page.getByRole('dialog', { name: 'New invoice' })
+    await expect(dialog).toBeVisible()
+    await dialog.getByRole('button', { name: 'Create invoice' }).click()
+    await expect(page.getByText('Invoice created')).toBeVisible()
+  })
 })
 
 test.describe('DataTable', () => {
@@ -151,8 +248,8 @@ test.describe('Sheet', () => {
     await preview.getByRole('button', { name: 'left' }).click()
     const sheet = page.getByRole('dialog', { name: /left sheet/i })
     await expect(sheet).toBeVisible()
-    const box = await sheet.boundingBox()
-    expect(box?.x).toBe(0)
+    // It slides in from the left edge; wait for the entrance to finish before measuring.
+    await expect.poll(async () => (await sheet.boundingBox())?.x).toBe(0)
     await page.keyboard.press('Escape')
     await expect(sheet).toBeHidden()
   })
@@ -724,5 +821,92 @@ test.describe('Layout and focus details', () => {
     await expect(panel).toBeFocused()
     const ring = await panel.evaluate((el) => getComputedStyle(el).boxShadow)
     expect(ring).not.toBe('none')
+  })
+})
+
+test.describe('Theme studio', () => {
+  const board = (page: import('@playwright/test').Page) => page.getByTestId('studio-board')
+  const background = (locator: import('@playwright/test').Locator) =>
+    locator.evaluate((el) => getComputedStyle(el).backgroundColor)
+
+  test('editing the brand color restyles the preview and the exported file', async ({ page }) => {
+    await open(page, '/themes/')
+    const cta = board(page).getByRole('button', { name: 'New project' })
+    const before = await background(cta)
+    await page.getByRole('textbox', { name: /^primary/ }).fill('oklch(60% 0.22 25)')
+    await expect.poll(() => background(cta)).not.toBe(before)
+    await expect(page.getByTestId('theme-export')).toContainText("primary: 'oklch(60% 0.22 25)'")
+    await expect(page.getByText('Edited', { exact: true })).toBeVisible()
+  })
+
+  test('switching the starting preset restyles the preview', async ({ page }) => {
+    await open(page, '/themes/')
+    const heading = board(page).getByRole('heading', { name: 'Good morning, Ada' })
+    const glyphFont = await heading.evaluate((el) => getComputedStyle(el).fontFamily)
+    await page.getByRole('radio', { name: 'Editorial' }).click()
+    await expect
+      .poll(() => heading.evaluate((el) => getComputedStyle(el).fontFamily))
+      .not.toBe(glyphFont)
+    await expect(page.getByTestId('theme-export')).toContainText('extends: presets.editorial')
+  })
+
+  test('flags an unreadable color and fixes it', async ({ page }) => {
+    await open(page, '/themes/')
+    const audit = page.getByTestId('contrast-audit')
+    await expect(audit.getByText('All pass')).toBeVisible()
+    await page.getByRole('textbox', { name: /^muted-foreground/ }).fill('oklch(88% 0.01 260)')
+    const fix = audit.getByRole('button', { name: 'Fix muted-foreground in light mode' })
+    await expect(fix).toBeVisible()
+    await fix.click()
+    await expect(fix).toBeHidden()
+    await expect(audit.getByText('All pass')).toBeVisible()
+  })
+
+  test('keeps the theme in a shareable URL', async ({ page }) => {
+    await open(page, '/themes/')
+    await page.getByRole('textbox', { name: /^primary/ }).fill('oklch(62% 0.2 300)')
+    await expect.poll(() => new URL(page.url()).searchParams.get('t')).toBeTruthy()
+    const shared = new URL(page.url())
+    await page.goto('about:blank')
+    await open(page, shared.pathname + shared.search)
+    await expect(page.getByRole('textbox', { name: /^primary/ })).toHaveValue('oklch(62% 0.2 300)')
+  })
+})
+
+test.describe('Blocks gallery', () => {
+  test('previews a block at phone and desktop widths', async ({ page }) => {
+    await open(page, '/blocks/')
+    await page.getByRole('heading', { level: 3, name: 'Pricing' }).scrollIntoViewIfNeeded()
+    const frameEl = page.getByTestId('block-frame-pricing-three-tiers')
+    await expect(frameEl).toBeVisible()
+    const frame = page.frameLocator('[data-testid="block-frame-pricing-three-tiers"]')
+    const starter = frame.getByRole('heading', { name: 'Starter' })
+    const growth = frame.getByRole('heading', { name: 'Growth' })
+    await expect(growth).toBeVisible()
+    const gap = async () =>
+      ((await growth.boundingBox())?.y ?? 0) - ((await starter.boundingBox())?.y ?? 0)
+    // Desktop: tiers side by side (once their staggered entrance has played).
+    await expect.poll(async () => Math.abs(await gap())).toBeLessThan(4)
+
+    await page.getByRole('radio', { name: /Phone/ }).click()
+    await expect.poll(async () => (await frameEl.boundingBox())?.width ?? 0).toBeLessThan(400)
+    // Phone: the frame's own breakpoints stack the tiers.
+    await expect.poll(gap).toBeGreaterThan(100)
+  })
+})
+
+test.describe('Templates', () => {
+  test('lists the apps with demos and source, and opens the file browser', async ({ page }) => {
+    await open(page, '/templates/')
+    const list = page.getByRole('list', { name: 'Templates' })
+    await expect(list.getByRole('link', { name: /Live demo/ })).toHaveCount(2)
+    await expect(list.getByRole('link', { name: 'Source' })).toHaveCount(3)
+    await list.getByRole('link', { name: /Open/ }).click()
+    await expect(page.getByRole('heading', { level: 1, name: 'File browser' })).toBeVisible()
+    await page
+      .getByRole('navigation', { name: 'Files' })
+      .getByRole('button', { name: /workspace\.json/ })
+      .click()
+    await expect(page.getByRole('tree')).toBeVisible()
   })
 })

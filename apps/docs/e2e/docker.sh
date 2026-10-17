@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Runs the docs e2e suite inside the official Playwright Linux image, so visual baselines
-# match CI pixel for pixel. The repo is copied into the container (host node_modules hold
+# match CI pixel for pixel. It runs as linux/amd64 like GitHub's runners: on Apple Silicon an
+# arm64 container antialiases text slightly differently, enough to fail a few screenshots. The repo is copied into the container (host node_modules hold
 # macOS binaries), installed and built there; only screenshots and the report come back.
 #
 #   e2e/docker.sh                  run every project, visual included
@@ -24,7 +25,7 @@ ARGS+=("$@")
 
 mkdir -p "$DOCS/e2e/__screenshots__" "$DOCS/e2e/.report"
 
-docker run --rm --ipc=host \
+docker run --rm --ipc=host --platform linux/amd64 \
   -v "$ROOT":/repo:ro \
   -v "$DOCS/e2e/__screenshots__":/out/screenshots \
   -v "$DOCS/e2e/.report":/out/report \
@@ -37,7 +38,7 @@ docker run --rm --ipc=host \
     npm install -g pnpm@${PNPM} --silent
     pnpm config set store-dir /pnpm-store >/dev/null
     pnpm install --frozen-lockfile --reporter=silent
-    pnpm -C apps/docs build >/dev/null
+    pnpm turbo run build --filter=docs >/dev/null
     status=0
     pnpm -C apps/docs exec playwright test ${ARGS[*]:-} || status=\$?
     cp -R apps/docs/e2e/__screenshots__/. /out/screenshots/ 2>/dev/null || true

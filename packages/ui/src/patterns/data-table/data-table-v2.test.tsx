@@ -475,6 +475,25 @@ describe('DataTable rows', () => {
 })
 
 describe('DataTable columns', () => {
+  it('re-measures pinned offsets when header cells resize (e.g. a web font swapping in)', () => {
+    const observed: Element[] = []
+    const Original = globalThis.ResizeObserver
+    globalThis.ResizeObserver = class {
+      observe(element: Element) {
+        observed.push(element)
+      }
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof ResizeObserver
+    try {
+      renderTable({ defaultState: { columnPinning: { left: ['total'], right: [] } } })
+      const headers = screen.getAllByRole('columnheader')
+      expect(headers.some((th) => observed.includes(th))).toBe(true)
+    } finally {
+      globalThis.ResizeObserver = Original
+    }
+  })
+
   it('hides, pins and moves columns from the column menu', async () => {
     const onStateChange = vi.fn()
     renderTable({ columnControls: true, onStateChange })

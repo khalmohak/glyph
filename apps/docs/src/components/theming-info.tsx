@@ -15,10 +15,12 @@ interface StylesFn {
 const modules: Record<string, unknown>[] = [ui, form, dataTable, chart, blocks]
 
 export function findStyles(component: string): StylesFn | undefined {
-  const key = `${component[0]!.toLowerCase()}${component.slice(1)}Styles`
+  // Case-insensitive, so acronyms match either spelling (InputOTP → inputOtpStyles).
+  const key = `${component}Styles`.toLowerCase()
   for (const mod of modules) {
-    const value = mod[key]
-    if (typeof value === 'function') return value as StylesFn
+    for (const [name, value] of Object.entries(mod)) {
+      if (name.toLowerCase() === key && typeof value === 'function') return value as StylesFn
+    }
   }
   return undefined
 }
@@ -26,7 +28,13 @@ export function findStyles(component: string): StylesFn | undefined {
 /** Shows how to restyle a component from the theme file: its slots and variants, read from its styles. */
 export function ThemingInfo({ component }: { component: string }) {
   const styles = findStyles(component)
-  if (!styles?.slots) return null
+  if (!styles?.slots)
+    return (
+      <Text tone="muted">
+        {component} has no styles of its own: it is built from other Glyph components, so it follows
+        their theme recipes and your theme&apos;s tokens.
+      </Text>
+    )
   const slots = Object.keys(styles.slots)
   const variants = Object.entries(styles.variants ?? {})
     .map(([name, values]) => [name, Object.keys(values)] as const)

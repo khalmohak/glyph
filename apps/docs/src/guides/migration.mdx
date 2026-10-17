@@ -1,0 +1,54 @@
+---
+title: Upgrading
+description: Breaking changes and how to move between versions.
+order: 11
+section: Shipping
+---
+
+Glyph is in its 0.x series: minor versions (0.7 → 0.8) can change behavior, and this page lists every change you may need to act on. Patch versions only fix bugs. The [changelog](/changelog) has the full release notes.
+
+## Keep packages in step
+
+Every `@glyphui/*` package is released together under one version number. Upgrade them together:
+
+<Install packages="@glyphui/ui@latest @glyphui/blocks@latest @glyphui/auth@latest @glyphui/viewers@latest" />
+
+## 0.8
+
+**Peer dependencies.** `@glyphui/auth`, `@glyphui/blocks` and `@glyphui/viewers` now take `@glyphui/ui` (and `blocks`, `tokens`) as peer dependencies, so your app and Glyph share one copy. Install `@glyphui/ui` yourself if you only listed `blocks` or `auth`. Before, a version mismatch installed a second copy and components such as `UserMenu` crashed with "must be used inside GlyphProvider".
+
+**Menus are non-modal.** `DropdownMenu` and `ContextMenu` no longer hide the rest of the page from screen readers while open; focus still moves into the menu, and Escape or an outside click closes it. Pass `modal` for the old behavior.
+
+**Password reset by code sends the email.** `ForgotPasswordForm` and `ResetPasswordForm` now send `{ email }` with the code. Update your server to check the code against that account only, not on its own.
+
+**Bearer sign-out sends the refresh token** (`{ refreshToken }`), so your server can revoke it. A `401` or `403` from sign-out counts as already signed out.
+
+**Number inputs report while typing.** `NumberInput` calls `onValueChange` as you type a valid number, not only on blur. Rounding and clamping to `min` and `max` still happen on blur.
+
+**StaggerItem's `index` is optional.** Items follow document order; existing `index` props keep working.
+
+New: `@glyphui/viewers`, `completeMagicLink` and `MagicLinkCallback`, `SignUpForm` `extraFields`, `AuthRevalidator`, `tableSearch()`, and contrast-safe foregrounds in `defineTheme`.
+
+## 0.7
+
+New package: `@glyphui/auth`. No changes needed in existing code.
+
+## 0.6
+
+DataTable v2 is a drop-in for the 0.5 API. Two things to know:
+
+- TanStack Table must be version 8: install `@tanstack/react-table@8`. Version 9 is a rewrite and isn't supported yet.
+- Pass `getRowId` if you haven't: selections now survive data changes, which needs stable row ids.
+
+## 0.5
+
+**Motion is on by default.** Overlays, indicators and blocks animate. To keep 0.4's stillness, set `motion: { level: 'none' }` in your theme or `motion="none"` on `GlyphProvider`; visitors with reduced motion get none either way.
+
+**One file per module.** `@glyphui/ui` is published as separate modules, so bundlers keep only what you import. No code changes, but deep imports of internal chunk files (never supported) no longer resolve.
+
+## 0.4
+
+- Connect your router with `<GlyphProvider router={reactRouter}>` from `@glyphui/ui/react-router`. `linkComponent` still works but doesn't mark active items.
+- `FormSubmit` outside `<Form>` needs `form={form}`; it used to crash.
+- Load Geist with `@import "@glyphui/ui/fonts.css"` if you use the default theme; it was never loaded for you.
+- Import `@glyphui/blocks/styles.css` if you use blocks; without it they render partly unstyled.
