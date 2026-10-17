@@ -1,0 +1,5 @@
+@import "@glyphui/ui/fonts.css";
+@import "tailwindcss";
+@import "@glyphui/ui/styles.css";
+@import "@glyphui/blocks/styles.css";
+@import "@glyphui/auth/styles.css";

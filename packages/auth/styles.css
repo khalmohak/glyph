@@ -1,0 +1,9 @@
+/*
+ * Import after the Glyph stylesheet so Tailwind generates the classes the auth screens use:
+ *
+ *   @import "tailwindcss";
+ *   @import "@glyphui/ui/styles.css";
+ *   @import "@glyphui/blocks/styles.css";
+ *   @import "@glyphui/auth/styles.css";
+ */
+@source "./src";

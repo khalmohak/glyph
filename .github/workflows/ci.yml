@@ -65,6 +65,10 @@ jobs:
         run: |
           pnpm turbo run build --filter=demo-saas
           pnpm -C apps/demo-saas e2e
+      - name: Auth journeys
+        run: |
+          pnpm turbo run build --filter=auth-example
+          pnpm -C apps/auth-example e2e
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -74,6 +78,8 @@ jobs:
             apps/docs/e2e/.results
             apps/demo-saas/e2e/.report
             apps/demo-saas/e2e/.results
+            apps/auth-example/e2e/.report
+            apps/auth-example/e2e/.results
           retention-days: 14
 
   consumer:

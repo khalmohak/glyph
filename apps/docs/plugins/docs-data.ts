@@ -66,15 +66,16 @@ function extractProps(uiRoot: string): Record<string, PropDoc[]> {
 async function highlightExamples(
   contentRoot: string,
 ): Promise<Record<string, { code: string; html: string }>> {
-  const files = walk(contentRoot, (f) => /\/examples\/[^/]+\.tsx$/.test(f))
+  // Examples render live; snippets (setup code for services the docs can't run) are shown only.
+  const files = walk(contentRoot, (f) => /\/(examples|snippets)\/[^/]+\.tsx?$/.test(f))
   const entries = await Promise.all(
     files.map(async (file) => {
       const code = readFileSync(file, 'utf8').trim()
-      const html = await codeToHtml(code, { lang: 'tsx', theme })
+      const html = await codeToHtml(code, { lang: file.endsWith('.ts') ? 'ts' : 'tsx', theme })
       const key = relative(contentRoot, file)
         .replace(/\\/g, '/')
         .replace('/examples/', '/')
-        .replace(/\.tsx$/, '')
+        .replace(/\.tsx?$/, '')
       return [key, { code, html }] as const
     }),
   )
@@ -182,7 +183,13 @@ export function docsData(): Plugin {
     },
     async load(id) {
       if (id === `\0${PROPS_ID}`) {
-        props ??= extractProps(uiRoot)
+        // Components from every package: ui first, so its names win on a clash.
+        props ??= Object.assign(
+          {},
+          extractProps(resolve(__dirname, '../../../packages/auth')),
+          extractProps(resolve(__dirname, '../../../packages/blocks')),
+          extractProps(uiRoot),
+        )
         return `export default ${JSON.stringify(props)}`
       }
       if (id === `\0${EXAMPLES_ID}`) {

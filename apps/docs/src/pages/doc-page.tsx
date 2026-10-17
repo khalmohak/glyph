@@ -1,9 +1,10 @@
+import examples from 'virtual:glyph-examples'
 import { Button, EmptyState, Eyebrow, Heading, Separator, Text } from '@glyphui/ui'
 import { ArrowLeft, Github, Hammer } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import { ExampleView } from '../components/example-view'
 import { PropsTable } from '../components/props-table'
-import { Snippet } from '../components/snippet'
+import { HighlightedCode, Snippet } from '../components/snippet'
 import { StatusBadge } from '../components/status-badge'
 import { ThemingInfo } from '../components/theming-info'
 import { getDoc } from '../lib/catalog'
@@ -16,8 +17,15 @@ export function DocPage() {
   const doc = getDoc(slug)
   if (!doc) return <NotFoundPage />
 
-  const named = (doc.exports ?? []).filter((name) => /^[A-Z]/.test(name) || name.startsWith('use'))
-  const importLine = `import { ${(named.length ? named : [doc.name]).slice(0, 4).join(', ')} } from '${doc.entry ?? '@glyphui/ui'}'`
+  const exports = doc.exports ?? []
+  const named = exports.filter((name) => /^[A-Z]/.test(name) || name.startsWith('use'))
+  const shown = named.length ? named : exports.length ? exports : [doc.name]
+  const importLine = `import { ${shown.slice(0, 4).join(', ')} } from '${doc.entry ?? '@glyphui/ui'}'`
+  const sourceRoot = doc.entry?.startsWith('@glyphui/auth')
+    ? 'packages/auth/src'
+    : doc.entry === '@glyphui/blocks'
+      ? 'packages/blocks/src'
+      : 'packages/ui/src'
 
   return (
     // minmax(0, 1fr) lets wide examples and code scroll instead of widening the page on phones.
@@ -43,7 +51,7 @@ export function DocPage() {
             <Snippet code={importLine} className="max-w-full flex-1 sm:flex-none" />
             {doc.source && (
               <Button variant="outline" size="sm" leftIcon={<Github />} asChild>
-                <a href={`${REPO}/blob/main/packages/ui/src/${doc.source}`}>Source</a>
+                <a href={`${REPO}/blob/main/${sourceRoot}/${doc.source}`}>Source</a>
               </Button>
             )}
             {doc.radix && (
@@ -51,6 +59,14 @@ export function DocPage() {
                 <a href={doc.radix}>Radix primitive</a>
               </Button>
             )}
+          </div>
+        )}
+        {doc.entry === '@glyphui/auth/ui' && (
+          <div className="grid gap-2">
+            <Text size="small" tone="muted">
+              The auth screens need their stylesheet, after the Glyph and blocks ones:
+            </Text>
+            <Snippet code={'@import "@glyphui/auth/styles.css";'} className="max-w-full sm:w-fit" />
           </div>
         )}
         {doc.entry === '@glyphui/blocks' && doc.status !== 'planned' && (
@@ -84,6 +100,31 @@ export function DocPage() {
               {doc.examples!.map((example) => (
                 <ExampleView key={example.file} slug={doc.slug} example={example} />
               ))}
+            </section>
+          )}
+
+          {(doc.snippets ?? []).length > 0 && (
+            <section className="grid gap-6" aria-label="Setup">
+              {doc.snippets!.map((snippet) => {
+                const source = examples[`${doc.slug}/snippets/${snippet.file}`]
+                return (
+                  <div key={snippet.file} className="grid gap-3">
+                    <div className="grid gap-1">
+                      <Heading level={2} size="h4">
+                        {snippet.title}
+                      </Heading>
+                      {snippet.description && <Text tone="muted">{snippet.description}</Text>}
+                    </div>
+                    {source && (
+                      <HighlightedCode
+                        html={source.html}
+                        code={source.code}
+                        className="rounded-lg border-(length:--glyph-border-width) border-border bg-subtle"
+                      />
+                    )}
+                  </div>
+                )
+              })}
             </section>
           )}
 

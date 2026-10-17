@@ -1,11 +1,16 @@
 {
   "@glyphui/tokens": 6724,
-  "@glyphui/ui": 194889,
+  "@glyphui/ui": 194950,
   "@glyphui/ui (Button only)": 15246,
   "@glyphui/ui (Badge only)": 14637,
   "@glyphui/ui (provider + Button)": 28503,
   "@glyphui/ui/form": 17307,
   "@glyphui/ui/data-table": 88100,
-  "@glyphui/ui/chart": 74773,
-  "@glyphui/blocks": 6064
+  "@glyphui/ui/chart": 74793,
+  "@glyphui/blocks": 6064,
+  "@glyphui/auth": 3082,
+  "@glyphui/auth/rest": 1932,
+  "@glyphui/auth/react-router": 1666,
+  "@glyphui/auth/ui": 8593,
+  "@glyphui/auth/ui (SignInForm only)": 5034
 }
