@@ -15,10 +15,12 @@ interface StylesFn {
 const modules: Record<string, unknown>[] = [ui, form, dataTable, chart, blocks]
 
 export function findStyles(component: string): StylesFn | undefined {
-  const key = `${component[0]!.toLowerCase()}${component.slice(1)}Styles`
+  // Case-insensitive, so acronyms match either spelling (InputOTP → inputOtpStyles).
+  const key = `${component}Styles`.toLowerCase()
   for (const mod of modules) {
-    const value = mod[key]
-    if (typeof value === 'function') return value as StylesFn
+    for (const [name, value] of Object.entries(mod)) {
+      if (name.toLowerCase() === key && typeof value === 'function') return value as StylesFn
+    }
   }
   return undefined
 }

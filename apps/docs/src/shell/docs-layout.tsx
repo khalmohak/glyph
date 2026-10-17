@@ -26,7 +26,9 @@ export interface DocsRouteHandle {
  * site header sits above it, so the sidebar and the mobile bar stick just below the header.
  */
 export function DocsLayout() {
-  const { pathname } = useLocation()
+  // GitHub Pages serves prerendered pages with a trailing slash (/docs/forms/); compare without it.
+  const { pathname: rawPathname } = useLocation()
+  const pathname = rawPathname.length > 1 ? rawPathname.replace(/\/+$/, '') : rawPathname
   const matches = useMatches()
   const wide = matches.some((m) => (m.handle as DocsRouteHandle | undefined)?.wide)
   const section =

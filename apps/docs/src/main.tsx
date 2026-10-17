@@ -24,8 +24,6 @@ const page =
   <K extends string>(load: () => Promise<Record<K, ComponentType>>, name: K) =>
   async () => ({ Component: (await load())[name] })
 
-const comingSoon = () => import('./pages/coming-soon')
-
 const router = createBrowserRouter(
   [
     {
