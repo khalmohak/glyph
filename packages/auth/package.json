@@ -4,7 +4,7 @@
   "description": "Authentication for Glyph apps: session state, protected routes and ready sign-in screens, with adapters for your own REST API, Firebase and Clerk.",
   "license": "MIT",
   "author": "Mohak Gupta (https://github.com/khalmohak)",
-  "homepage": "https://github.com/khalmohak/glyph#readme",
+  "homepage": "https://glyphui.xyz",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/khalmohak/glyph.git",

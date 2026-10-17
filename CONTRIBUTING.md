@@ -57,7 +57,7 @@ Notes:
 
 ## Hosting on Cloudflare (maintainers)
 
-The site is moving to Cloudflare Pages on `glyphui.xyz`:
+The site runs on Cloudflare Pages:
 
 | Address | App | Pages project |
 |---|---|---|
@@ -65,9 +65,11 @@ The site is moving to Cloudflare Pages on `glyphui.xyz`:
 | `demo.glyphui.xyz` | Ledgerline demo (`apps/demo-saas`) | `glyph-demo` |
 | `auth.glyphui.xyz` | auth example (`apps/auth-example`) | `glyph-auth` |
 
-`.github/workflows/cloudflare.yml` builds all three, runs `scripts/cloudflare.mjs` (it creates the projects, attaches the domains and adds the DNS records, and does nothing if they exist), and deploys: production from `main`, a preview URL per pull request (listed in the job summary). Until the secrets below exist it skips itself, and GitHub Pages keeps serving `khalmohak.github.io/glyph`.
+`.github/workflows/cloudflare.yml` builds all three, runs `scripts/cloudflare.mjs` (it creates the projects, attaches the domains and adds the DNS records, and does nothing if they exist), and deploys: production from `main`, a preview URL per pull request (listed in the job summary). It skips itself when the secrets below are missing (for example on forks). `www.glyphui.xyz` redirects to the root through a Cloudflare redirect rule.
 
-One-time setup:
+The old address, `khalmohak.github.io/glyph`, is a small redirect site (`.github/pages-redirect/`, deployed by `pages.yml`) that sends every path to its new home, `/demo` and `/auth` to their subdomains.
+
+One-time setup (already done for `glyphui.xyz`; here for a fresh account or domain):
 
 1. Create a free Cloudflare account and **Add a site** → `glyphui.xyz` → Free plan.
 2. At your registrar, replace the domain's nameservers with the two Cloudflare shows. Wait until the site says **Active** (minutes to a few hours).
@@ -83,9 +85,8 @@ One-time setup:
 
 Never paste the token into chat, an issue, or a file in the repo.
 
-Once `glyphui.xyz` works, switch the package READMEs' links to it (npm shows them, so they can't follow a build setting) and retire the GitHub Pages workflow, or point it at redirects to the new domain.
 
-The address-dependent pieces (canonical and Open Graph URLs, `sitemap.xml`, `robots.txt`, `llms.txt`, links to the demos) come from `SITE_URL`, `DEMO_URL` and `AUTH_URL`; base paths from `DOCS_BASE`, `DEMO_BASE` and `AUTH_EXAMPLE_BASE`. The GitHub Pages workflow can also serve a custom domain on its own: set the repository variable `CUSTOM_DOMAIN` and point the domain's DNS at GitHub Pages (`A` 185.199.108–111.153).
+The address-dependent pieces (canonical and Open Graph URLs, `sitemap.xml`, `robots.txt`, `llms.txt`, links to the demos) come from `SITE_URL`, `DEMO_URL` and `AUTH_URL` (defaults: the `glyphui.xyz` hosts); base paths from `DOCS_BASE`, `DEMO_BASE` and `AUTH_EXAMPLE_BASE`. The package READMEs link to `glyphui.xyz` directly, since npm can't follow a build setting.
 
 ## Releasing (maintainers)
 

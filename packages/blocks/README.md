@@ -2,7 +2,7 @@
 
 Ready-made page sections for [Glyph](https://github.com/khalmohak/glyph): hero, pricing, FAQ, testimonials, sign-in and more. They are built from `@glyphui/ui` and styled only by your theme, so the same block fits any Glyph theme with no extra CSS.
 
-[Docs](https://khalmohak.github.io/glyph/) · [Blocks](https://khalmohak.github.io/glyph/components?category=Blocks) · [GitHub](https://github.com/khalmohak/glyph)
+[Docs](https://glyphui.xyz/) · [Blocks](https://glyphui.xyz/components?category=Blocks) · [GitHub](https://github.com/khalmohak/glyph)
 
 ## Install
 

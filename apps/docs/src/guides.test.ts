@@ -120,7 +120,7 @@ describe('Markdown exports', () => {
     const guide = guides[0] as (typeof guides)[number]
     const md = guideMarkdown(source, guide, ctx)
     expect(md).toContain('npm install -D @glyphui/ui')
-    expect(md).toContain('(https://khalmohak.github.io/glyph/docs/forms)')
+    expect(md).toContain('(https://glyphui.xyz/docs/forms)')
     expect(md).toContain('```tsx title="a.tsx"\n')
     expect(md).toContain("import { x } from './x'")
     expect(md).toContain('"[a](/b)"')

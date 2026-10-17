@@ -10,7 +10,7 @@ React components on Tailwind CSS v4 that take their whole look from one typed th
 [![npm](https://img.shields.io/npm/v/@glyphui/ui?label=%40glyphui%2Fui)](https://www.npmjs.com/package/@glyphui/ui)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-[Docs](https://khalmohak.github.io/glyph/) · [Components](https://khalmohak.github.io/glyph/components) · [Theme studio](https://khalmohak.github.io/glyph/themes) · [Contributing](./CONTRIBUTING.md) · [Changelog](./packages/ui/CHANGELOG.md)
+[Docs](https://glyphui.xyz/) · [Components](https://glyphui.xyz/components) · [Theme studio](https://glyphui.xyz/themes) · [Contributing](./CONTRIBUTING.md) · [Changelog](./packages/ui/CHANGELOG.md)
 
 </div>
 
@@ -148,7 +148,7 @@ function SignInPage() {
 | Blocks (`@glyphui/blocks`) | AuthCard · Cta · Faq · FeatureGrid · FeatureSplit · Hero · LogoCloud · Newsletter · Pricing · SectionHeader · SiteFooter · Stats · Testimonials |
 | Viewers (`@glyphui/viewers`) | AudioPlayer · CodeViewer · CsvViewer · DiffViewer · FilePreview · ImageViewer · JsonViewer · MarkdownViewer · PdfViewer · SpreadsheetViewer · VideoPlayer |
 
-Every component has a page with live examples, props and theming slots in the [docs](https://khalmohak.github.io/glyph/components). Regenerate this table with `pnpm -C apps/docs readme:components`.
+Every component has a page with live examples, props and theming slots in the [docs](https://glyphui.xyz/components). Regenerate this table with `pnpm -C apps/docs readme:components`.
 
 ## Develop
 

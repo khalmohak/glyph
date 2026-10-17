@@ -1,8 +1,11 @@
-name: Docs and demos
+name: GitHub Pages redirect
 
+# The docs and demos moved to Cloudflare (glyphui.xyz; see cloudflare.yml). This keeps the old
+# khalmohak.github.io/glyph links working by redirecting every path to its new address.
 on:
   push:
     branches: [main]
+    paths: ['.github/pages-redirect/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 
 permissions:
@@ -19,58 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      # Where the site lives. By default GitHub Pages under /glyph/. To move to a custom domain,
-      # set the repository variable CUSTOM_DOMAIN (e.g. glyphui.dev): everything is then served
-      # from / and a CNAME file is written. See CONTRIBUTING.md, "Custom domain".
-      - name: Site location
-        env:
-          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
-        run: |
-          if [ -n "$CUSTOM_DOMAIN" ]; then
-            base=/
-            site_url="https://$CUSTOM_DOMAIN"
-          else
-            base=/glyph/
-            site_url="https://khalmohak.github.io/glyph"
-          fi
-          {
-            echo "BASE=$base"
-            echo "DOCS_BASE=$base"
-            echo "DEMO_BASE=${base}demo/"
-            echo "AUTH_EXAMPLE_BASE=${base}auth/"
-            echo "SITE_URL=$site_url"
-          } >> "$GITHUB_ENV"
-      - run: pnpm turbo run build --filter=docs --filter=demo-saas --filter=auth-example
-      # Docs at the base, demo app at <base>demo/, auth example at <base>auth/. The old
-      # showcase URL redirects to the docs home, which now has its content.
-      # 404.html lets docs deep links load; the demo gets an index.html per route instead.
-      - env:
-          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
-        run: |
+      - run: |
           mkdir -p site
-          cp -R apps/docs/dist/. site/
-          cp site/index.html site/404.html
-          mkdir -p site/showcase
-          printf '<!doctype html><meta charset="utf-8"><title>Glyph</title><meta http-equiv="refresh" content="0; url=%s"><link rel="canonical" href="%s"><a href="%s">Glyph docs</a>\n' "$BASE" "$BASE" "$BASE" > site/showcase/index.html
-          if [ -n "$CUSTOM_DOMAIN" ]; then echo "$CUSTOM_DOMAIN" > site/CNAME; fi
-          mkdir -p site/demo
-          cp -R apps/demo-saas/dist/. site/demo/
-          for route in sign-in app app/invoices app/customers app/settings; do
-            mkdir -p "site/demo/$route"
-            cp site/demo/index.html "site/demo/$route/index.html"
-          done
-          mkdir -p site/auth
-          cp -R apps/auth-example/dist/. site/auth/
-          for route in sign-in sign-up forgot-password reset-password magic-link app app/admin app/billing; do
-            mkdir -p "site/auth/$route"
-            cp site/auth/index.html "site/auth/$route/index.html"
-          done
+          cp .github/pages-redirect/index.html site/index.html
+          cp .github/pages-redirect/index.html site/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

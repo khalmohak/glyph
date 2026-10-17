@@ -2,7 +2,7 @@
 
 React components on Tailwind CSS v4 that take their whole look from **one typed theme file**, with the parts every app rebuilds already solved: forms, data tables, app layout, and loading / empty / error states.
 
-[Docs](https://khalmohak.github.io/glyph/) · [Components](https://khalmohak.github.io/glyph/components) · [Theme studio](https://khalmohak.github.io/glyph/themes) · [GitHub](https://github.com/khalmohak/glyph) · [Changelog](https://github.com/khalmohak/glyph/blob/main/packages/ui/CHANGELOG.md)
+[Docs](https://glyphui.xyz/) · [Components](https://glyphui.xyz/components) · [Theme studio](https://glyphui.xyz/themes) · [GitHub](https://github.com/khalmohak/glyph) · [Changelog](https://github.com/khalmohak/glyph/blob/main/packages/ui/CHANGELOG.md)
 
 ## Install
 
@@ -40,7 +40,7 @@ createRoot(document.getElementById('root')!).render(
 )
 ```
 
-- `router` (optional) makes Glyph's links client-side and marks the current Sidebar, Navbar and NavigationMenu item automatically. For other routers, pass `{ Link, useIsActive }`; the [getting-started guide](https://khalmohak.github.io/glyph/getting-started) has TanStack Router and Next.js versions.
+- `router` (optional) makes Glyph's links client-side and marks the current Sidebar, Navbar and NavigationMenu item automatically. For other routers, pass `{ Link, useIsActive }`; the [getting-started guide](https://glyphui.xyz/getting-started) has TanStack Router and Next.js versions.
 - `toaster` mounts the toast container, so `toast.success('Saved')` works anywhere. `useConfirm()` needs no setup.
 
 To avoid a light flash for dark-mode visitors, add the Vite plugin:
@@ -102,7 +102,7 @@ The same tokens work in your own markup: `bg-primary`, `text-muted-foreground`, 
 | Blocks (`@glyphui/blocks`) | AuthCard · Cta · Faq · FeatureGrid · FeatureSplit · Hero · LogoCloud · Newsletter · Pricing · SectionHeader · SiteFooter · Stats · Testimonials |
 | Viewers (`@glyphui/viewers`) | AudioPlayer · CodeViewer · CsvViewer · DiffViewer · FilePreview · ImageViewer · JsonViewer · MarkdownViewer · PdfViewer · SpreadsheetViewer · VideoPlayer |
 
-Every component has a page with live examples and props in the [docs](https://khalmohak.github.io/glyph/components). Accessible behavior comes from [Radix UI](https://www.radix-ui.com/). Every component accepts `className`, and most accept `asChild`.
+Every component has a page with live examples and props in the [docs](https://glyphui.xyz/components). Accessible behavior comes from [Radix UI](https://www.radix-ui.com/). Every component accepts `className`, and most accept `asChild`.
 
 ## Patterns
 
