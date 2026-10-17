@@ -88,6 +88,9 @@ test('role and permission checks show a fallback', async ({ page }) => {
 test('forgot and reset password through the emailed link', async ({ page }) => {
   await page.goto('/sign-in')
   await page.getByRole('link', { name: 'Forgot password?' }).click()
+  // The sign-in page has an Email field too, and React Router commits the new page in a
+  // transition just after the URL changes: wait for the page itself.
+  await expect(page.getByRole('heading', { name: 'Reset your password' })).toBeVisible()
   await page.getByRole('textbox', { name: 'Email' }).fill('ada@example.com')
   await page.getByRole('button', { name: 'Send reset link' }).click()
   await expect(page.getByText(/If an account exists for ada@example.com/)).toBeVisible()
