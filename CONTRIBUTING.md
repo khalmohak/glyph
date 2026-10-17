@@ -55,6 +55,23 @@ Notes:
 
 `pnpm-workspace.yaml` sets `minimumReleaseAge` to 14 days: new versions are not installed until they have been public for two weeks.
 
+## Custom domain (maintainers)
+
+The docs deploy to `https://khalmohak.github.io/glyph/` by default. Everything that depends on the address (the base path, canonical and Open Graph URLs, `sitemap.xml`, `robots.txt`, `llms.txt`, and links to the demo apps) comes from two build settings, `DOCS_BASE` and `SITE_URL`. The Pages workflow sets both from one repository variable.
+
+To move to a domain such as `glyphui.dev`:
+
+1. At your DNS provider, point the apex domain at GitHub Pages:
+   - `A` records: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+   - `AAAA` records: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
+   - optionally a `CNAME` for `www` → `khalmohak.github.io`
+2. In the repository's **Settings → Secrets and variables → Actions → Variables**, add `CUSTOM_DOMAIN` = `glyphui.dev`.
+3. Run the **Docs and demos** workflow (or push to `main`). It builds everything for `/`, writes the `CNAME` file and deploys.
+4. In **Settings → Pages**, check that the custom domain shows `glyphui.dev`, then turn on **Enforce HTTPS** once the certificate is issued.
+5. Update the absolute links in the READMEs (they're shown on npm, so they can't follow the variable).
+
+Removing the variable moves the site back to GitHub Pages under `/glyph/`.
+
 ## Releasing (maintainers)
 
 `pnpm changeset` → describe the change → merge. `pnpm release` builds and publishes.

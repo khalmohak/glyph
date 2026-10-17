@@ -7,8 +7,15 @@
 export const SITE_NAME = 'Glyph'
 export const REPO_URL = 'https://github.com/khalmohak/glyph'
 export const NPM_URL = 'https://www.npmjs.com/package/@glyphui/ui'
-/** The deployed site, for links that must leave this app (the demo apps live beside it). */
-export const LIVE_URL = 'https://khalmohak.github.io/glyph'
+/**
+ * The deployed site, without a trailing slash: canonical URLs, the sitemap, llms.txt and links
+ * to the demo apps that live beside the docs. Set SITE_URL at build time to move the site
+ * (e.g. SITE_URL=https://glyphui.dev with DOCS_BASE=/); Vite inlines it for the browser.
+ */
+export const LIVE_URL = (process.env.SITE_URL || 'https://khalmohak.github.io/glyph').replace(
+  /\/+$/,
+  '',
+)
 
 export interface NavSection {
   label: string

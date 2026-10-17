@@ -11,6 +11,10 @@ import { remarkGuide } from './plugins/guides'
 export default defineConfig({
   // GitHub Pages serves the docs from /glyph/; locally they run at /.
   base: process.env.DOCS_BASE ?? '/',
+  // lib/site.ts reads process.env.SITE_URL in Node (prerender, llms.txt) and in the browser.
+  define: {
+    'process.env.SITE_URL': JSON.stringify(process.env.SITE_URL ?? ''),
+  },
   plugins: [
     // Guides are MDX. Frontmatter is read separately (plugins/guides.ts), so it's only stripped here.
     {

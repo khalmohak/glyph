@@ -1,6 +1,6 @@
 import { ErrorState, LoadingState } from '@glyphui/ui'
 import { Suspense, useEffect, useRef } from 'react'
-import { useParams } from 'react-router'
+import { useSearchParams } from 'react-router'
 import { ErrorBoundary } from '../components/error-boundary'
 import { previewFor } from '../components/example-view'
 import { getDoc } from '../lib/catalog'
@@ -16,7 +16,9 @@ export interface BlockFrameMessage {
  * an iframe, so the block's responsive layout reacts to the frame's width, not the window's.
  */
 export function BlockFramePage() {
-  const { slug = '', file = '' } = useParams()
+  const [params] = useSearchParams()
+  const slug = params.get('slug') ?? ''
+  const file = params.get('file') ?? ''
   const doc = getDoc(slug)
   const example = doc?.examples?.find((e) => e.file === file)
   const main = useRef<HTMLElement>(null)
