@@ -440,6 +440,8 @@ export function PdfViewer(inProps: PdfViewerProps) {
     <div
       ref={root}
       data-slot="pdf-viewer"
+      // Tells assistive tech (and tests) the document is still loading.
+      aria-busy={load.status === 'loading' || undefined}
       className={cn(s.root({ class: slots.root }), className)}
       style={fullscreen.active ? undefined : heightStyle(height)}
       onKeyDown={onKeyDown}

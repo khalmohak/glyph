@@ -1,0 +1,71 @@
+{
+  "name": "@glyphui/mcp",
+  "version": "0.8.1",
+  "description": "MCP server for Glyph: lets Claude Code, Cursor, VS Code and other AI coding agents look up Glyph components, props, examples, setup and theming before they write code.",
+  "license": "MIT",
+  "author": "Mohak Gupta (https://github.com/khalmohak)",
+  "homepage": "https://glyphui.xyz/docs/ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khalmohak/glyph.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/khalmohak/glyph/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "claude",
+    "cursor",
+    "react",
+    "tailwindcss",
+    "design-system"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "bin": {
+    "glyphui-mcp": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./manifest.json": "./data/manifest.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "data"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "manifest": "node ../../apps/docs/scripts/mcp-manifest.mjs data/manifest.json",
+    "build": "tsdown",
+    "typecheck": "tsc",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "check:exports": "attw --pack . --profile esm-only --exclude-entrypoints ./manifest.json"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@glyphui/tsconfig": "workspace:*",
+    "@types/node": "^24.19.0",
+    "@vitest/coverage-v8": "3.2.7",
+    "tsdown": "^0.23.0",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.7"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.0",
+    "zod": "^4.6.5"
+  }
+}

@@ -130,6 +130,17 @@ function SignInPage() {
 | `@glyphui/blocks` | Page sections: Hero, Pricing, FAQ, Testimonials, Newsletter, AuthCard, SiteFooter and more |
 | `@glyphui/auth` | `AuthProvider`, `useAuth`, roles and permissions, session refresh, tab sync and idle timeout; adapters for your REST API, Firebase and Clerk (`/rest`, `/firebase`, `/clerk`, `/memory`); React Router guards and loaders (`/react-router`); sign-in, sign-up, reset, code, user-menu and session screens (`/ui`) |
 | `@glyphui/tokens` | The framework-free theme engine, if you only need the CSS variables |
+| `@glyphui/mcp` | MCP server that gives coding agents Glyph's components, props, examples, setup and theming |
+
+## Use with AI
+
+Claude Code, Cursor, VS Code, Windsurf and Claude Desktop can look up Glyph's real API through the MCP server instead of guessing props:
+
+```sh
+claude mcp add glyph -- npx -y @glyphui/mcp
+```
+
+Setup for each editor, [llms.txt](https://glyphui.xyz/llms.txt), Markdown versions of every page and an `AGENTS.md` snippet are in the [Use with AI](https://glyphui.xyz/docs/ai) guide.
 
 ## Components
 
@@ -165,6 +176,7 @@ packages/blocks   page sections built from @glyphui/ui
 packages/viewers  file and data viewers (PDF, CSV, spreadsheets, JSON, code, Markdown, diffs, media)
 packages/ui       components/, patterns/, provider/, hooks/, utils/, register.ts, themes.ts
 packages/auth     auth client, REST/Firebase/Clerk adapters, React Router guards, auth screens
+packages/mcp      MCP server for coding agents; its data is generated from apps/docs at build
 apps/docs         docs and showcase: gallery, playgrounds, theme studio, guides (GitHub Pages /glyph/)
 apps/demo-saas    Ledgerline demo app with Playwright journeys (/glyph/demo/)
 apps/auth-example full auth flow against a fake REST server (/glyph/auth/)

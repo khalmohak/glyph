@@ -116,6 +116,14 @@ describe('PdfViewer', () => {
     expect(tasks.created - tasks.destroyed).toBe(0)
   })
 
+  it('is aria-busy while the document loads, and not after', async () => {
+    const { container } = renderWithGlyph(<PdfViewer source={new Blob([new Uint8Array([1])])} />)
+    const root = container.querySelector('[data-slot="pdf-viewer"]')
+    expect(root).toHaveAttribute('aria-busy', 'true')
+    expect(await screen.findByText('/ 3')).toBeInTheDocument()
+    expect(root).not.toHaveAttribute('aria-busy')
+  })
+
   it('opens a document and moves between pages', async () => {
     const onLoad = vi.fn()
     renderWithGlyph(<PdfViewer source={new Blob([new Uint8Array([1])])} onLoad={onLoad} />)

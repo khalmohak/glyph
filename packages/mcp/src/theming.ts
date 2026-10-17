@@ -1,0 +1,67 @@
+import type { Manifest } from './manifest'
+
+/** The theme file reference: what a theme controls, the presets, and a complete example. */
+export function themingMarkdown(m: Manifest): string {
+  const t = m.theming.tokens
+  const list = (names: string[] | undefined) => (names ?? []).map((n) => `\`${n}\``).join(', ')
+  const out = [
+    `# Theming Glyph ${m.version}`,
+    '',
+    "One typed file, `glyph.theme.ts`, decides how every component looks: color (per light and dark mode), type, shape, depth, density, motion, and per-component defaults. Pass it to `<GlyphProvider theme={theme}>`. A theme that doesn't exist on a component (an unknown variant or slot) is a type error.",
+    '',
+    '## Presets',
+    '',
+    'Start from one with `extends` and override only what differs:',
+    '',
+    ...m.theming.presets.map(
+      (p) =>
+        `- \`presets.${p.name}\`: ${p.description} Primary ${p.primary.light} (light) / ${p.primary.dark} (dark); sans ${p.fonts.sans.split(',')[0]}; radius md ${p.radius.md ?? '?'}${p.motionLevel ? `; motion ${p.motionLevel}` : ''}${p.recipes.length ? `; recipes for ${p.recipes.join(', ')}` : ''}.`,
+    ),
+    '',
+    '## What a theme sets',
+    '',
+    `- \`colors.light\` / \`colors.dark\`: ${list(t.colors)}. Readable \`*-text\` and \`*-foreground\` colors are derived when you only set a tone.`,
+    `- \`radius\`: ${list(t.radius)}`,
+    `- \`shadow\` (one set, or \`{ light, dark }\`): ${list(t.shadow)}`,
+    `- \`font\`: ${list(t.font)}, plus optional \`features\``,
+    `- \`text\` (size, lineHeight, tracking, weight per step): ${list(t.text)}`,
+    `- \`border.width\`; \`control\` (heights): ${list(t.control)}`,
+    `- \`motion\`: \`duration\` (${list(t.duration)}), \`easing\` (${list(t.easing)}), \`level\` (${list(t.motionLevel)}), \`spring\` ({ stiffness, damping })`,
+    "- `components`: per-component `defaultVariants` and extra `className`s per slot (see `get_component` → Theming for each component's slots and variants).",
+    '',
+    'The same tokens are Tailwind utilities in your own markup: `bg-primary`, `text-muted-foreground`, `rounded-lg`, `shadow-md`, `text-h2`, `font-display`.',
+    '',
+    '## Complete example',
+    '',
+    '```ts',
+    '// src/glyph.theme.ts',
+    "import { defineTheme, presets } from '@glyphui/ui'",
+    '',
+    'export default defineTheme({',
+    "  name: 'acme',",
+    '  extends: presets.glyph,',
+    '  colors: {',
+    "    light: { primary: 'oklch(55% 0.2 30)' },",
+    "    dark: { primary: 'oklch(70% 0.19 45)' },",
+    '  },',
+    "  radius: { md: '6px', lg: '10px' },",
+    '  font: { sans: \'"Inter Variable", system-ui, sans-serif\' },',
+    "  motion: { level: 'subtle' },",
+    '  components: {',
+    "    Button: { defaultVariants: { size: 'lg' }, className: { base: 'tracking-tight' } },",
+    "    Card: { className: { root: 'shadow-md' } },",
+    '  },',
+    '})',
+    '```',
+    '',
+    '## Also',
+    '',
+    '- `<ThemeScope theme={other}>` renders a subtree with another theme (side-by-side previews, a branded section).',
+    '- `useColorMode()` returns `{ mode, resolvedMode, setMode }` for a light/dark/system switch.',
+    '- `auditContrast(theme)` lists text and color pairs below WCAG AA; GlyphProvider warns about them in development.',
+    '- `<GlyphProvider motion="none">` turns animation off (tests, user setting); reduced-motion preferences always win.',
+    '',
+    `Full guide: \`get_guide\` "theming" · Theme studio (design a theme visually and export the file): ${m.site.url}/themes`,
+  ]
+  return out.join('\n')
+}

@@ -50,6 +50,11 @@ export const guides: readonly Guide[] = [
     description: 'Install Glyph, add a theme file, and wrap your app.',
   },
   {
+    slug: 'ai',
+    title: 'Use with AI',
+    description: "Give Claude Code, Cursor, VS Code and other coding agents Glyph's real API.",
+  },
+  {
     slug: 'theming',
     title: 'Theming',
     description: 'One typed theme file: colors, type, shape, depth, motion and component recipes.',

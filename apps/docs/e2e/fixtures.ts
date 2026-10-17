@@ -39,6 +39,12 @@ export async function open(page: Page, path: string) {
   await page.waitForSelector('style[data-glyph-theme-style]', { state: 'attached' })
   // Lazy example previews show a spinner while their chunk loads.
   await expect(page.locator('[data-example] > [data-slot="spinner"]')).toHaveCount(0)
+  // Viewers mark themselves busy while loading a file (their controls are disabled meanwhile).
+  // (Only viewers: a DataTable example in its loading state stays busy on purpose.)
+  await expect(page.locator('[data-example] [data-slot$="-viewer"][aria-busy="true"]')).toHaveCount(
+    0,
+    { timeout: 30_000 },
+  )
   await settle(page)
 }
 

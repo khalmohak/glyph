@@ -1,0 +1,110 @@
+---
+title: Use with AI
+description: Give Claude Code, Cursor, VS Code and other coding agents Glyph's real API.
+order: 2
+section: Foundations
+---
+
+Coding agents write better Glyph code when they can look up the real API instead of recalling it. Glyph gives them three ways in: an MCP server for agents that call tools, Markdown versions of every page for agents that read the web, and a short block for your project's agent instructions.
+
+## MCP server
+
+`@glyphui/mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) server. Your editor starts it on demand with `npx`; there is nothing to install in your project. Everything it serves is bundled in the package and generated from these docs for that release, so it works offline and answers for one exact Glyph version.
+
+### Claude Code
+
+```sh
+claude mcp add glyph -- npx -y @glyphui/mcp
+```
+
+To share it with your team, add it to the project's `.mcp.json` instead: `claude mcp add --scope project glyph -- npx -y @glyphui/mcp`. Run `/mcp` in Claude Code to check that it's connected.
+
+### Cursor
+
+```json title=".cursor/mcp.json"
+{
+  "mcpServers": {
+    "glyph": { "command": "npx", "args": ["-y", "@glyphui/mcp"] }
+  }
+}
+```
+
+### VS Code
+
+For GitHub Copilot's agent mode:
+
+```json title=".vscode/mcp.json"
+{
+  "servers": {
+    "glyph": { "type": "stdio", "command": "npx", "args": ["-y", "@glyphui/mcp"] }
+  }
+}
+```
+
+### Windsurf
+
+```json title="~/.codeium/windsurf/mcp_config.json"
+{
+  "mcpServers": {
+    "glyph": { "command": "npx", "args": ["-y", "@glyphui/mcp"] }
+  }
+}
+```
+
+### Claude Desktop
+
+Settings → Developer → Edit Config, then add the server to `claude_desktop_config.json` and restart the app:
+
+```json title="claude_desktop_config.json"
+{
+  "mcpServers": {
+    "glyph": { "command": "npx", "args": ["-y", "@glyphui/mcp"] }
+  }
+}
+```
+
+### Match your Glyph version
+
+`npx -y @glyphui/mcp` runs the latest release. If your project is on an older version, pin the server to it, such as `npx -y @glyphui/mcp@0.9.0`. Or add it as a dev dependency, so it upgrades with the rest of Glyph, and run its `glyphui-mcp` command instead of `npx`.
+
+## What the server provides
+
+| Tool | Use it to |
+|---|---|
+| `get_setup` | Add Glyph to a Vite, Next.js or other app: install commands with the peers you need, CSS imports, color mode, a theme file and the provider tree. |
+| `list_components` | Browse components by category, status or package. |
+| `search_docs` | Search components, props, guide sections and release notes, such as "server side pagination". |
+| `get_component` | Get one component's import, peer dependencies, props for each export, theme slots and variants, keyboard behavior and examples. |
+| `get_example` | Read the full source of one example. |
+| `list_guides`, `get_guide` | Read a guide, such as [Forms](/docs/forms) or [Data tables](/docs/data-tables), as Markdown. |
+| `get_theming` | See the presets, every token a theme sets, and a complete theme file. |
+
+It also serves the docs as resources (`glyph://llms-full`, `glyph://components/button`, `glyph://guides/forms`), which some clients let you attach to a chat, and a `build-with-glyph` prompt that asks the agent to check each API before using it.
+
+You don't need to name the tools. Ask for what you want ("add a settings page with a profile form") and the agent calls them as it goes.
+
+## llms.txt and Markdown pages
+
+For agents that read the web instead of calling tools:
+
+- [glyphui.xyz/llms.txt](https://glyphui.xyz/llms.txt) is an index of every guide and component, following the [llms.txt](https://llmstxt.org) convention.
+- [glyphui.xyz/llms-full.txt](https://glyphui.xyz/llms-full.txt) is all of it in one file, for pasting into a chat or a project's knowledge.
+- Every docs page has a Markdown version at the same URL plus `.md`, such as [glyphui.xyz/components/button.md](https://glyphui.xyz/components/button.md) or [glyphui.xyz/docs/forms.md](https://glyphui.xyz/docs/forms.md).
+
+## Project instructions
+
+Agents read a project file before they start: `AGENTS.md` (Codex, Cursor, VS Code and others), `CLAUDE.md` (Claude Code) or `.cursor/rules`. A few lines there keep them on Glyph's conventions:
+
+```md title="AGENTS.md"
+## UI
+
+This app uses Glyph (@glyphui/ui and friends) for all UI. Before using a component,
+look it up with the glyph MCP server (get_component, search_docs) or at
+https://glyphui.xyz/llms.txt. Don't guess props.
+
+- Import from the entry each component lists, such as @glyphui/ui/form.
+- Style through src/glyph.theme.ts and the token utilities (bg-primary,
+  text-muted-foreground), not hard-coded colors.
+- Prefer an existing block or pattern over building from primitives.
+- Keep labels, aria-label on icon-only buttons, and keyboard behavior.
+```
