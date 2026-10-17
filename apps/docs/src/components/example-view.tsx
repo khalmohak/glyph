@@ -1,16 +1,28 @@
 import examples from 'virtual:glyph-examples'
 import { Card, Spinner, Tabs, TabsContent, TabsList, TabsTrigger, Text } from '@glyphui/ui'
-import { type ComponentType, lazy, Suspense, useMemo } from 'react'
+import { type ComponentType, type LazyExoticComponent, lazy, Suspense } from 'react'
 import { exampleLoader } from '../lib/catalog'
 import type { ExampleMeta } from '../lib/doc'
 import { HighlightedCode } from './snippet'
 
+// One lazy component per example, kept for the session. Creating it during render (even in
+// useMemo) breaks client navigation: the new page renders in a transition, suspends, and is
+// discarded, so each retry made a fresh lazy component that suspended again, forever.
+const previews = new Map<string, LazyExoticComponent<ComponentType>>()
+
+function previewFor(slug: string, file: string) {
+  const key = `${slug}/${file}`
+  let preview = previews.get(key)
+  if (!preview) {
+    preview = lazy(exampleLoader(slug, file) as () => Promise<{ default: ComponentType }>)
+    previews.set(key, preview)
+  }
+  return preview
+}
+
 /** One example: live preview and its exact source. */
 export function ExampleView({ slug, example }: { slug: string; example: ExampleMeta }) {
-  const Preview = useMemo(
-    () => lazy(exampleLoader(slug, example.file) as () => Promise<{ default: ComponentType }>),
-    [slug, example.file],
-  )
+  const Preview = previewFor(slug, example.file)
   const source = examples[`${slug}/${example.file}`]
   const id = `example-${example.file}`
 

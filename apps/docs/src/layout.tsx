@@ -29,9 +29,12 @@ const REPO = 'https://github.com/khalmohak/glyph'
 
 export function Layout() {
   const { pathname } = useLocation()
-  // Scroll to top on navigation; the AppShell main area is the page scroller.
+  // Scroll to top on navigation; the AppShell main area is the page scroller. The block body
+  // matters: newer Chrome returns a Promise from scrollTo, and an effect must not return one.
   // biome-ignore lint/correctness/useExhaustiveDependencies: run on every route change
-  useEffect(() => window.scrollTo(0, 0), [pathname])
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
 
   return (
     <AppShell sidebar={<DocsSidebar pathname={pathname} />} mobileBrand={<Brand />}>
