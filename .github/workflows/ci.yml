@@ -58,7 +58,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm -C apps/docs build
+      # Through turbo so the packages build first (the docs measure their gzip sizes).
+      - run: pnpm turbo run build --filter=docs
       - name: Accessibility, interaction and visual tests
         run: pnpm -C apps/docs e2e
       - name: Demo app journeys
