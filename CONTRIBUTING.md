@@ -55,22 +55,37 @@ Notes:
 
 `pnpm-workspace.yaml` sets `minimumReleaseAge` to 14 days: new versions are not installed until they have been public for two weeks.
 
-## Custom domain (maintainers)
+## Hosting on Cloudflare (maintainers)
 
-The docs deploy to `https://khalmohak.github.io/glyph/` by default. Everything that depends on the address (the base path, canonical and Open Graph URLs, `sitemap.xml`, `robots.txt`, `llms.txt`, and links to the demo apps) comes from two build settings, `DOCS_BASE` and `SITE_URL`. The Pages workflow sets both from one repository variable.
+The site is moving to Cloudflare Pages on `glyphui.xyz`:
 
-To move to a domain such as `glyphui.dev`:
+| Address | App | Pages project |
+|---|---|---|
+| `glyphui.xyz` | docs and showcase (`apps/docs`) | `glyph-docs` |
+| `demo.glyphui.xyz` | Ledgerline demo (`apps/demo-saas`) | `glyph-demo` |
+| `auth.glyphui.xyz` | auth example (`apps/auth-example`) | `glyph-auth` |
 
-1. At your DNS provider, point the apex domain at GitHub Pages:
-   - `A` records: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
-   - `AAAA` records: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
-   - optionally a `CNAME` for `www` → `khalmohak.github.io`
-2. In the repository's **Settings → Secrets and variables → Actions → Variables**, add `CUSTOM_DOMAIN` = `glyphui.dev`.
-3. Run the **Docs and demos** workflow (or push to `main`). It builds everything for `/`, writes the `CNAME` file and deploys.
-4. In **Settings → Pages**, check that the custom domain shows `glyphui.dev`, then turn on **Enforce HTTPS** once the certificate is issued.
-5. Update the absolute links in the READMEs (they're shown on npm, so they can't follow the variable).
+`.github/workflows/cloudflare.yml` builds all three, runs `scripts/cloudflare.mjs` (it creates the projects, attaches the domains and adds the DNS records, and does nothing if they exist), and deploys: production from `main`, a preview URL per pull request (listed in the job summary). Until the secrets below exist it skips itself, and GitHub Pages keeps serving `khalmohak.github.io/glyph`.
 
-Removing the variable moves the site back to GitHub Pages under `/glyph/`.
+One-time setup:
+
+1. Create a free Cloudflare account and **Add a site** → `glyphui.xyz` → Free plan.
+2. At your registrar, replace the domain's nameservers with the two Cloudflare shows. Wait until the site says **Active** (minutes to a few hours).
+3. **My Profile → API Tokens → Create token → Custom token** with:
+   - Account › **Cloudflare Pages** › Edit
+   - Zone › **DNS** › Edit, and Zone › **Zone** › Read, for `glyphui.xyz` only
+4. In GitHub, **Settings → Secrets and variables → Actions**:
+   - secret `CLOUDFLARE_API_TOKEN` = the token
+   - secret `CLOUDFLARE_ACCOUNT_ID` = your account ID (shown on the domain's overview page)
+   - (only if the domain differs) variable `CLOUDFLARE_DOMAIN`
+5. Run the **Cloudflare** workflow (Actions tab → Run workflow), or push to `main`.
+6. In Cloudflare, **Rules → Redirect Rules → Create rule → template "Redirect from WWW to Root"** so `www.glyphui.xyz` goes to `glyphui.xyz`.
+
+Never paste the token into chat, an issue, or a file in the repo.
+
+Once `glyphui.xyz` works, switch the package READMEs' links to it (npm shows them, so they can't follow a build setting) and retire the GitHub Pages workflow, or point it at redirects to the new domain.
+
+The address-dependent pieces (canonical and Open Graph URLs, `sitemap.xml`, `robots.txt`, `llms.txt`, links to the demos) come from `SITE_URL`, `DEMO_URL` and `AUTH_URL`; base paths from `DOCS_BASE`, `DEMO_BASE` and `AUTH_EXAMPLE_BASE`. The GitHub Pages workflow can also serve a custom domain on its own: set the repository variable `CUSTOM_DOMAIN` and point the domain's DNS at GitHub Pages (`A` 185.199.108–111.153).
 
 ## Releasing (maintainers)
 

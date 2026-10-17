@@ -1,7 +1,7 @@
 import { SiteFooter as Footer } from '@glyphui/blocks'
 import { Button } from '@glyphui/ui'
 import { Github } from 'lucide-react'
-import { guides, LIVE_URL, NPM_URL, REPO_URL } from '../lib/site'
+import { AUTH_URL, DEMO_URL, guides, NPM_URL, REPO_URL } from '../lib/site'
 import { Brand } from './brand'
 
 /** The footer on full-width pages, built from the SiteFooter block. */
@@ -30,8 +30,8 @@ export function SiteFooter() {
         {
           title: 'Demos',
           links: [
-            { label: 'Ledgerline SaaS', href: `${LIVE_URL}/demo/` },
-            { label: 'Auth example', href: `${LIVE_URL}/auth/` },
+            { label: 'Ledgerline SaaS', href: `${DEMO_URL}/` },
+            { label: 'Auth example', href: `${AUTH_URL}/` },
           ],
         },
         {
