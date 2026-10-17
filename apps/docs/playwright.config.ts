@@ -40,7 +40,7 @@ export default defineConfig({
     },
     {
       name: 'interactions',
-      testMatch: /(^|\/)(interactions|component-page)\.spec\.ts$/,
+      testMatch: /(^|\/)(interactions|component-page|guides)\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'] },
     },
     {

@@ -5,6 +5,7 @@ import { Fragment } from 'react'
 import { Link } from 'react-router'
 import { addedIn, isNew } from '../../lib/added'
 import type { DocMeta } from '../../lib/doc'
+import { CopyAsMarkdown } from '../copy-as-markdown'
 import { Snippet } from '../snippet'
 import { StatusBadge } from '../status-badge'
 
@@ -93,6 +94,7 @@ export function DocHeader({ doc }: { doc: DocMeta }) {
                 <a href={doc.radix}>Radix primitive</a>
               </Button>
             )}
+            <CopyAsMarkdown path={`/components/${doc.slug}`} title={doc.name} />
           </div>
           {stylesheetNote(entry)}
         </>

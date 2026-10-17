@@ -1,0 +1,62 @@
+---
+title: Accessibility
+description: What Glyph handles for you, and what each app still has to do.
+order: 9
+section: Shipping
+---
+
+Glyph's interactive components are built on [Radix UI](https://www.radix-ui.com) primitives, which follow the WAI-ARIA authoring practices for keyboard support, focus and screen readers. Glyph adds the parts Radix leaves to you: labels and errors wired to fields, contrast-checked themes, visible focus, and motion that respects user settings. Every docs page is tested with [axe](https://github.com/dequelabs/axe-core) in light and dark mode.
+
+## What Glyph does
+
+- **Keyboard.** Menus, selects, comboboxes, tabs, dialogs, date pickers, sliders, the data table's headers and filters, the tree view and the calendar heatmap all work without a mouse. Dialogs and sheets trap focus and return it when they close.
+- **Focus.** Every interactive element has a visible focus ring drawn from the theme's `ring` color, including in themes that remove shadows.
+- **Labels.** Inside a `Field`, inputs get their label, description and error through `aria-labelledby`, `aria-describedby` and `aria-invalid`, so screen readers read all three.
+- **Contrast.** Every preset passes WCAG AA, and `defineTheme` derives readable text colors when you change a brand color. In development, the provider warns when your theme fails; see [Check contrast](/docs/theming#check-contrast).
+- **Announcements.** Toasts are announced politely; danger and warning alerts immediately. Charts include a visually hidden data table, so screen-reader users get the numbers.
+- **Motion.** Visitors who ask their system for reduced motion get none. See [Motion](/docs/motion#reduced-motion).
+
+## What your app still has to do
+
+- **Name icon-only buttons.** `IconButton` requires an `aria-label`, and TypeScript enforces it. Do the same for links that only contain an icon.
+- **Label every field.** Use `Field` or `FormField` with a `label`, or give the control an `aria-label`. A placeholder isn't a label.
+- **Write alt text.** Describe images that carry meaning; pass `alt=""` for decorative ones.
+- **Keep one `h1` per page** and don't skip heading levels. `Heading` separates the level from the visual size: `<Heading level={2} size="h4">`.
+- **Don't rely on color alone.** Pair status colors with text or an icon, as Glyph's badges and alerts do.
+- **Name your tables.** Pass `aria-label` to `DataTable` so screen-reader users know which table they're in.
+- **Enforce permissions on the server.** Hiding a button with `Can` isn't access control.
+
+## Test with axe
+
+Run axe in your end-to-end tests to catch regressions. With Playwright:
+
+<Install packages="@playwright/test @axe-core/playwright" dev />
+
+```ts title="e2e/a11y.spec.ts" check
+import AxeBuilder from '@axe-core/playwright'
+import { expect, test } from '@playwright/test'
+
+for (const path of ['/', '/app', '/app/settings']) {
+  test(`${path} has no accessibility violations`, async ({ page }) => {
+    await page.goto(path)
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+      .analyze()
+    expect(results.violations).toEqual([])
+  })
+}
+```
+
+Check both color modes and any open overlays (menus, dialogs), since they add content to the page.
+
+## Keyboard checklist
+
+Automated checks catch about a third of accessibility problems. Before a release, go through your main flows with the keyboard only:
+
+1. Tab reaches every control, in a sensible order, and the focus ring is always visible.
+2. Enter and Space activate buttons; arrow keys move within menus, tabs, radio groups and lists.
+3. Escape closes dialogs, menus and popovers, and focus returns to what opened them.
+4. Forms can be filled and submitted, and errors are reachable and read out.
+5. Nothing traps focus except an open dialog.
+
+Then try a screen reader (VoiceOver on macOS, NVDA on Windows) on the same flows.

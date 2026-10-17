@@ -1,0 +1,280 @@
+---
+title: Data tables
+description: Sorting, filters, server mode, URL state, bulk actions and virtualization.
+order: 6
+section: Building apps
+---
+
+`DataTable` from `@glyphui/ui/data-table` is the table most apps end up building by hand: search, filter chips, multi-column sorting, pagination, selection with bulk actions, column controls, clickable and expandable rows, inline editing and CSV export, with loading, empty and error states. It runs on [TanStack Table](https://tanstack.com/table) version 8.
+
+<Install packages="@tanstack/react-table@8" />
+
+## Columns and rows
+
+Columns are typed from your row type with `createColumnHelper`. `getRowId` keeps selections stable across pages and data changes.
+
+```tsx title="src/invoices-table.tsx" check
+import { Badge } from '@glyphui/ui'
+import { createColumnHelper, DataTable } from '@glyphui/ui/data-table'
+
+interface Invoice {
+  id: string
+  customer: string
+  status: 'paid' | 'open' | 'overdue'
+  total: number
+}
+
+const tone = { paid: 'success', open: 'info', overdue: 'danger' } as const
+const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+
+const col = createColumnHelper<Invoice>()
+const columns = [
+  col.accessor('id', { header: 'Invoice' }),
+  col.accessor('customer', { header: 'Customer' }),
+  col.accessor('status', {
+    header: 'Status',
+    cell: (info) => (
+      <Badge tone={tone[info.getValue()]} dot className="capitalize">
+        {info.getValue()}
+      </Badge>
+    ),
+    meta: {
+      filter: {
+        type: 'multi',
+        options: [
+          { value: 'paid', label: 'Paid' },
+          { value: 'open', label: 'Open' },
+          { value: 'overdue', label: 'Overdue' },
+        ],
+      },
+    },
+  }),
+  col.accessor('total', {
+    header: 'Total',
+    cell: (info) => usd.format(info.getValue()),
+    meta: { align: 'right' },
+  }),
+]
+
+export function InvoicesTable({ invoices }: { invoices: Invoice[] }) {
+  return (
+    <DataTable
+      aria-label="Invoices"
+      data={invoices}
+      columns={columns}
+      getRowId={(row) => row.id}
+      search={{ placeholder: 'Search invoices…' }}
+      selectable
+      columnControls
+    />
+  )
+}
+```
+
+Define `columns` outside the component (or memoize them) so the table doesn't rebuild on every render. Set `meta: { align: 'right' }` on numeric columns.
+
+## Filters
+
+`meta.filter` on a column adds it to the Filter menu, and active filters show as chips above the table. Types: `select`, `multi` (with match counts), `range`, `date-range` and `text`. Shift-click column headers to sort by several columns.
+
+<Example id="data-table/filters" />
+
+## Server mode
+
+With `mode="server"`, the table hands paging, sorting, search and filters to you through `onStateChange`. Pass the current page as `data`, the total as `rowCount`, and `loading` while you fetch; the previous rows stay on screen under a progress bar until the new page arrives.
+
+```tsx title="src/server-invoices.tsx" check
+import {
+  createColumnHelper,
+  DataTable,
+  type DataTableState,
+  getFilterList,
+} from '@glyphui/ui/data-table'
+import { useEffect, useState } from 'react'
+
+interface Invoice {
+  id: string
+  customer: string
+  total: number
+}
+
+interface Page {
+  rows: Invoice[]
+  total: number
+}
+
+const col = createColumnHelper<Invoice>()
+const columns = [
+  col.accessor('id', { header: 'Invoice' }),
+  col.accessor('customer', { header: 'Customer' }),
+  col.accessor('total', { header: 'Total', meta: { align: 'right' } }),
+]
+
+type Query = Pick<DataTableState, 'pagination' | 'sorting' | 'search' | 'columnFilters'>
+
+async function fetchInvoices(query: Query): Promise<Page> {
+  const params = new URLSearchParams({
+    page: String(query.pagination.pageIndex),
+    size: String(query.pagination.pageSize),
+    q: query.search,
+  })
+  for (const status of getFilterList(query.columnFilters, 'status')) params.append('status', status)
+  const sort = query.sorting[0]
+  if (sort) params.set('sort', `${sort.id}.${sort.desc ? 'desc' : 'asc'}`)
+  return (await fetch(`/api/invoices?${params}`)).json()
+}
+
+export function ServerInvoices() {
+  const [query, setQuery] = useState<Query>({
+    pagination: { pageIndex: 0, pageSize: 25 },
+    sorting: [],
+    search: '',
+    columnFilters: [],
+  })
+  const [page, setPage] = useState<Page>()
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let current = true
+    setLoading(true)
+    fetchInvoices(query).then((next) => {
+      // Ignore responses that arrive after a newer query.
+      if (!current) return
+      setPage(next)
+      setLoading(false)
+    })
+    return () => {
+      current = false
+    }
+  }, [query])
+
+  return (
+    <DataTable
+      aria-label="Invoices"
+      mode="server"
+      data={page?.rows}
+      rowCount={page?.total}
+      loading={loading}
+      columns={columns}
+      getRowId={(row) => row.id}
+      state={query}
+      onStateChange={(next) =>
+        setQuery({
+          pagination: next.pagination,
+          sorting: next.sorting,
+          search: next.search,
+          columnFilters: next.columnFilters,
+        })
+      }
+      search
+    />
+  )
+}
+```
+
+- `getFilterList(state.columnFilters, 'status')` always returns an array, even when a shared link held a single value.
+- APIs without a total pass `hasNextPage` for cursor paging, or `onLoadMore` for a "Load more" list.
+- In `multi` filters, give options a `count` from your server and the menu shows it.
+
+With TanStack Query, keep the previous page while the next one loads:
+
+```tsx
+const { data, isFetching } = useQuery({
+  queryKey: ['invoices', query],
+  queryFn: () => fetchInvoices(query),
+  placeholderData: keepPreviousData,
+})
+
+<DataTable mode="server" data={data?.rows} rowCount={data?.total} loading={isFetching} … />
+```
+
+## State in the URL
+
+`useTableUrlState` stores the page, sort, search, filters and hidden columns in the URL, so a view can be shared and the back button works. Spread what it returns onto the table:
+
+<Example id="data-table/url-state" />
+
+- `prefix` keeps several tables on one page apart (`orders.page`, `orders.sort`).
+- Pass `columns` so filters decode by type: a shared link with one status still gives a `multi` filter an array.
+- With React Router, pass `adapter: useRouterUrlAdapter()` from `@glyphui/ui/react-router`.
+
+The format is readable: `page` (from 1) and `size`, `sort=column` or `column.desc` (comma-separated for several), `q` for search, one `f.<column>` parameter per filter value, and `hide=col,col`. Build links to a view, for example from a command menu, with `tableSearch`:
+
+```ts title="src/links.ts" check
+import { tableSearch } from '@glyphui/ui/data-table'
+
+// "?q=INV-1043&f.status=overdue"
+export const overdueInvoice = `/invoices${tableSearch({
+  search: 'INV-1043',
+  columnFilters: [{ id: 'status', value: ['overdue'] }],
+})}`
+```
+
+## Selection and bulk actions
+
+`selectable` adds checkboxes. Select every row on the page and a banner offers to select every matching row; `bulkActions` renders your actions in a floating bar.
+
+<Example id="data-table/bulk-actions" />
+
+In server mode, "select all" sets `allMatchingSelected` in the state instead of listing ids. Act on the query, not the ids, when it's set.
+
+## Rows
+
+- `onRowClick(row)` opens details, for example in a Sheet. Clicks on buttons, links, checkboxes and menus inside the row act on themselves.
+- `getRowHref(row)` renders the first column as a real link, so keyboard users, middle-click and "open in new tab" work.
+- `renderSubRow(row)` adds an expander with any content below the row.
+
+## Inline editing
+
+`editableCell()` edits text, numbers or choices in place. `onCellEdit` saves: the new value shows at once and rolls back if your promise rejects.
+
+<Example id="data-table/editing" />
+
+## Export, density and columns
+
+- `exportCsv` adds an Export menu: this page, the selected rows, or every row (in server mode, pass `fetchAll`). Fields are quoted per RFC 4180, and text that starts like a formula (`=`, `+`, `-`, `@`) is neutralized so spreadsheets don't run it. `exportTableCsv()` and `toCsv()` export without a table.
+- `densityToggle` adds compact, default and comfortable rows. A theme can set the default for every table.
+- `columnControls` adds hiding, drag and keyboard resizing, pinning and reordering.
+
+## Phones
+
+`mobile="cards"` turns each row into a card below 640px, using the column headers as labels. The default scrolls the table sideways.
+
+<Example id="data-table/mobile-cards" />
+
+## Ten thousand rows
+
+For large client-side tables, render only the visible rows with `virtualRows` from `@glyphui/ui/data-table/virtual`:
+
+<Install packages="@tanstack/react-virtual" />
+
+```tsx title="src/all-events.tsx" check
+import { createColumnHelper, DataTable } from '@glyphui/ui/data-table'
+import { virtualRows } from '@glyphui/ui/data-table/virtual'
+
+interface LogEvent {
+  id: string
+  name: string
+}
+
+const col = createColumnHelper<LogEvent>()
+const columns = [col.accessor('id', { header: 'ID' }), col.accessor('name', { header: 'Event' })]
+
+// Create the virtualizer once, outside the component.
+const virtual = virtualRows({ height: 480 })
+
+export function AllEvents({ events }: { events: LogEvent[] }) {
+  return (
+    <DataTable
+      aria-label="Events"
+      data={events}
+      columns={columns}
+      getRowId={(row) => row.id}
+      pageSize={false}
+      virtualize={virtual}
+    />
+  )
+}
+```
+
+Search, sort and select still work across every row, and screen readers get the full row count. Expandable rows aren't virtualized; use pages for tables with row details.

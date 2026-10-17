@@ -66,6 +66,18 @@ function extractProps(root: string): Record<string, PropDoc[]> {
   return out
 }
 
+/** Props of every package's components. ui last, so its names win on a clash. */
+export function extractAllProps(): Record<string, PropDoc[]> {
+  const packages = resolve(__dirname, '../../../packages')
+  return Object.assign(
+    {},
+    extractProps(join(packages, 'auth')),
+    extractProps(join(packages, 'blocks')),
+    extractProps(join(packages, 'viewers')),
+    extractProps(join(packages, 'ui')),
+  )
+}
+
 async function highlightExamples(
   contentRoot: string,
 ): Promise<Record<string, { code: string; html: string }>> {
@@ -309,14 +321,7 @@ export function docsData(): Plugin {
     },
     async load(id) {
       if (id === `\0${PROPS_ID}`) {
-        // Components from every package: ui first, so its names win on a clash.
-        props ??= Object.assign(
-          {},
-          extractProps(resolve(__dirname, '../../../packages/auth')),
-          extractProps(resolve(__dirname, '../../../packages/blocks')),
-          extractProps(viewersRoot),
-          extractProps(uiRoot),
-        )
+        props ??= extractAllProps()
         return `export default ${JSON.stringify(props)}`
       }
       if (id === `\0${SIZES_ID}`) {

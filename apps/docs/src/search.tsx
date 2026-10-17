@@ -1,3 +1,4 @@
+import releases from 'virtual:glyph-releases'
 import {
   Button,
   CommandEmpty,
@@ -17,6 +18,7 @@ import {
   BookOpen,
   Braces,
   FileText,
+  Hash,
   History,
   LayoutGrid,
   LayoutTemplate,
@@ -26,12 +28,15 @@ import {
   Search,
   Shapes,
   Sun,
+  Tag,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { StatusBadge } from './components/status-badge'
 import { docs, docsByCategory } from './lib/catalog'
+import { guideIndex } from './lib/content'
 import { guides } from './lib/site'
+import { releaseAnchor } from './lib/slug'
 import { useThemeChoice } from './theme-choice'
 
 interface PropHit {
@@ -151,6 +156,27 @@ export function SearchCommand() {
               </CommandItem>
             ))}
           </CommandGroup>
+          {query.trim().length >= 2 && (
+            <CommandGroup heading="Guide sections">
+              {guideIndex.flatMap((guide) =>
+                guide.headings.map((heading) => (
+                  <CommandItem
+                    key={`${guide.slug}#${heading.id}`}
+                    icon={<Hash />}
+                    value={`section ${heading.text} ${guide.title}`}
+                    onSelect={() => go(`/docs/${guide.slug}#${heading.id}`)}
+                  >
+                    <span className="flex min-w-0 flex-1 items-baseline justify-between gap-3">
+                      <span className="truncate">{heading.text}</span>
+                      <span className="truncate text-caption text-faint-foreground">
+                        {guide.title}
+                      </span>
+                    </span>
+                  </CommandItem>
+                )),
+              )}
+            </CommandGroup>
+          )}
           {propHits.length > 0 && (
             <CommandGroup heading="Props">
               {propHits.map((hit) => (
@@ -190,6 +216,18 @@ export function SearchCommand() {
               ))}
             </CommandGroup>
           ))}
+          <CommandGroup heading="Releases">
+            {releases.map((version) => (
+              <CommandItem
+                key={version}
+                icon={<Tag />}
+                value={`release changelog ${version}`}
+                onSelect={() => go(`/changelog#${releaseAnchor(version)}`)}
+              >
+                {version === 'Unreleased' ? 'Unreleased changes' : `Release ${version}`}
+              </CommandItem>
+            ))}
+          </CommandGroup>
           <CommandSeparator />
           <CommandGroup heading="Theme">
             {(Object.keys(presets) as PresetName[]).map((name) => (

@@ -11,6 +11,23 @@ declare module 'virtual:glyph-sizes' {
   export default sizes
 }
 
+// Ambient modules can't import types by relative path, so these are typed in src/lib/content.ts.
+declare module 'virtual:glyph-guides' {
+  const guides: unknown
+  export default guides
+}
+
+declare module 'virtual:glyph-changelog' {
+  const changelog: unknown
+  export default changelog
+}
+
+declare module 'virtual:glyph-releases' {
+  /** Release versions, newest first. */
+  const releases: string[]
+  export default releases
+}
+
 declare module 'virtual:glyph-examples' {
   /** Keyed by `<slug>/<file>`. */
   const examples: Record<string, { code: string; html: string }>

@@ -1,0 +1,119 @@
+---
+title: Routing
+description: Connect React Router, TanStack Router or Next.js for links and active items.
+order: 4
+section: Foundations
+---
+
+Glyph doesn't depend on a router. Connect yours once on `GlyphProvider` and two things follow everywhere:
+
+- Glyph's links (`Link`, `SidebarItem`, Navbar links, `NavigationMenuLink`, table rows with `getRowHref`) navigate client-side.
+- Sidebar, Navbar and NavigationMenu items mark the current page with `aria-current="page"`, without an `active` prop.
+
+## React Router
+
+React Router 7 or later works out of the box:
+
+```tsx title="src/providers.tsx" check
+import { GlyphProvider } from '@glyphui/ui'
+import { reactRouter } from '@glyphui/ui/react-router'
+import type { ReactNode } from 'react'
+
+export function Providers({ children }: { children: ReactNode }) {
+  return <GlyphProvider router={reactRouter}>{children}</GlyphProvider>
+}
+```
+
+`GlyphProvider` goes outside the router: with a data router, wrap `<RouterProvider>`; with `<BrowserRouter>`, either side works.
+
+## Active items
+
+An item is active on its own path and every path below it, like React Router's `NavLink`. Pass `end` on index items, or `/app` would stay active on every page:
+
+```tsx title="src/app-sidebar.tsx" check
+import { Sidebar, SidebarContent, SidebarItem } from '@glyphui/ui'
+import { FileText, Home, Settings } from 'lucide-react'
+
+export function AppSidebar() {
+  return (
+    <Sidebar>
+      <SidebarContent aria-label="Main">
+        <SidebarItem href="/app" icon={<Home />} end>
+          Dashboard
+        </SidebarItem>
+        <SidebarItem href="/app/invoices" icon={<FileText />}>
+          Invoices
+        </SidebarItem>
+        <SidebarItem href="/app/settings" icon={<Settings />}>
+          Settings
+        </SidebarItem>
+      </SidebarContent>
+    </Sidebar>
+  )
+}
+```
+
+An explicit `active` prop always wins. Hash links, external URLs and `mailto:` render as plain anchors and are never active.
+
+<Example id="router/active-items" />
+
+Your own components can use the same matching with `useIsActive(href, { end })`.
+
+## TanStack Router
+
+Pass an object with your router's `Link` and a `useIsActive` hook:
+
+```tsx title="src/glyph-router.tsx"
+import type { GlyphRouter } from '@glyphui/ui'
+import { Link, useLocation } from '@tanstack/react-router'
+
+export const tanstackRouter: GlyphRouter = {
+  Link: ({ href, ...props }) => <Link to={href} {...props} />,
+  useIsActive: (href, { end } = {}) => {
+    const pathname = useLocation({ select: (location) => location.pathname })
+    return end ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)
+  },
+}
+
+// <GlyphProvider router={tanstackRouter}>
+```
+
+## Next.js
+
+The same object, built from `next/link` and `usePathname`, in a client component:
+
+```tsx title="app/glyph-router.tsx"
+'use client'
+import type { GlyphRouter } from '@glyphui/ui'
+import NextLink from 'next/link'
+import { usePathname } from 'next/navigation'
+
+export const nextRouter: GlyphRouter = {
+  Link: NextLink,
+  useIsActive: (href, { end } = {}) => {
+    const pathname = usePathname()
+    return end ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)
+  },
+}
+```
+
+Use it in the providers component from [Getting started](/docs/getting-started#nextjs).
+
+## Tables with URL state
+
+`useTableUrlState` keeps a DataTable's page, sort, search and filters in the URL. It uses the History API by default; with React Router, pass `useRouterUrlAdapter()` so the router's location and `useSearchParams` always agree with the table:
+
+```tsx title="src/use-invoice-view.ts" check
+import { useTableUrlState } from '@glyphui/ui/data-table'
+import { useRouterUrlAdapter } from '@glyphui/ui/react-router'
+
+export function useInvoiceView() {
+  return useTableUrlState({ prefix: 'invoices', adapter: useRouterUrlAdapter() })
+}
+```
+
+[Data tables](/docs/data-tables#state-in-the-url) has the rest.
+
+## Navigation and tests
+
+React Router 7 renders the next page inside a transition: the URL changes a moment before the new page appears. In end-to-end tests, wait for the new page's content, not the URL, before interacting. [Testing your app](/docs/testing#end-to-end-tests) has examples.

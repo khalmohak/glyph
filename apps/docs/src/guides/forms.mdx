@@ -1,0 +1,148 @@
+---
+title: Forms
+description: Schema-validated forms with server errors, in pages and modals.
+order: 5
+section: Building apps
+---
+
+`@glyphui/ui/form` wraps [react-hook-form](https://react-hook-form.com) with a schema and Glyph's fields. You describe the data once; field names, values and errors are typed from it, and labels, descriptions, error messages and `aria-*` attributes are wired for you.
+
+<Install packages="react-hook-form @hookform/resolvers zod" />
+
+Any [Standard Schema](https://standardschema.dev) validator works: zod, valibot, arktype.
+
+## A form
+
+```tsx title="src/signup-form.tsx" check
+import { Input } from '@glyphui/ui'
+import { Form, FormError, FormField, FormSubmit, useForm } from '@glyphui/ui/form'
+import { z } from 'zod'
+
+const schema = z.object({
+  name: z.string().trim().min(2, 'Use at least 2 characters'),
+  email: z.email('Enter a valid email address'),
+})
+
+async function createAccount(values: z.infer<typeof schema>) {
+  const res = await fetch('/api/accounts', { method: 'POST', body: JSON.stringify(values) })
+  return res.status === 409 ? 'taken' : 'ok'
+}
+
+export function SignupForm() {
+  const form = useForm({ schema, defaultValues: { name: '', email: '' } })
+  return (
+    <Form
+      form={form}
+      className="grid max-w-sm gap-4"
+      onSubmit={async (values) => {
+        if ((await createAccount(values)) === 'taken')
+          return { errors: { email: 'That email is already registered.' } }
+      }}
+    >
+      <FormError />
+      <FormField control={form.control} name="name" label="Name" required>
+        {(field) => <Input autoComplete="name" {...field} />}
+      </FormField>
+      <FormField control={form.control} name="email" label="Email" required>
+        {(field) => <Input type="email" autoComplete="email" {...field} />}
+      </FormField>
+      <FormSubmit>Create account</FormSubmit>
+    </Form>
+  )
+}
+```
+
+<Example id="form/signup" />
+
+- `name` is checked against the schema: a typo is a compile error.
+- `onSubmit` only runs with valid values, already parsed by the schema.
+- `FormSubmit` shows a spinner and blocks double submits until `onSubmit` settles.
+
+## Server errors
+
+What `onSubmit` returns or throws decides what the user sees:
+
+| From `onSubmit` | Shown |
+|---|---|
+| `{ errors: { email: '…' } }` | Under the matching field |
+| `{ errors: { root: '…' } }` | In `FormError`, above the form |
+| A thrown error | Its message in `FormError` |
+| Nothing | Nothing; reset or navigate as you like |
+
+A field's server error clears as soon as the user edits that field.
+
+## Other field types
+
+`FormField` passes react-hook-form's field (`{ value, onChange, onBlur, name, ref }`) to its child. Glyph inputs inside a field pick up its label, description and error wiring on their own. Text inputs take the field with `{...field}`; controls with a `value` / `onValueChange` API map it explicitly:
+
+```tsx title="src/plan-fields.tsx" check
+import { DatePicker, NumberInput, Select, SelectItem } from '@glyphui/ui'
+import { Form, FormField, useForm } from '@glyphui/ui/form'
+import { z } from 'zod'
+
+const schema = z.object({
+  plan: z.enum(['starter', 'growth']),
+  seats: z.number().int().min(1),
+  startsOn: z.date('Choose a start date'),
+})
+
+export function PlanFields() {
+  const form = useForm({ schema, defaultValues: { plan: 'starter', seats: 5 } })
+  return (
+    <Form form={form} onSubmit={() => {}} className="grid gap-4">
+      <FormField control={form.control} name="plan" label="Plan">
+        {(field) => (
+          <Select value={field.value} onValueChange={field.onChange}>
+            <SelectItem value="starter">Starter</SelectItem>
+            <SelectItem value="growth">Growth</SelectItem>
+          </Select>
+        )}
+      </FormField>
+      <FormField control={form.control} name="seats" label="Seats">
+        {(field) => (
+          <NumberInput
+            value={field.value ?? null}
+            onValueChange={(v) => field.onChange(v ?? undefined)}
+            min={1}
+          />
+        )}
+      </FormField>
+      <FormField control={form.control} name="startsOn" label="Starts on">
+        {(field) => <DatePicker value={field.value} onValueChange={field.onChange} />}
+      </FormField>
+    </Form>
+  )
+}
+```
+
+NumberInput reports the value while you type, so a field error clears before you reach the submit button.
+
+## Forms in a Modal
+
+A Modal's `footer` sits outside the form element, so give `FormSubmit` the form explicitly:
+
+<Example id="modal/validated-form" />
+
+For a plain form without the form pattern, pass `onSubmit` to `Modal` instead: its body and footer become one `<form>`, and a `type="submit"` button in the footer works.
+
+## Confirmations
+
+For "are you sure?" questions, skip the form: `useConfirm()` opens a themed confirmation dialog and resolves to `true` or `false`.
+
+```tsx title="src/delete-button.tsx" check
+import { Button, useConfirm } from '@glyphui/ui'
+
+export function DeleteButton({ onDelete }: { onDelete: () => void }) {
+  const confirm = useConfirm()
+  return (
+    <Button
+      variant="danger"
+      onClick={async () => {
+        if (await confirm({ title: 'Delete project?', tone: 'danger' })) onDelete()
+      }}
+    >
+      Delete
+    </Button>
+  )
+}
+```

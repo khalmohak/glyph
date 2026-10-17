@@ -49,7 +49,7 @@ const router = createBrowserRouter(
               path: 'templates/viewers',
               lazy: page(() => import('./pages/viewers-template'), 'ViewersTemplatePage'),
             },
-            { path: 'changelog', lazy: page(comingSoon, 'ChangelogPage') },
+            { path: 'changelog', lazy: page(() => import('./pages/changelog'), 'ChangelogPage') },
           ],
         },
         {
@@ -70,7 +70,7 @@ const router = createBrowserRouter(
             { path: 'docs/:slug', lazy: page(() => import('./pages/guide'), 'GuidePage') },
             {
               path: 'getting-started',
-              lazy: page(() => import('./pages/getting-started'), 'GettingStartedPage'),
+              lazy: page(() => import('./pages/guide'), 'GettingStartedGuide'),
             },
             { path: '*', lazy: page(() => import('./pages/not-found'), 'NotFoundPage') },
           ],

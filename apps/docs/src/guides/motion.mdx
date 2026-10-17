@@ -1,0 +1,124 @@
+---
+title: Motion
+description: Motion levels, springs, reduced motion and the animation primitives.
+order: 3
+section: Foundations
+---
+
+Glyph animates by default, and the theme decides how much. Overlays spring out of the element that opened them, active indicators slide between tabs, list items enter and leave, and page sections reveal as they scroll into view. None of it needs code in your app.
+
+## Motion levels
+
+`theme.motion.level` is one of three values:
+
+| Level | What it does |
+|---|---|
+| `none` | Renders everything instantly. Exit events still fire, so overlays close normally. |
+| `subtle` | The default: short, purposeful movement. |
+| `expressive` | Travels further and overshoots slightly on a soft spring. |
+
+<Example id="motion/levels" />
+
+The spring behind overlays, indicators and reveals is also part of the theme:
+
+```ts title="src/glyph.theme.ts" check
+import { defineTheme, presets } from '@glyphui/ui'
+
+export default defineTheme({
+  name: 'acme',
+  extends: presets.glyph,
+  motion: {
+    level: 'expressive',
+    // Lower damping bounces more; higher stiffness is faster.
+    spring: { stiffness: 380, damping: 22 },
+    duration: { fast: '120ms', base: '180ms', slow: '280ms' },
+  },
+})
+```
+
+The presets differ here too: brutalist snaps with no bounce, playful is expressive.
+
+## Reduced motion
+
+Visitors who ask their operating system for reduced motion never get animation, whatever the theme says. Content never depends on an animation to become visible: server-rendered HTML, tests and reduced-motion visitors see everything at once.
+
+To turn motion off for everyone, for example from a user setting or in tests, override the theme on the provider:
+
+```tsx title="src/root.tsx" check
+import { GlyphProvider } from '@glyphui/ui'
+import type { ReactNode } from 'react'
+
+export function Root({ calm, children }: { calm: boolean; children: ReactNode }) {
+  return <GlyphProvider motion={calm ? 'none' : undefined}>{children}</GlyphProvider>
+}
+```
+
+## Reveal and Stagger
+
+`Reveal` fades and lifts its child in when it scrolls into view. `Stagger` does the same for each direct child in turn: card grids, feature lists, pricing tiers.
+
+<Example id="motion/reveal" />
+
+```tsx title="src/features.tsx" check
+import { Card, Reveal, Stagger } from '@glyphui/ui'
+
+export function Features({ items }: { items: { title: string; body: string }[] }) {
+  return (
+    <>
+      <Reveal>
+        <h2 className="font-display text-h2">Why teams switch</h2>
+      </Reveal>
+      <Stagger as="ul" className="grid gap-4 sm:grid-cols-3">
+        {items.map((item) => (
+          <li key={item.title}>
+            <Card>
+              <h3 className="font-display text-h4">{item.title}</h3>
+              <p className="text-small text-muted-foreground">{item.body}</p>
+            </Card>
+          </li>
+        ))}
+      </Stagger>
+    </>
+  )
+}
+```
+
+Every block in `@glyphui/blocks` already uses them. Pass `animate={false}` to a block to turn its entrance off.
+
+## Animated numbers
+
+`AnimatedNumber` counts to its value on a spring and formats it with `Intl.NumberFormat`. Screen readers get the final value, not every step.
+
+<Example id="motion/animated-number" />
+
+## Page transitions
+
+Wrap your router's outlet and key it by path. Only the new page animates in; the old one leaves at once, so pages never overlap:
+
+```tsx title="src/layout.tsx" check
+import { PageTransition } from '@glyphui/ui'
+import { Outlet, useLocation } from 'react-router'
+
+export function Layout() {
+  const { pathname } = useLocation()
+  return (
+    <PageTransition transitionKey={pathname}>
+      <Outlet />
+    </PageTransition>
+  )
+}
+```
+
+The first page renders without an entrance.
+
+## Custom animations
+
+For your own enter and exit animations, use `Presence` and `m.*` elements from the [motion](https://motion.dev) library, re-exported by Glyph. They share the theme's spring and turn off with reduced motion:
+
+<Example id="motion/presence" />
+
+In plain CSS, the spring is available as an easing: `ease-spring duration-(--glyph-duration-spring)` in Tailwind, or `var(--glyph-ease-spring)` and `var(--glyph-duration-spring)`.
+
+## Cost
+
+Buttons and other CSS-only components never load the motion library. The library's animation features load after the first render, so they don't delay the page. [`useMotionSettings()`](/components/motion) tells your own components the current level and spring.

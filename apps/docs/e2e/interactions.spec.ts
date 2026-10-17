@@ -37,11 +37,11 @@ test.describe('Docs navigation', () => {
     }
   })
 
-  test('guides without a page yet point to their reference', async ({ page }) => {
-    await open(page, '/docs/forms/')
-    await expect(page.getByRole('heading', { level: 1, name: 'Forms' })).toBeVisible()
-    await page.getByRole('link', { name: 'Form', exact: true }).click()
-    await expect(page.getByRole('heading', { level: 1, name: 'Form' })).toBeVisible()
+  test('guides link through to component pages', async ({ page }) => {
+    await open(page, '/docs/auth/')
+    await expect(page.getByRole('heading', { level: 1, name: 'Authentication' })).toBeVisible()
+    await page.getByRole('link', { name: 'Firebase', exact: true }).click()
+    await expect(page.getByRole('heading', { level: 1, name: /Firebase/ })).toBeVisible()
   })
 })
 
