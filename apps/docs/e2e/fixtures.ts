@@ -71,5 +71,37 @@ export async function example(page: Page, id: string) {
   return preview
 }
 
-export const test = base
+/** React errors that mean a page or example crashed, even when an error boundary caught it. */
+const crashMessages = [
+  'must not return anything besides a function',
+  'destroy is not a function',
+  'caught the following error during render',
+]
+
+export const test = base.extend<{ page: Page }>({
+  page: async ({ page }, use) => {
+    // Newer Chrome returns a Promise from scroll methods; Playwright's Chromium may not yet.
+    // Emulate it so code like `useEffect(() => window.scrollTo(0, 0))` fails here, too.
+    await page.addInitScript(() => {
+      for (const target of [window, Element.prototype] as unknown as Record<string, unknown>[]) {
+        for (const name of ['scrollTo', 'scrollBy', 'scroll'] as const) {
+          const original = target[name] as ((...args: unknown[]) => unknown) | undefined
+          if (typeof original !== 'function') continue
+          target[name] = function (this: unknown, ...args: unknown[]) {
+            const result = original.apply(this, args)
+            return result instanceof Promise ? result : Promise.resolve(result)
+          }
+        }
+      }
+    })
+    const crashes: string[] = []
+    page.on('console', (message) => {
+      const text = message.text()
+      if (message.type() === 'error' && crashMessages.some((m) => text.includes(m)))
+        crashes.push(text.slice(0, 300))
+    })
+    await use(page)
+    expect(crashes, 'React render errors on the page').toEqual([])
+  },
+})
 export { expect }

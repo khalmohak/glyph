@@ -1,9 +1,22 @@
-import { example, expect, prepare, test } from './fixtures'
+import { example, expect, open, prepare, test } from './fixtures'
 
 /** Interaction tests for the hard components, driven through their docs examples. */
 
 test.beforeEach(async ({ page }) => {
   await prepare(page, { mode: 'light', motion: true })
+})
+
+test.describe('Docs navigation', () => {
+  // Route changes run effect cleanups; a bad cleanup (e.g. returning scrollTo's Promise in
+  // newer Chrome) crashes the page on the second navigation.
+  test('moves between pages from the sidebar without errors', async ({ page }) => {
+    await open(page, '/components/button/')
+    const nav = page.getByRole('complementary')
+    for (const name of ['Badge', 'Card', 'Tabs', 'Button']) {
+      await nav.getByRole('link', { name, exact: true }).click()
+      await expect(page.getByRole('heading', { level: 1, name })).toBeVisible()
+    }
+  })
 })
 
 test.describe('DataTable', () => {
