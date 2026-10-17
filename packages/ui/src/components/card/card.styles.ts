@@ -1,7 +1,7 @@
 import { themedBorder, transition } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const cardStyles = tv({
+export const cardStyles = /* @__PURE__ */ tv({
   slots: {
     root: ['flex flex-col rounded-lg text-foreground', themedBorder, transition],
     header: 'flex flex-col gap-1',

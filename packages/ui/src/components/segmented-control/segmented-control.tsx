@@ -1,24 +1,29 @@
 import { ToggleGroup } from 'radix-ui'
-import { type ReactNode, useContext } from 'react'
+import { type ReactNode, useContext, useId } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
+import { useControllableState } from '../../hooks/use-controllable-state'
 import { warnOnce } from '../../internal/dev'
+import { ActiveIndicator } from '../../motion/active-indicator'
 import { focusRing, themedBorder, transition } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 import { FieldContext } from '../field/field-context'
 
-export const segmentedControlStyles = tv({
+export const segmentedControlStyles = /* @__PURE__ */ tv({
   slots: {
     root: [
-      'inline-flex items-center gap-0.5 rounded-md border-border bg-muted p-0.5',
+      'isolate inline-flex items-center gap-0.5 rounded-md border-border bg-muted p-0.5',
       themedBorder,
     ],
     item: [
-      'inline-flex h-full cursor-pointer select-none items-center justify-center gap-1.5 whitespace-nowrap rounded-[calc(var(--radius-md)-2px)] px-3 font-medium text-muted-foreground',
+      'relative inline-flex h-full cursor-pointer select-none items-center justify-center gap-1.5 whitespace-nowrap rounded-[calc(var(--radius-md)-2px)] px-3 font-medium text-muted-foreground',
       transition,
       focusRing,
-      'hover:text-foreground data-[state=on]:bg-raised data-[state=on]:text-foreground data-[state=on]:shadow-xs',
+      'hover:text-foreground data-[state=on]:text-foreground',
       'disabled:pointer-events-none disabled:opacity-50 [&>svg]:size-4',
     ],
+    /** The raised thumb that slides to the selected option. */
+    indicator:
+      'pointer-events-none absolute inset-0 -z-10 rounded-[calc(var(--radius-md)-2px)] bg-raised shadow-xs',
   },
   variants: {
     size: {
@@ -58,6 +63,12 @@ export function SegmentedControl<T extends string>(inProps: SegmentedControlProp
   const { options, value, defaultValue, onValueChange, size, fullWidth, className, ...rest } = props
   const field = useContext(FieldContext)
   const s = segmentedControlStyles({ size, fullWidth })
+  const [selected, setSelected] = useControllableState<T | undefined>({
+    value,
+    defaultValue,
+    onChange: (next) => next !== undefined && onValueChange?.(next),
+  })
+  const indicatorId = `${useId()}-segmented-indicator`
   const labelledBy = rest['aria-labelledby'] ?? (rest['aria-label'] ? undefined : field?.labelId)
   if (!rest['aria-label'] && !labelledBy) {
     warnOnce(
@@ -70,10 +81,9 @@ export function SegmentedControl<T extends string>(inProps: SegmentedControlProp
     <ToggleGroup.Root
       type="single"
       data-slot="segmented-control"
-      {...(value !== undefined && { value })}
-      {...(defaultValue !== undefined && { defaultValue })}
+      value={selected ?? ''}
       // Radix emits '' when the active item is clicked again; a segmented control never deselects.
-      onValueChange={(next: string) => next && onValueChange?.(next as T)}
+      onValueChange={(next: string) => next && setSelected(next as T)}
       className={s.root({ class: [slots.root, className] })}
       aria-labelledby={labelledBy}
       aria-describedby={describedBy || undefined}
@@ -87,6 +97,12 @@ export function SegmentedControl<T extends string>(inProps: SegmentedControlProp
           className={s.item({ class: slots.item })}
         >
           {option.label}
+          {option.value === selected && (
+            <ActiveIndicator
+              layoutId={indicatorId}
+              className={s.indicator({ class: slots.indicator })}
+            />
+          )}
         </ToggleGroup.Item>
       ))}
     </ToggleGroup.Root>

@@ -1,5 +1,6 @@
 import type { Theme } from './define-theme'
 import type { ColorMode } from './schema'
+import { defaultSpring, springEasing } from './spring'
 
 const PREFIX = '--glyph'
 
@@ -31,6 +32,9 @@ export function staticVars(theme: Theme): Vars {
   vars['border-width'] = theme.border.width
   for (const [key, value] of Object.entries(theme.motion.duration)) vars[`duration-${key}`] = value
   for (const [key, value] of Object.entries(theme.motion.easing)) vars[`ease-${key}`] = value
+  const spring = springEasing(theme.motion.spring ?? defaultSpring)
+  vars['ease-spring'] = spring.easing
+  vars['duration-spring'] = `${spring.duration}ms`
   for (const [key, value] of Object.entries(theme.control)) vars[`control-${key}`] = value
   vars['font-features'] ??= 'normal'
   return vars

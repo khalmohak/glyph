@@ -1,5 +1,6 @@
-import { Container, cn, Section } from '@glyphui/ui'
+import { Container, cn, Section, Stagger } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import { type BlockMotionProps, CountUp } from '../internal/motion'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 import { type HeadingLevel, SectionHeader } from '../section-header'
 
@@ -9,7 +10,7 @@ export interface StatItem {
   description?: ReactNode
 }
 
-export interface StatsProps extends Omit<ComponentProps<'section'>, 'title'> {
+export interface StatsProps extends Omit<ComponentProps<'section'>, 'title'>, BlockMotionProps {
   eyebrow?: ReactNode
   title?: ReactNode
   description?: ReactNode
@@ -29,6 +30,7 @@ export function Stats({
   variant = 'plain',
   align = 'left',
   headingLevel = 2,
+  animate = true,
   className,
   ...props
 }: StatsProps) {
@@ -51,9 +53,12 @@ export function Stats({
             align={align}
             headingLevel={headingLevel}
             titleId={titleId}
+            animate={animate}
           />
         )}
-        <dl
+        <Stagger
+          as="dl"
+          enabled={animate}
           className={cn(
             'grid gap-6 sm:grid-cols-2',
             items.length >= 4 ? 'lg:grid-cols-4' : items.length === 3 ? 'lg:grid-cols-3' : '',
@@ -76,10 +81,12 @@ export function Stats({
                   <span className="mt-1 block text-faint-foreground">{item.description}</span>
                 )}
               </dt>
-              <dd className="font-display text-h1 tabular-nums text-foreground">{item.value}</dd>
+              <dd className="font-display text-h1 tabular-nums text-foreground">
+                <CountUp value={item.value} animate={animate} />
+              </dd>
             </div>
           ))}
-        </dl>
+        </Stagger>
       </Container>
     </Section>
   )

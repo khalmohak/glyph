@@ -1,6 +1,7 @@
 import { type DragEvent, type ReactNode, useId, useRef, useState } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { useControllableState } from '../../hooks/use-controllable-state'
+import { PresenceItem, PresenceList } from '../../motion/presence-list'
 import { IconButton } from '../button'
 import { useFieldControl } from '../field/field-context'
 import { fileUploadStyles } from './file-upload.styles'
@@ -287,55 +288,57 @@ export function FileUpload(inProps: FileUploadProps) {
 
       {files.length > 0 && (
         <ul className={s.list({ class: slots.list })} aria-label="Selected files">
-          {files.map((item) => (
-            <li
-              key={item.id}
-              data-slot="file-upload-item"
-              className={s.item({ class: slots.item })}
-            >
-              <span className={s.fileIcon({ class: slots.fileIcon })}>
-                <FileIcon />
-              </span>
-              <span className={s.fileText({ class: slots.fileText })}>
-                <span className={s.fileName({ class: slots.fileName })}>{item.file.name}</span>
-                {item.error ? (
-                  <span className={s.fileError({ class: slots.fileError })}>{item.error}</span>
-                ) : (
-                  <span className={s.fileMeta({ class: slots.fileMeta })}>
-                    {formatBytes(item.file.size)}
-                    {item.progress !== undefined &&
-                      item.progress < 100 &&
-                      ` · ${Math.round(item.progress)}%`}
-                  </span>
-                )}
-                {item.progress !== undefined && item.progress < 100 && !item.error && (
-                  <span
-                    role="progressbar"
-                    aria-label={`Uploading ${item.file.name}`}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={Math.round(item.progress)}
-                    className={s.progress({ class: slots.progress })}
-                  >
+          <PresenceList>
+            {files.map((item) => (
+              <PresenceItem
+                key={item.id}
+                data-slot="file-upload-item"
+                className={s.item({ class: slots.item })}
+              >
+                <span className={s.fileIcon({ class: slots.fileIcon })}>
+                  <FileIcon />
+                </span>
+                <span className={s.fileText({ class: slots.fileText })}>
+                  <span className={s.fileName({ class: slots.fileName })}>{item.file.name}</span>
+                  {item.error ? (
+                    <span className={s.fileError({ class: slots.fileError })}>{item.error}</span>
+                  ) : (
+                    <span className={s.fileMeta({ class: slots.fileMeta })}>
+                      {formatBytes(item.file.size)}
+                      {item.progress !== undefined &&
+                        item.progress < 100 &&
+                        ` · ${Math.round(item.progress)}%`}
+                    </span>
+                  )}
+                  {item.progress !== undefined && item.progress < 100 && !item.error && (
                     <span
-                      className={s.progressBar({ class: slots.progressBar })}
-                      style={{ width: `${Math.max(0, Math.min(100, item.progress))}%` }}
-                    />
-                  </span>
-                )}
-              </span>
-              <IconButton
-                size="sm"
-                icon={<XIcon />}
-                aria-label={`Remove ${item.file.name}`}
-                disabled={disabled}
-                onClick={() => {
-                  setFiles(files.filter((f) => f.id !== item.id))
-                  setRejections([])
-                }}
-              />
-            </li>
-          ))}
+                      role="progressbar"
+                      aria-label={`Uploading ${item.file.name}`}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round(item.progress)}
+                      className={s.progress({ class: slots.progress })}
+                    >
+                      <span
+                        className={s.progressBar({ class: slots.progressBar })}
+                        style={{ width: `${Math.max(0, Math.min(100, item.progress))}%` }}
+                      />
+                    </span>
+                  )}
+                </span>
+                <IconButton
+                  size="sm"
+                  icon={<XIcon />}
+                  aria-label={`Remove ${item.file.name}`}
+                  disabled={disabled}
+                  onClick={() => {
+                    setFiles(files.filter((f) => f.id !== item.id))
+                    setRejections([])
+                  }}
+                />
+              </PresenceItem>
+            ))}
+          </PresenceList>
         </ul>
       )}
     </div>

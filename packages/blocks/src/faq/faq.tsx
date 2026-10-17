@@ -5,9 +5,11 @@ import {
   AccordionTrigger,
   Container,
   cn,
+  Reveal,
   Section,
 } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import type { BlockMotionProps } from '../internal/motion'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 import { type HeadingLevel, SectionHeader } from '../section-header'
 
@@ -18,7 +20,7 @@ export interface FaqItem {
   id?: string
 }
 
-export interface FaqProps extends Omit<ComponentProps<'section'>, 'title'> {
+export interface FaqProps extends Omit<ComponentProps<'section'>, 'title'>, BlockMotionProps {
   eyebrow?: ReactNode
   title?: ReactNode
   description?: ReactNode
@@ -39,6 +41,7 @@ export function Faq({
   layout = 'stacked',
   multiple = false,
   headingLevel = 2,
+  animate = true,
   className,
   ...props
 }: FaqProps) {
@@ -79,10 +82,13 @@ export function Faq({
             align={layout === 'split' ? 'left' : 'center'}
             headingLevel={headingLevel}
             titleId={titleId}
+            animate={animate}
             className={layout === 'split' ? 'h-fit lg:sticky lg:top-24' : undefined}
           />
         )}
-        {list}
+        <Reveal enabled={animate} delay={120} className="min-w-0">
+          {list}
+        </Reveal>
       </Container>
     </Section>
   )

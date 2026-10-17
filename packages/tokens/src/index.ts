@@ -28,6 +28,13 @@ export type {
   GlyphComponentRegistry,
 } from './register'
 export * from './schema'
+export {
+  defaultSpring,
+  type SpringEasing,
+  type SpringEasingOptions,
+  springEasing,
+  springPosition,
+} from './spring'
 export { deriveTextColor } from './text-colors'
 export {
   modeVars,

@@ -1,9 +1,11 @@
 {
-  "@glyphui/tokens": 6227,
-  "@glyphui/ui": 172784,
-  "@glyphui/ui (Button only)": 15164,
-  "@glyphui/ui/form": 17099,
-  "@glyphui/ui/data-table": 23032,
-  "@glyphui/ui/chart": 15381,
-  "@glyphui/blocks": 5544
+  "@glyphui/tokens": 6724,
+  "@glyphui/ui": 194889,
+  "@glyphui/ui (Button only)": 15246,
+  "@glyphui/ui (Badge only)": 14637,
+  "@glyphui/ui (provider + Button)": 28503,
+  "@glyphui/ui/form": 17307,
+  "@glyphui/ui/data-table": 23370,
+  "@glyphui/ui/chart": 74773,
+  "@glyphui/blocks": 6064
 }

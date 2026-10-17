@@ -10,7 +10,7 @@ import { defineTheme, presets as tokenPresets } from '@glyphui/tokens'
 export const glyph = tokenPresets.glyph
 
 /** Zero radius, heavy borders, hard offset shadows, loud color. */
-export const brutalist = defineTheme({
+export const brutalist = /* @__PURE__ */ defineTheme({
   name: 'brutalist',
   extends: tokenPresets.brutalist,
   components: {
@@ -27,7 +27,7 @@ export const brutalist = defineTheme({
 })
 
 /** Serif display type, warm paper neutrals, deep green ink, hairlines instead of shadows. */
-export const editorial = defineTheme({
+export const editorial = /* @__PURE__ */ defineTheme({
   name: 'editorial',
   extends: tokenPresets.editorial,
   components: {
@@ -38,7 +38,7 @@ export const editorial = defineTheme({
 })
 
 /** Pill shapes, lavender and mint, chunky rounded type, springy motion. */
-export const playful = defineTheme({
+export const playful = /* @__PURE__ */ defineTheme({
   name: 'playful',
   extends: tokenPresets.playful,
   components: {

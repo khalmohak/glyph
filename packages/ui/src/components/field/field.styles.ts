@@ -1,6 +1,6 @@
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const fieldStyles = tv({
+export const fieldStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'grid gap-1.5',
     label: '',

@@ -1,11 +1,14 @@
-import { Button, Container, cn, Heading, Input, Section, Text } from '@glyphui/ui'
+import { Button, Container, cn, Heading, Input, Reveal, Section, Stagger, Text } from '@glyphui/ui'
 import { type ComponentProps, type FormEvent, type ReactNode, useId, useState } from 'react'
+import type { BlockMotionProps } from '../internal/motion'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 import type { HeadingLevel } from '../section-header'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
-export interface NewsletterProps extends Omit<ComponentProps<'section'>, 'title' | 'onSubmit'> {
+export interface NewsletterProps
+  extends Omit<ComponentProps<'section'>, 'title' | 'onSubmit'>,
+    BlockMotionProps {
   title: ReactNode
   description?: ReactNode
   /** Called with the email. Reject (throw) to show `errorMessage` or the error's message. */
@@ -37,6 +40,7 @@ export function Newsletter({
   invalidMessage = 'Enter a valid email address.',
   layout = 'centered',
   headingLevel = 2,
+  animate = true,
   className,
   ...props
 }: NewsletterProps) {
@@ -82,13 +86,13 @@ export function Newsletter({
           split ? 'items-center lg:grid-cols-2 lg:gap-16' : 'justify-items-center text-center',
         )}
       >
-        <div className={cn('grid gap-3', !split && 'justify-items-center')}>
+        <Stagger enabled={animate} className={cn('grid gap-3', !split && 'justify-items-center')}>
           <Heading level={headingLevel} size="h3" id={titleId}>
             {title}
           </Heading>
           {description && <Text tone="muted">{description}</Text>}
-        </div>
-        <div className="grid w-full gap-2">
+        </Stagger>
+        <Reveal enabled={animate} delay={140} className="grid w-full gap-2">
           <form noValidate onSubmit={submit} className="flex w-full flex-col gap-2 sm:flex-row">
             <label htmlFor={inputId} className="sr-only">
               Email address
@@ -127,7 +131,7 @@ export function Newsletter({
               {privacyNote}
             </p>
           )}
-        </div>
+        </Reveal>
       </Container>
     </Section>
   )

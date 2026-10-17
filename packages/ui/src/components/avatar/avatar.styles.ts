@@ -1,6 +1,6 @@
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const avatarStyles = tv({
+export const avatarStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden rounded-pill bg-muted align-middle',
     image: 'size-full object-cover',

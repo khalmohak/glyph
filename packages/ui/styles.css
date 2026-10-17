@@ -13,6 +13,11 @@
 @source "./src";
 
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+/* Motion level from the theme or GlyphProvider's `motion` prop, set as data-motion on <html>. */
+@custom-variant motion-none (&:where([data-motion="none"], [data-motion="none"] *));
+@custom-variant motion-expressive (
+  &:where([data-motion="expressive"], [data-motion="expressive"] *)
+);
 
 @theme inline {
   --color-background: var(--glyph-background);
@@ -107,8 +112,19 @@
 
   --ease-standard: var(--glyph-ease-standard);
   --ease-emphasized: var(--glyph-ease-emphasized);
+  /* The theme's spring as a CSS linear() curve. Pair with duration-(--glyph-duration-spring). */
+  --ease-spring: var(--glyph-ease-spring);
 
-  --animate-pop-in: glyph-pop-in var(--glyph-duration-fast) var(--glyph-ease-standard);
+  /* Menus, popovers, tooltips: scale and fade from the trigger, on the theme's spring. */
+  --animate-pop-in: glyph-pop-in var(--glyph-duration-spring) var(--glyph-ease-spring) both;
+  --animate-pop-out: glyph-pop-out var(--glyph-duration-fast) var(--glyph-ease-standard) both;
+  /* Dialogs and the command menu: rise and scale in, settle out quickly. */
+  --animate-dialog-in: glyph-dialog-in var(--glyph-duration-spring) var(--glyph-ease-spring) both;
+  --animate-dialog-out: glyph-dialog-out var(--glyph-duration-fast) var(--glyph-ease-standard) both;
+  /* Route changes (PageTransition) and newly inserted content. */
+  --animate-page-in: glyph-page-in var(--glyph-duration-slow) var(--glyph-ease-standard) both;
+  /* Strokes drawn on, e.g. the Checkbox tick. Set --glyph-draw-length to the path length. */
+  --animate-draw: glyph-draw var(--glyph-duration-base) var(--glyph-ease-standard) both;
   --animate-fade-in: glyph-fade-in var(--glyph-duration-base) var(--glyph-ease-standard);
   --animate-slide-in-left: glyph-slide-in-left var(--glyph-duration-slow) var(--glyph-ease-standard);
   --animate-slide-in-top: glyph-slide-in-top var(--glyph-duration-slow) var(--glyph-ease-standard);
@@ -130,10 +146,72 @@
   --animate-collapse-up: glyph-collapse-up var(--glyph-duration-base) var(--glyph-ease-standard);
 }
 
+/*
+ * Motion levels. `subtle` (the default) keeps distances short; `expressive` travels further
+ * and scales more; `none` collapses every Glyph duration so things appear instantly.
+ * Popovers set --glyph-motion-x/y from their side so they grow out of the trigger.
+ */
+:root,
+[data-motion="subtle"] {
+  --glyph-motion-scale: 0.96;
+  --glyph-motion-scale-out: 0.98;
+  --glyph-motion-distance: 4px;
+  --glyph-motion-rise: 8px;
+}
+[data-motion="expressive"] {
+  --glyph-motion-scale: 0.86;
+  --glyph-motion-scale-out: 0.94;
+  --glyph-motion-distance: 10px;
+  --glyph-motion-rise: 28px;
+}
+[data-motion="none"],
+[data-motion="none"] * {
+  --glyph-duration-fast: 1ms !important;
+  --glyph-duration-base: 1ms !important;
+  --glyph-duration-slow: 1ms !important;
+  --glyph-duration-spring: 1ms !important;
+}
+
 @keyframes glyph-pop-in {
   from {
     opacity: 0;
-    transform: translateY(-2px) scale(0.98);
+    transform: translate(var(--glyph-motion-x, 0), var(--glyph-motion-y, 0))
+      scale(var(--glyph-motion-scale));
+  }
+}
+@keyframes glyph-pop-out {
+  to {
+    opacity: 0;
+    transform: translate(var(--glyph-motion-x, 0), var(--glyph-motion-y, 0))
+      scale(var(--glyph-motion-scale-out));
+  }
+}
+@keyframes glyph-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--glyph-motion-rise)) scale(var(--glyph-motion-scale));
+  }
+}
+@keyframes glyph-dialog-out {
+  to {
+    opacity: 0;
+    transform: scale(var(--glyph-motion-scale-out));
+  }
+}
+@keyframes glyph-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--glyph-motion-distance));
+  }
+}
+@keyframes glyph-draw {
+  from {
+    stroke-dasharray: var(--glyph-draw-length, 1);
+    stroke-dashoffset: var(--glyph-draw-length, 1);
+  }
+  to {
+    stroke-dasharray: var(--glyph-draw-length, 1);
+    stroke-dashoffset: 0;
   }
 }
 @keyframes glyph-fade-in {
@@ -215,6 +293,46 @@
   }
 }
 
+/*
+ * Reveal and Stagger. The hidden state is set by JavaScript just before the element comes
+ * into view, so content without JavaScript, or with motion off, is never hidden. Revealing
+ * plays an animation with backwards fill only: once it ends, the element's own styles
+ * (hover transforms, transitions) apply untouched.
+ */
+@layer components {
+  :root,
+  [data-motion="subtle"] {
+    --glyph-stagger-step: 55ms;
+  }
+  [data-motion="expressive"] {
+    --glyph-stagger-step: 90ms;
+  }
+  [data-reveal="hidden"],
+  [data-stagger="hidden"] [data-stagger-item] {
+    opacity: 0;
+  }
+  [data-reveal="shown"],
+  [data-stagger="shown"] [data-stagger-item] {
+    animation: glyph-reveal var(--glyph-duration-spring) var(--glyph-ease-spring) backwards;
+    animation-delay: var(--glyph-reveal-delay, 0ms);
+  }
+  [data-stagger="shown"] [data-stagger-item] {
+    animation-delay: calc(
+      var(--glyph-stagger-delay, 0ms) +
+      var(--glyph-stagger-index, 0) *
+      var(--glyph-stagger-step)
+    );
+  }
+}
+
+@keyframes glyph-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--glyph-reveal-y, var(--glyph-motion-rise)))
+      scale(var(--glyph-reveal-scale, 1));
+  }
+}
+
 @layer base {
   *,
   ::before,
@@ -254,8 +372,9 @@
     background-color: color-mix(in oklab, var(--color-primary) 30%, transparent);
   }
 
+  /* Loading spinners keep turning: they are essential feedback, not decoration. */
   @media (prefers-reduced-motion: reduce) {
-    *,
+    *:not([data-slot="spinner"], [data-slot="spinner"] *),
     ::before,
     ::after {
       animation-duration: 0.01ms !important;

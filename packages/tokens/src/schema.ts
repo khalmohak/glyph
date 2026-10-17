@@ -73,6 +73,7 @@ export const textTokens = [
 export const durationTokens = ['fast', 'base', 'slow'] as const
 export const easingTokens = ['standard', 'emphasized'] as const
 export const controlSizes = ['sm', 'md', 'lg'] as const
+export const motionLevels = ['none', 'subtle', 'expressive'] as const
 export const colorModes = ['light', 'dark'] as const
 
 export type ColorToken = (typeof colorTokens)[number]
@@ -85,6 +86,19 @@ export type TextToken = (typeof textTokens)[number]
 export type DurationToken = (typeof durationTokens)[number]
 export type EasingToken = (typeof easingTokens)[number]
 export type ControlSize = (typeof controlSizes)[number]
+/**
+ * How much a theme animates. `none` renders everything statically, `subtle` keeps motion
+ * short and purposeful, `expressive` adds springy overshoot and staggered entrances.
+ * A visitor's reduced-motion preference always turns animation off.
+ */
+export type MotionLevel = (typeof motionLevels)[number]
+
+/** A physical spring, as used by the `motion` library. Higher damping means less bounce. */
+export interface SpringConfig {
+  stiffness: number
+  damping: number
+  mass?: number
+}
 export type ColorMode = (typeof colorModes)[number]
 
 /** Semantic tones shared by components that communicate status (Badge, Alert, ...). */
@@ -120,6 +134,10 @@ export interface ThemeTokens {
   motion: {
     duration: Record<DurationToken, string>
     easing: Record<EasingToken, string>
+    /** Default `subtle`. */
+    level?: MotionLevel
+    /** The spring behind overlays, indicators and layout animations. */
+    spring?: SpringConfig
   }
   /** Heights of interactive controls (buttons, inputs, selects). Sets the theme's density. */
   control: Record<ControlSize, string>

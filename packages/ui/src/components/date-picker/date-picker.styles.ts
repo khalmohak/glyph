@@ -3,7 +3,7 @@ import { popover } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 import { fieldControl } from '../input/input.styles'
 
-export const datePickerStyles = tv({
+export const datePickerStyles = /* @__PURE__ */ tv({
   slots: {
     trigger: [
       ...fieldControl,
@@ -16,7 +16,7 @@ export const datePickerStyles = tv({
     placeholder: 'min-w-0 flex-1 truncate text-faint-foreground',
     clear:
       'inline-flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-xs text-faint-foreground hover:bg-muted hover:text-foreground [&>svg]:size-3.5',
-    content: [popover, 'w-auto p-0'],
+    content: [popover, 'origin-(--radix-popover-content-transform-origin) w-auto p-0'],
     layout: 'flex flex-col sm:flex-row',
     presets:
       'flex gap-1 overflow-x-auto border-b border-border p-2 sm:w-40 sm:flex-col sm:overflow-visible sm:border-r sm:border-b-0',

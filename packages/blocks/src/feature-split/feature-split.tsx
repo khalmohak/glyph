@@ -1,5 +1,6 @@
-import { Container, cn, Eyebrow, Heading, Section, Text } from '@glyphui/ui'
+import { Container, cn, Eyebrow, Heading, Reveal, Section, Stagger, Text } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import type { BlockMotionProps } from '../internal/motion'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 import { type HeadingLevel, SectionHeader } from '../section-header'
 
@@ -13,7 +14,9 @@ export interface FeatureSplitItem {
   media: ReactNode
 }
 
-export interface FeatureSplitProps extends Omit<ComponentProps<'section'>, 'title'> {
+export interface FeatureSplitProps
+  extends Omit<ComponentProps<'section'>, 'title'>,
+    BlockMotionProps {
   eyebrow?: ReactNode
   title?: ReactNode
   description?: ReactNode
@@ -31,6 +34,7 @@ export function FeatureSplit({
   items,
   mediaFirst = false,
   headingLevel = 2,
+  animate = true,
   className,
   ...props
 }: FeatureSplitProps) {
@@ -52,13 +56,14 @@ export function FeatureSplit({
             description={description}
             headingLevel={headingLevel}
             titleId={titleId}
+            animate={animate}
           />
         )}
         {items.map((item, i) => {
           const mediaLeft = mediaFirst ? i % 2 === 0 : i % 2 === 1
           return (
             <div key={i} className="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
-              <div className={cn('grid gap-4', mediaLeft && 'lg:order-2')}>
+              <Stagger enabled={animate} className={cn('grid gap-4', mediaLeft && 'lg:order-2')}>
                 {item.eyebrow && <Eyebrow tone="primary">{item.eyebrow}</Eyebrow>}
                 <Heading level={rowLevel} size="h3">
                   {item.title}
@@ -78,8 +83,15 @@ export function FeatureSplit({
                   </ul>
                 )}
                 {item.actions && <div className="flex flex-wrap gap-3 pt-2">{item.actions}</div>}
-              </div>
-              <div className={cn('min-w-0', mediaLeft && 'lg:order-1')}>{item.media}</div>
+              </Stagger>
+              <Reveal
+                enabled={animate}
+                delay={120}
+                scale
+                className={cn('min-w-0', mediaLeft && 'lg:order-1')}
+              >
+                {item.media}
+              </Reveal>
             </div>
           )
         })}

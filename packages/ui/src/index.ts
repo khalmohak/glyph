@@ -6,8 +6,10 @@ export {
   type ColorToken,
   type ComponentOverrides,
   defineTheme,
+  type MotionLevel,
   type RadiusToken,
   type ShadowToken,
+  type SpringConfig,
   type TextToken,
   type Theme,
   type ThemeInput,
@@ -87,6 +89,7 @@ export * from './components/tooltip'
 export * from './components/tree-view'
 export * from './components/visually-hidden'
 export * from './hooks'
+export * from './motion'
 // Patterns
 export * from './patterns/app-shell'
 export * from './patterns/async'

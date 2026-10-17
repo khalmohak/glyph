@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing, themedBorder, transition } from '../../utils/styles'
 import { tv } from '../../utils/tv'
 
-export const fileUploadStyles = tv({
+export const fileUploadStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'grid gap-3',
     dropzone: [

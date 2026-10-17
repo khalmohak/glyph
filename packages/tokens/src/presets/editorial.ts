@@ -2,7 +2,7 @@ import { defineTheme } from '../define-theme'
 import { glyph } from './glyph'
 
 /** Serif display type, warm paper neutrals, deep green ink, hairlines instead of shadows. */
-export const editorial = defineTheme({
+export const editorial = /* @__PURE__ */ defineTheme({
   name: 'editorial',
   extends: glyph,
   colors: {
@@ -112,6 +112,8 @@ export const editorial = defineTheme({
       standard: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
       emphasized: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
     },
+    level: 'subtle',
+    spring: { stiffness: 260, damping: 32 },
   },
   control: { sm: '32px', md: '38px', lg: '44px' },
 })

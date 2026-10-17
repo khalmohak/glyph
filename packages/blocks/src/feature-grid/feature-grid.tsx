@@ -1,9 +1,10 @@
-import { Card, Container, Section, Text, tv, useLinkComponent } from '@glyphui/ui'
+import { Card, Container, Section, Stagger, Text, tv, useLinkComponent } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import type { BlockMotionProps } from '../internal/motion'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 import { type HeadingLevel, SectionHeader } from '../section-header'
 
-export const featureGridStyles = tv({
+export const featureGridStyles = /* @__PURE__ */ tv({
   slots: {
     grid: 'grid gap-4 sm:grid-cols-2',
     icon: 'flex size-10 items-center justify-center rounded-md border-(length:--glyph-border-width) border-border bg-subtle text-primary [&>svg]:size-5',
@@ -27,7 +28,9 @@ export interface Feature {
   href?: string
 }
 
-export interface FeatureGridProps extends Omit<ComponentProps<'section'>, 'title'> {
+export interface FeatureGridProps
+  extends Omit<ComponentProps<'section'>, 'title'>,
+    BlockMotionProps {
   eyebrow?: ReactNode
   title?: ReactNode
   description?: ReactNode
@@ -49,6 +52,7 @@ export function FeatureGrid({
   variant = 'cards',
   align = 'left',
   headingLevel = 2,
+  animate = true,
   className,
   ...props
 }: FeatureGridProps) {
@@ -75,9 +79,10 @@ export function FeatureGrid({
             align={align}
             headingLevel={headingLevel}
             titleId={titleId}
+            animate={animate}
           />
         )}
-        <ul className={s.grid()}>
+        <Stagger as="ul" className={s.grid()} enabled={animate}>
           {features.map((feature, i) => {
             const body = (
               <>
@@ -108,7 +113,7 @@ export function FeatureGrid({
               </li>
             )
           })}
-        </ul>
+        </Stagger>
       </Container>
     </Section>
   )

@@ -4,7 +4,7 @@ import { useComponentConfig } from '../../hooks/use-component-config'
 import type { StylesEntry } from '../../utils/registry'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const aspectRatioStyles = tv({
+export const aspectRatioStyles = /* @__PURE__ */ tv({
   slots: {
     base: 'overflow-hidden [&>img]:size-full [&>img]:object-cover [&>video]:size-full [&>video]:object-cover',
   },

@@ -5,7 +5,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing, themedBorder, transition } from '../../utils/styles'
 import { tv } from '../../utils/tv'
 
-export const toastStyles = tv({
+export const toastStyles = /* @__PURE__ */ tv({
   slots: {
     toast: [
       'group flex w-(--width) items-start gap-3 rounded-lg border-border bg-raised p-4 text-small text-foreground shadow-lg',

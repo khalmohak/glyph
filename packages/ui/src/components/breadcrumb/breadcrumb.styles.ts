@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing, transition } from '../../utils/styles'
 import { tv } from '../../utils/tv'
 
-export const breadcrumbStyles = tv({
+export const breadcrumbStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'min-w-0',
     list: 'flex flex-wrap items-center gap-1.5 text-small text-muted-foreground',

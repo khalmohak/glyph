@@ -3,7 +3,7 @@ import { popover } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 import { fieldControl } from '../input/input.styles'
 
-export const comboboxStyles = tv({
+export const comboboxStyles = /* @__PURE__ */ tv({
   slots: {
     trigger: [
       ...fieldControl,
@@ -15,7 +15,10 @@ export const comboboxStyles = tv({
     placeholder: 'truncate text-faint-foreground',
     chip: 'inline-flex h-5.5 max-w-40 shrink-0 items-center truncate rounded-pill bg-muted px-2 text-caption text-foreground',
     icon: 'size-4 shrink-0 text-faint-foreground',
-    content: [popover, 'w-(--radix-popover-trigger-width) min-w-56 p-0'],
+    content: [
+      popover,
+      'origin-(--radix-popover-content-transform-origin) w-(--radix-popover-trigger-width) min-w-56 p-0',
+    ],
     search:
       'flex items-center gap-2 border-b border-border px-3 text-faint-foreground [&>svg]:size-4 [&>svg]:shrink-0',
     input:

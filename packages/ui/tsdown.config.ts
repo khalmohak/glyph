@@ -10,6 +10,9 @@ export default defineConfig({
     vite: 'src/integrations/vite.ts',
   },
   format: 'esm',
+  // One output file per source module, so bundlers drop everything an app doesn't import
+  // (with `sideEffects` in package.json). A single bundled file kept every dependency alive.
+  unbundle: true,
   platform: 'neutral',
   dts: true,
   clean: true,

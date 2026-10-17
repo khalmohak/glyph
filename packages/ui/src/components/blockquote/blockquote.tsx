@@ -3,7 +3,7 @@ import { useComponentConfig } from '../../hooks/use-component-config'
 import type { StylesEntry } from '../../utils/registry'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const blockquoteStyles = tv({
+export const blockquoteStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'grid gap-3 border-l-2 border-primary pl-5',
     quote: 'font-display text-pretty text-foreground',

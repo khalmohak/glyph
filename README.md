@@ -98,7 +98,7 @@ const form = useForm({ schema, defaultValues })   // zod, valibot, arktype: any 
 | `@glyphui/ui` | Components on Radix (Modal, DatePicker, Combobox, FileUpload, CommandMenu, Toast...), `AppShell` / `Sidebar` / `Navbar` / `PageHeader`, `Async` + `EmptyState` / `ErrorState`, `useConfirm`, `GlyphProvider`, `useColorMode`, presets |
 | `@glyphui/ui/form` | `useForm`, `Form`, `FormField`, `FormSubmit`, `FormError` |
 | `@glyphui/ui/data-table` | `DataTable` with sorting, search, selection, paging and loading / empty / error states (needs `@tanstack/react-table@8`) |
-| `@glyphui/ui/chart` | `LineChart`, `AreaChart`, `BarChart`, `DonutChart`, `Sparkline`, colored by the theme's chart palette (needs `recharts`) |
+| `@glyphui/ui/chart` | 15 chart types (line, area, bar, composed, pie, radar, scatter, funnel, treemap, Sankey, heatmap, gauge, sparkline, ...), `ChartCard` and PNG/SVG export, colored by the theme's chart palette (needs `recharts`) |
 | `@glyphui/ui/react-router` | `reactRouter` for `GlyphProvider`: client-side links and automatic active items |
 | `@glyphui/ui/vite` | `glyphColorMode()` Vite plugin that prevents the dark-mode flash |
 | `@glyphui/ui/fonts.css` | Geist and Geist Mono for the default theme |
@@ -107,17 +107,17 @@ const form = useForm({ schema, defaultValues })   // zod, valibot, arktype: any 
 
 ## Components
 
-| Category | Components (95) |
+| Category | Components (106) |
 |---|---|
 | Actions | Button · CopyButton · Toggle |
 | Forms | Calendar · Checkbox · Combobox · DatePicker · Field · FileUpload · Input · InputOTP · Label · NumberInput · PasswordInput · RadioGroup · SegmentedControl · Select · Slider · Switch · TagInput · Textarea |
 | Overlays | Alert Dialog · ContextMenu · Dialog · Dropdown Menu · HoverCard · Modal · Popover · Sheet · Tooltip |
 | Navigation | Breadcrumb · CommandMenu · Link · NavigationMenu · Pagination · Stepper · Tabs |
 | Feedback | Alert · Banner · Progress · Skeleton · Spinner · Toast |
-| Data display | Accordion · Avatar · Badge · Carousel · Chart · Collapsible · DescriptionList · Kbd · StatCard · Table · Timeline · TreeView |
+| Data display | Accordion · Avatar · Badge · Carousel · Chart · ChartCard · Collapsible · DescriptionList · FunnelChart · Gauge · Heatmap · Kbd · PieChart · RadarChart · SankeyChart · ScatterChart · Sparkline · StatCard · Table · Timeline · Treemap · TreeView |
 | Typography | Blockquote · Code · Eyebrow · Heading · Prose · Text |
 | Layout | AspectRatio · Card · Container · Grid · Resizable · ScrollArea · Section · Separator · Stack · VisuallyHidden |
-| Patterns | AppShell · Async · DataTable · Form · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Vite plugin |
+| Patterns | AppShell · Async · DataTable · Form · Motion · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Vite plugin |
 | Blocks (`@glyphui/blocks`) | AuthCard · Cta · Faq · FeatureGrid · FeatureSplit · Hero · LogoCloud · Newsletter · Pricing · SectionHeader · SiteFooter · Stats · Testimonials |
 
 Every component has a page with live examples, props and theming slots in the [docs](https://khalmohak.github.io/glyph/components). Regenerate this table with `pnpm -C apps/docs readme:components`.

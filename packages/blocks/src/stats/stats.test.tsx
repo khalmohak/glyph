@@ -13,6 +13,26 @@ describe('Stats', () => {
       />,
     )
     expect(screen.getByText('Customers').tagName).toBe('DT')
+    expect(screen.getByText('4,200').closest('dd')).not.toBeNull()
+  })
+
+  it('keeps prefixes, suffixes, grouping and decimals of numeric values', () => {
+    render(
+      <Stats
+        items={[
+          { label: 'Revenue', value: '$48,210' },
+          { label: 'Rating', value: '4.9/5' },
+          { label: 'Region', value: 'EU and US' },
+        ]}
+      />,
+    )
+    expect(screen.getByText('48,210').closest('dd')).toHaveTextContent('$48,210')
+    expect(screen.getByText('4.9').closest('dd')).toHaveTextContent('4.9/5')
+    expect(screen.getByText('EU and US').tagName).toBe('DD')
+  })
+
+  it('renders plain values when animation is off', () => {
+    render(<Stats animate={false} items={[{ label: 'Customers', value: '4,200' }]} />)
     expect(screen.getByText('4,200').tagName).toBe('DD')
   })
 })

@@ -1,9 +1,10 @@
-import { Container, Heading, Section, Text, tv } from '@glyphui/ui'
+import { Container, Heading, Reveal, Section, Stagger, Text, tv } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import type { BlockMotionProps } from '../internal/motion'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 import type { HeadingLevel } from '../section-header'
 
-export const heroStyles = tv({
+export const heroStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'relative isolate overflow-hidden',
     glow: 'pointer-events-none absolute inset-x-0 -top-40 -z-10 h-[32rem] bg-[radial-gradient(50%_50%_at_50%_40%,color-mix(in_oklab,var(--color-primary)_18%,transparent),transparent)]',
@@ -26,7 +27,7 @@ export const heroStyles = tv({
   defaultVariants: { variant: 'centered' },
 })
 
-export interface HeroProps extends Omit<ComponentProps<'section'>, 'title'> {
+export interface HeroProps extends Omit<ComponentProps<'section'>, 'title'>, BlockMotionProps {
   /** `centered` (default), `left`, or `split` with media beside the text on large screens. */
   variant?: 'centered' | 'left' | 'split'
   /** Small label above the title, e.g. a Badge announcing a release. */
@@ -56,6 +57,7 @@ export function Hero({
   footnote,
   glow = true,
   headingLevel = 1,
+  animate = true,
   className,
   ...props
 }: HeroProps) {
@@ -72,7 +74,7 @@ export function Hero({
     >
       {glow && <div aria-hidden="true" className={s.glow()} />}
       <Container className={s.layout()}>
-        <div className={s.text()}>
+        <Stagger className={s.text()} enabled={animate} step={70}>
           {eyebrow && <div>{eyebrow}</div>}
           <Heading level={headingLevel} size="display" id={titleId}>
             {title}
@@ -84,8 +86,12 @@ export function Hero({
           )}
           {actions && <div className={s.actions()}>{actions}</div>}
           {footnote && <p className={s.footnote()}>{footnote}</p>}
-        </div>
-        {media && <div className={s.media()}>{media}</div>}
+        </Stagger>
+        {media && (
+          <Reveal className={s.media()} enabled={animate} delay={180} scale>
+            {media}
+          </Reveal>
+        )}
       </Container>
     </Section>
   )

@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { tv, type VariantProps } from '../../utils/tv'
 import { fieldControl } from '../input/input.styles'
 
-export const tagInputStyles = tv({
+export const tagInputStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'grid gap-1.5',
     frame: [

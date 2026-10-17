@@ -5,9 +5,12 @@ import type { StylesEntry } from '../../utils/registry'
 import { popover } from '../../utils/styles'
 import { tv } from '../../utils/tv'
 
-export const hoverCardStyles = tv({
+export const hoverCardStyles = /* @__PURE__ */ tv({
   slots: {
-    content: [popover, 'w-72 max-w-[calc(100vw-2rem)] p-4 text-small outline-none'],
+    content: [
+      popover,
+      'origin-(--radix-hover-card-content-transform-origin) w-72 max-w-[calc(100vw-2rem)] p-4 text-small outline-none',
+    ],
   },
 })
 

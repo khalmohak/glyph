@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { tv } from '../../utils/tv'
 
-export const separatorStyles = tv({
+export const separatorStyles = /* @__PURE__ */ tv({
   slots: { base: 'shrink-0 bg-border' },
   variants: {
     orientation: {

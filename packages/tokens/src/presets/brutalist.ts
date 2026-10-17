@@ -2,7 +2,7 @@ import { defineTheme } from '../define-theme'
 import { glyph } from './glyph'
 
 /** Zero radius, heavy borders, hard offset shadows, loud color, heavy grotesk type. */
-export const brutalist = defineTheme({
+export const brutalist = /* @__PURE__ */ defineTheme({
   name: 'brutalist',
   extends: glyph,
   colors: {
@@ -95,6 +95,9 @@ export const brutalist = defineTheme({
   motion: {
     duration: { fast: '60ms', base: '90ms', slow: '140ms' },
     easing: { standard: 'linear', emphasized: 'linear' },
+    level: 'subtle',
+    // Stiff and fully damped: things snap into place, no bounce.
+    spring: { stiffness: 900, damping: 60 },
   },
   control: { sm: '34px', md: '42px', lg: '50px' },
 })

@@ -1,6 +1,7 @@
 import { type ClipboardEvent, type KeyboardEvent, useId, useRef, useState } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { useControllableState } from '../../hooks/use-controllable-state'
+import { PresenceItem, PresenceList } from '../../motion/presence-list'
 import { useFieldControl } from '../field/field-context'
 import { type TagInputVariants, tagInputStyles } from './tag-input.styles'
 
@@ -147,24 +148,32 @@ export function TagInput(inProps: TagInputProps) {
         className={s.frame({ class: slots.frame })}
         onClick={() => inputRef.current?.focus()}
       >
-        {tags.map((tag, index) => (
-          <span key={`${tag}-${index}`} data-slot="tag" className={s.tag({ class: slots.tag })}>
-            <span className={s.tagLabel({ class: slots.tagLabel })}>{tag}</span>
-            {!disabled && (
-              <button
-                type="button"
-                aria-label={`Remove ${tag}`}
-                className={s.remove({ class: slots.remove })}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  remove(index)
-                }}
-              >
-                <XIcon />
-              </button>
-            )}
-          </span>
-        ))}
+        <PresenceList>
+          {tags.map((tag, index) => (
+            <PresenceItem
+              as="span"
+              // Keyed by value and occurrence, so removing one tag doesn't re-key the rest.
+              key={`${tag}-${tags.slice(0, index).filter((t) => t === tag).length}`}
+              data-slot="tag"
+              className={s.tag({ class: slots.tag })}
+            >
+              <span className={s.tagLabel({ class: slots.tagLabel })}>{tag}</span>
+              {!disabled && (
+                <button
+                  type="button"
+                  aria-label={`Remove ${tag}`}
+                  className={s.remove({ class: slots.remove })}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    remove(index)
+                  }}
+                >
+                  <XIcon />
+                </button>
+              )}
+            </PresenceItem>
+          ))}
+        </PresenceList>
         <input
           ref={inputRef}
           id={id}

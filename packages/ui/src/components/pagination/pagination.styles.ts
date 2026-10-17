@@ -2,20 +2,22 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing, transition } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const paginationStyles = tv({
+export const paginationStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'flex',
-    list: 'flex flex-wrap items-center gap-1',
+    list: 'isolate flex flex-wrap items-center gap-1',
     item: [
-      'inline-flex shrink-0 cursor-pointer select-none items-center justify-center rounded-md font-medium tabular-nums text-muted-foreground',
+      'relative inline-flex shrink-0 cursor-pointer select-none items-center justify-center rounded-md font-medium tabular-nums text-muted-foreground',
       transition,
       focusRing,
       'hover:bg-muted hover:text-foreground',
-      'aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground aria-[current=page]:shadow-xs',
+      'aria-[current=page]:text-primary-foreground aria-[current=page]:hover:bg-transparent',
       'disabled:pointer-events-none disabled:opacity-40 aria-disabled:pointer-events-none aria-disabled:opacity-40',
       '[&>svg]:size-4',
     ],
     ellipsis: 'inline-flex items-center justify-center text-faint-foreground',
+    /** The current page's highlight. Slides to the new page when it changes. */
+    indicator: 'pointer-events-none absolute inset-0 -z-10 rounded-[inherit] bg-primary shadow-xs',
   },
   variants: {
     size: {

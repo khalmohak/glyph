@@ -1,6 +1,6 @@
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const spinnerStyles = tv({
+export const spinnerStyles = /* @__PURE__ */ tv({
   slots: {
     base: 'inline-block shrink-0 animate-spin',
     track: 'opacity-20',

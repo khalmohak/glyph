@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing } from '../../utils/styles'
 import { tv } from '../../utils/tv'
 
-export const passwordInputStyles = tv({
+export const passwordInputStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'grid gap-1.5',
     toggle: [

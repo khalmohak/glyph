@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { tv } from '../../utils/tv'
 
-export const labelStyles = tv({
+export const labelStyles = /* @__PURE__ */ tv({
   slots: {
     base: 'inline-flex select-none items-center gap-1 text-small font-medium text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-60',
   },

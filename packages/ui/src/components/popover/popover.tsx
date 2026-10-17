@@ -5,7 +5,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { popover } from '../../utils/styles'
 import { tv } from '../../utils/tv'
 
-export const popoverStyles = tv({
+export const popoverStyles = /* @__PURE__ */ tv({
   slots: {
     content: [
       popover,

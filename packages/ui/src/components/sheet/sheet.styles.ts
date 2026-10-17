@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing, transition } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const sheetStyles = tv({
+export const sheetStyles = /* @__PURE__ */ tv({
   slots: {
     overlay:
       'fixed inset-0 z-50 bg-overlay data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out',

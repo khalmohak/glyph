@@ -1,7 +1,7 @@
 import type { StylesEntry } from '../../utils/registry'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const resizableStyles = tv({
+export const resizableStyles = /* @__PURE__ */ tv({
   slots: {
     group: 'flex h-full w-full data-[panel-group-direction=vertical]:flex-col',
     panel: 'min-w-0',

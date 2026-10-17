@@ -8,7 +8,7 @@ import { tv, type VariantProps } from '../../utils/tv'
  * Element styles for long-form content. Every value comes from theme tokens, so articles
  * pick up the theme's display font, type scale, colors and radius.
  */
-export const proseStyles = tv({
+export const proseStyles = /* @__PURE__ */ tv({
   slots: {
     base: [
       'text-foreground [&>:first-child]:mt-0 [&>:last-child]:mb-0',

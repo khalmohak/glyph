@@ -1,12 +1,14 @@
 import type { StylesEntry } from '../../utils/registry'
-import { themedBorder } from '../../utils/styles'
+import { overlayMotion, themedBorder } from '../../utils/styles'
 import { tv } from '../../utils/tv'
 
-export const commandMenuStyles = tv({
+export const commandMenuStyles = /* @__PURE__ */ tv({
   slots: {
-    overlay: 'fixed inset-0 z-50 animate-fade-in bg-overlay',
+    overlay: ['fixed inset-0 z-50 bg-overlay', overlayMotion],
     content: [
-      'fixed top-[12vh] left-1/2 z-50 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-xl border-border bg-raised text-foreground shadow-lg outline-none animate-pop-in',
+      'fixed top-[12vh] left-1/2 z-50 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-xl border-border bg-raised text-foreground shadow-lg outline-none',
+      // Anchored near the top, so it grows down from its top edge.
+      'origin-top animate-pop-in data-[state=closed]:animate-pop-out',
       themedBorder,
     ],
     root: 'flex w-full flex-col overflow-hidden bg-raised text-foreground',

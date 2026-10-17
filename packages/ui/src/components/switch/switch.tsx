@@ -5,7 +5,7 @@ import { focusRing, themedBorder, transition } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 import { useFieldControl } from '../field/field-context'
 
-export const switchStyles = tv({
+export const switchStyles = /* @__PURE__ */ tv({
   slots: {
     root: [
       'peer inline-flex shrink-0 cursor-pointer items-center rounded-pill border-transparent bg-input p-px',
@@ -15,7 +15,7 @@ export const switchStyles = tv({
       'data-[state=checked]:bg-primary disabled:cursor-not-allowed disabled:opacity-50',
     ],
     thumb:
-      'pointer-events-none block rounded-pill bg-white shadow-sm transition-transform duration-(--glyph-duration-base) ease-emphasized data-[state=unchecked]:translate-x-0',
+      'pointer-events-none block rounded-pill bg-white shadow-sm transition-[translate] duration-(--glyph-duration-spring) ease-spring data-[state=unchecked]:translate-x-0',
   },
   variants: {
     size: {

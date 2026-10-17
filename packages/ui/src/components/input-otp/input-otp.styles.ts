@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { transition } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const inputOtpStyles = tv({
+export const inputOtpStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'flex items-center gap-2 has-disabled:opacity-50',
     input: 'disabled:cursor-not-allowed',

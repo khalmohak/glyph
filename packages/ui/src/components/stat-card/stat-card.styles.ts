@@ -1,7 +1,7 @@
 import type { StylesEntry } from '../../utils/registry'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const statCardStyles = tv({
+export const statCardStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'gap-2',
     header: 'flex items-center justify-between gap-2',

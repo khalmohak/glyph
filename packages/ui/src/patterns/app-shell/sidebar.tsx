@@ -1,14 +1,25 @@
-import type { ComponentProps, MouseEvent, ReactNode } from 'react'
+import {
+  type ComponentProps,
+  createContext,
+  type MouseEvent,
+  type ReactNode,
+  useContext,
+  useId,
+} from 'react'
 import { IconButton, type IconButtonProps } from '../../components/button'
 import { Tooltip } from '../../components/tooltip'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { useMediaQuery } from '../../hooks/use-media-query'
 import { PanelLeftIcon } from '../../internal/icons'
+import { ActiveIndicator } from '../../motion/active-indicator'
 import { useIsActive, useLinkComponent } from '../../provider/glyph-context'
 import { sidebarStyles } from './app-shell.styles'
 import { useAppShell } from './app-shell-context'
 
 const s = sidebarStyles()
+
+/** One id per sidebar, so its active highlight slides between that sidebar's items only. */
+const SidebarIndicatorContext = createContext<string | null>(null)
 
 function useSlots() {
   return useComponentConfig('Sidebar', {})[1]
@@ -18,13 +29,16 @@ function useSlots() {
 export function Sidebar({ className, ...props }: ComponentProps<'aside'>) {
   const { collapsed } = useAppShell()
   const slots = useSlots()
+  const indicatorId = `${useId()}-sidebar-indicator`
   return (
-    <aside
-      data-slot="sidebar"
-      data-collapsed={collapsed}
-      className={s.root({ class: [slots.root, className] })}
-      {...props}
-    />
+    <SidebarIndicatorContext.Provider value={indicatorId}>
+      <aside
+        data-slot="sidebar"
+        data-collapsed={collapsed}
+        className={s.root({ class: [slots.root, className] })}
+        {...props}
+      />
+    </SidebarIndicatorContext.Provider>
   )
 }
 
@@ -98,6 +112,7 @@ export function SidebarItem({
   const { collapsed, inDrawer, setMobileOpen } = useAppShell()
   const Link = useLinkComponent()
   const slots = useSlots()
+  const indicatorId = useContext(SidebarIndicatorContext)
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {
     onClick?.(event)
@@ -106,6 +121,12 @@ export function SidebarItem({
 
   const content = (
     <>
+      {active && indicatorId && (
+        <ActiveIndicator
+          layoutId={indicatorId}
+          className={s.itemIndicator({ class: slots.itemIndicator })}
+        />
+      )}
       {icon && (
         <span className={s.itemIcon({ class: slots.itemIcon })} aria-hidden="true">
           {icon}

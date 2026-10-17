@@ -5,7 +5,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing } from '../../utils/styles'
 import { tv } from '../../utils/tv'
 
-export const scrollAreaStyles = tv({
+export const scrollAreaStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'relative overflow-hidden',
     viewport: ['size-full rounded-[inherit]', focusRing],

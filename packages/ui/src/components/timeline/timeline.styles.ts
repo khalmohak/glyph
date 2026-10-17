@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { themedBorder } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const timelineStyles = tv({
+export const timelineStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'grid',
     item: 'group/item relative grid grid-cols-[auto_1fr] gap-x-3',

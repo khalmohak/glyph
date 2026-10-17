@@ -1,4 +1,5 @@
 import {
+  AnimatedNumber,
   Badge,
   Button,
   Card,
@@ -6,10 +7,12 @@ import {
   cn,
   Section,
   SegmentedControl,
+  Stagger,
   Text,
   useLinkComponent,
 } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId, useState } from 'react'
+import type { BlockMotionProps } from '../internal/motion'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 import { type HeadingLevel, SectionHeader } from '../section-header'
 
@@ -29,7 +32,7 @@ export interface PricingTier {
   badge?: ReactNode
 }
 
-export interface PricingProps extends Omit<ComponentProps<'section'>, 'title'> {
+export interface PricingProps extends Omit<ComponentProps<'section'>, 'title'>, BlockMotionProps {
   eyebrow?: ReactNode
   title?: ReactNode
   description?: ReactNode
@@ -48,6 +51,13 @@ const defaultBillingLabels: Record<Billing, ReactNode> = { monthly: 'Monthly', y
 const defaultPeriodLabels: Record<Billing, ReactNode> = {
   monthly: 'per month',
   yearly: 'per month, billed yearly',
+}
+
+/** Rounds an in-between value to the decimals of the price it is heading to. */
+function roundLike(value: number, target: number): number {
+  const decimals = String(target).split('.')[1]?.length ?? 0
+  const factor = 10 ** decimals
+  return Math.round(value * factor) / factor
 }
 
 function CheckIcon() {
@@ -78,6 +88,7 @@ export function Pricing({
   periodLabels = defaultPeriodLabels,
   formatPrice = (amount) => `$${amount}`,
   headingLevel = 2,
+  animate = true,
   className,
   ...props
 }: PricingProps) {
@@ -105,6 +116,7 @@ export function Pricing({
             align="center"
             headingLevel={headingLevel}
             titleId={titleId}
+            animate={animate}
           />
         )}
         {hasPeriods && (
@@ -119,7 +131,9 @@ export function Pricing({
             ]}
           />
         )}
-        <ul
+        <Stagger
+          as="ul"
+          enabled={animate}
           className={cn(
             'grid items-stretch gap-4',
             tiers.length === 2 && 'mx-auto w-full max-w-4xl md:grid-cols-2',
@@ -154,7 +168,16 @@ export function Pricing({
                   <p className="flex flex-wrap items-baseline gap-x-1.5">
                     {/* Shrinks with the card so wide display fonts and text prices never overflow. */}
                     <span className="min-w-0 font-display text-h1 tabular-nums [font-size:min(var(--text-h1),18cqi)] [overflow-wrap:anywhere]">
-                      {numeric ? formatPrice(amount) : amount}
+                      {numeric ? (
+                        // Springs between monthly and yearly prices; no count-up on load.
+                        <AnimatedNumber
+                          value={amount}
+                          from={amount}
+                          formatValue={(n) => formatPrice(roundLike(n, amount))}
+                        />
+                      ) : (
+                        amount
+                      )}
                     </span>
                     {/* A free tier has no billing period. */}
                     {numeric && amount > 0 && (
@@ -190,7 +213,7 @@ export function Pricing({
               </li>
             )
           })}
-        </ul>
+        </Stagger>
       </Container>
     </Section>
   )

@@ -170,7 +170,7 @@ export function FormSubmit({ form, onClick, ...props }: FormSubmitProps) {
   return <Button type="button" loading={isSubmitting} onClick={submitOutside} {...props} />
 }
 
-export const formErrorStyles = tv({
+export const formErrorStyles = /* @__PURE__ */ tv({
   slots: {
     base: 'flex items-start gap-2 rounded-md border border-danger/30 bg-danger/8 px-3 py-2.5 text-small text-danger-text',
     icon: 'mt-0.5 size-4 shrink-0',

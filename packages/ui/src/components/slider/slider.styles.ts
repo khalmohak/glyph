@@ -1,7 +1,7 @@
 import type { StylesEntry } from '../../utils/registry'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const sliderStyles = tv({
+export const sliderStyles = /* @__PURE__ */ tv({
   slots: {
     wrapper: 'grid w-full gap-1.5',
     root: 'relative flex h-5 w-full touch-none select-none items-center data-disabled:cursor-not-allowed data-disabled:opacity-50',

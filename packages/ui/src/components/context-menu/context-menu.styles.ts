@@ -3,10 +3,12 @@ import { tv, type VariantProps } from '../../utils/tv'
 import { dropdownMenuStyles } from '../dropdown-menu/dropdown-menu.styles'
 
 /** Same look as DropdownMenu; only the available-height variable differs. */
-export const contextMenuStyles = tv({
+export const contextMenuStyles = /* @__PURE__ */ tv({
   extend: dropdownMenuStyles,
   slots: {
-    content: 'max-h-(--radix-context-menu-content-available-height)',
+    content:
+      'origin-(--radix-context-menu-content-transform-origin) max-h-(--radix-context-menu-content-available-height)',
+    subContent: 'origin-(--radix-context-menu-content-transform-origin)',
   },
 })
 

@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { tv } from '../../utils/tv'
 
-export const tableStyles = tv({
+export const tableStyles = /* @__PURE__ */ tv({
   slots: {
     wrapper: 'relative w-full overflow-x-auto',
     table: 'w-full caption-bottom border-collapse text-small tabular-nums',

@@ -6,6 +6,7 @@
  * with peer dependencies external and regular dependencies included, since users ship those. The
  * gzipped size is compared against `scripts/size-budget.json`; an entry more than 5% over
  * budget fails. `Button only` imports a single component to catch tree-shaking regressions.
+ * Budgets cover code that loads up front; lazily imported chunks are listed but not budgeted.
  *
  * Usage: pnpm size            check against the budget (run `pnpm build` first)
  *        pnpm size --update   write current sizes as the new budget
@@ -50,6 +51,16 @@ const entries = [
     pkg: 'ui',
     code: `export { Button } from '${distFile('ui', '.')}'`,
   },
+  {
+    name: '@glyphui/ui (Badge only)',
+    pkg: 'ui',
+    code: `export { Badge } from '${distFile('ui', '.')}'`,
+  },
+  {
+    name: '@glyphui/ui (provider + Button)',
+    pkg: 'ui',
+    code: `export { GlyphProvider, Button } from '${distFile('ui', '.')}'`,
+  },
   { name: '@glyphui/ui/form', pkg: 'ui', code: `export * from '${distFile('ui', './form')}'` },
   {
     name: '@glyphui/ui/data-table',
@@ -76,11 +87,17 @@ async function measure({ pkg, code }, i) {
   })
   const { output } = await bundle.generate({ format: 'esm', minify: true })
   await bundle.close()
-  const js = output
-    .filter((o) => o.type === 'chunk')
-    .map((o) => o.code)
-    .join('\n')
-  return { min: Buffer.byteLength(js), gzip: gzipSync(js, { level: 9 }).length }
+  // Code behind dynamic import() loads later, only when used, so it is reported separately
+  // and the budget applies to what loads up front.
+  const chunks = output.filter((o) => o.type === 'chunk')
+  const concat = (list) => list.map((o) => o.code).join('\n')
+  const initial = concat(chunks.filter((o) => !o.isDynamicEntry))
+  const lazy = concat(chunks.filter((o) => o.isDynamicEntry))
+  return {
+    min: Buffer.byteLength(initial),
+    gzip: gzipSync(initial, { level: 9 }).length,
+    lazy: lazy ? gzipSync(lazy, { level: 9 }).length : 0,
+  }
 }
 
 const kb = (n) => `${(n / 1024).toFixed(1)} kB`
@@ -89,7 +106,7 @@ const next = {}
 let failed = false
 
 console.log(
-  `${'Entry'.padEnd(30)}${'min'.padStart(11)}${'gzip'.padStart(11)}${'budget'.padStart(11)}`,
+  `${'Entry'.padEnd(33)}${'min'.padStart(11)}${'gzip'.padStart(11)}${'budget'.padStart(11)}${'lazy gzip'.padStart(12)}`,
 )
 for (const [i, entry] of entries.entries()) {
   const size = await measure(entry, i)
@@ -99,7 +116,7 @@ for (const [i, entry] of entries.entries()) {
   if (over || (!update && limit === undefined)) failed = true
   const note = limit === undefined ? (update ? '' : '  no budget') : over ? '  OVER BUDGET' : ''
   console.log(
-    `${entry.name.padEnd(30)}${kb(size.min).padStart(11)}${kb(size.gzip).padStart(11)}${(limit ? kb(limit) : '-').padStart(11)}${note}`,
+    `${entry.name.padEnd(33)}${kb(size.min).padStart(11)}${kb(size.gzip).padStart(11)}${(limit ? kb(limit) : '-').padStart(11)}${(size.lazy ? kb(size.lazy) : '-').padStart(12)}${note}`,
   )
 }
 

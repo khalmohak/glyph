@@ -4,7 +4,7 @@ import { tv } from '../../utils/tv'
 import { useFieldControl } from '../field/field-context'
 import { fieldControl } from '../input/input.styles'
 
-export const textareaStyles = tv({
+export const textareaStyles = /* @__PURE__ */ tv({
   slots: {
     base: [
       ...fieldControl,
