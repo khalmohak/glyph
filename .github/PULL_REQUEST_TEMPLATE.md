@@ -4,7 +4,7 @@
 
 ## How to check it
 
-<!-- Steps, a screenshot of the showcase in more than one theme, or the test that covers it. -->
+<!-- Steps, a screenshot of the docs in more than one theme, or the test that covers it. -->
 
 ## Checklist
 

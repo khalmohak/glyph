@@ -1,4 +1,4 @@
-name: Docs, showcase and demos
+name: Docs and demos
 
 on:
   push:
@@ -25,20 +25,20 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo run build --filter=docs --filter=showcase --filter=demo-saas --filter=auth-example
+      - run: pnpm turbo run build --filter=docs --filter=demo-saas --filter=auth-example
         env:
           DOCS_BASE: /glyph/
           DEMO_BASE: /glyph/demo/
           AUTH_EXAMPLE_BASE: /glyph/auth/
-      # Docs at /glyph/, showcase at /glyph/showcase/, demo app at /glyph/demo/, auth example
-      # at /glyph/auth/.
+      # Docs at /glyph/, demo app at /glyph/demo/, auth example at /glyph/auth/. The old
+      # showcase URL redirects to the docs home, which now has its content.
       # 404.html lets docs deep links load; the demo gets an index.html per route instead.
       - run: |
           mkdir -p site
           cp -R apps/docs/dist/. site/
           cp site/index.html site/404.html
           mkdir -p site/showcase
-          cp -R apps/showcase/dist/. site/showcase/
+          printf '<!doctype html><meta charset="utf-8"><title>Glyph</title><meta http-equiv="refresh" content="0; url=/glyph/"><link rel="canonical" href="/glyph/"><a href="/glyph/">Glyph docs</a>\n' > site/showcase/index.html
           mkdir -p site/demo
           cp -R apps/demo-saas/dist/. site/demo/
           for route in sign-in app app/invoices app/customers app/settings; do
@@ -47,7 +47,7 @@ jobs:
           done
           mkdir -p site/auth
           cp -R apps/auth-example/dist/. site/auth/
-          for route in sign-in sign-up forgot-password reset-password app app/admin app/billing; do
+          for route in sign-in sign-up forgot-password reset-password magic-link app app/admin app/billing; do
             mkdir -p "site/auth/$route"
             cp site/auth/index.html "site/auth/$route/index.html"
           done

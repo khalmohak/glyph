@@ -10,7 +10,7 @@ React components on Tailwind CSS v4 that take their whole look from one typed th
 [![npm](https://img.shields.io/npm/v/@glyphui/ui?label=%40glyphui%2Fui)](https://www.npmjs.com/package/@glyphui/ui)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-[Docs](https://khalmohak.github.io/glyph/) · [Components](https://khalmohak.github.io/glyph/components) · [Showcase](https://khalmohak.github.io/glyph/showcase/) · [Contributing](./CONTRIBUTING.md) · [Changelog](./packages/ui/CHANGELOG.md)
+[Docs](https://khalmohak.github.io/glyph/) · [Components](https://khalmohak.github.io/glyph/components) · [Theme studio](https://khalmohak.github.io/glyph/themes) · [Contributing](./CONTRIBUTING.md) · [Changelog](./packages/ui/CHANGELOG.md)
 
 </div>
 
@@ -154,20 +154,20 @@ Every component has a page with live examples, props and theming slots in the [d
 
 ```sh
 pnpm install
-pnpm dev          # showcase at :5173 and docs at :5174, running on library source (instant HMR)
+pnpm dev          # docs at :5174, running on library source (instant HMR)
 pnpm check        # lint, typecheck (incl. type tests), tests, build
 pnpm changeset    # describe a change to a published package
 ```
-
-Showcase deep links: `?theme=brutalist&mode=light`.
 
 ```
 packages/tokens   theme engine (no React)
 packages/blocks   page sections built from @glyphui/ui
 packages/viewers  file and data viewers (PDF, CSV, spreadsheets, JSON, code, Markdown, diffs, media)
 packages/ui       components/, patterns/, provider/, hooks/, utils/, register.ts, themes.ts
-apps/docs         component catalog, examples, prop tables, roadmap (GitHub Pages /glyph/)
-apps/showcase     one app, four themes (GitHub Pages /glyph/showcase/)
+packages/auth     auth client, REST/Firebase/Clerk adapters, React Router guards, auth screens
+apps/docs         docs and showcase: gallery, playgrounds, theme studio, guides (GitHub Pages /glyph/)
+apps/demo-saas    Ledgerline demo app with Playwright journeys (/glyph/demo/)
+apps/auth-example full auth flow against a fake REST server (/glyph/auth/)
 tooling/tsconfig  shared TypeScript configs
 ```
 

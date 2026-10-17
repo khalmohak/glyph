@@ -136,7 +136,7 @@ export function HomePage() {
           title="Running in three steps"
           description="Works with Vite, Next.js and any React 19 app on Tailwind CSS 4."
         />
-        <Stagger className="grid gap-4 lg:grid-cols-3">
+        <Stagger className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-3">
           <Step n={1} title="Install">
             <CodeBlock language="sh" code="npm install @glyphui/ui" />
           </Step>
@@ -164,7 +164,7 @@ export function HomePage() {
           title="See it in real apps"
           description="Two complete apps built only with Glyph, running against their own APIs."
         />
-        <Stagger className="grid gap-4 md:grid-cols-2">
+        <Stagger className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
           <DemoCard
             title="Ledgerline"
             description="A billing SaaS: dashboard charts, a server-side invoices table with URL state and bulk actions, forms in modals, and a ⌘K menu."
@@ -200,7 +200,8 @@ export function HomePage() {
 function Section({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <section className={['py-10 sm:py-14', className].filter(Boolean).join(' ')}>
-      <Container className="grid gap-8">{children}</Container>
+      {/* minmax(0, 1fr): wide content (code in a wide mono font) scrolls instead of widening the page. */}
+      <Container className="grid grid-cols-[minmax(0,1fr)] gap-8">{children}</Container>
     </section>
   )
 }
@@ -241,7 +242,7 @@ function Hero() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 -top-48 h-[40rem] bg-[radial-gradient(45%_45%_at_50%_40%,color-mix(in_oklab,var(--color-primary)_16%,transparent),transparent)]"
       />
-      <Container className="relative grid gap-12">
+      <Container className="relative grid grid-cols-[minmax(0,1fr)] gap-12">
         <Reveal className="mx-auto grid max-w-3xl justify-items-center gap-6 text-center">
           <Badge tone="primary" dot asChild>
             <Link to="/components?sort=newest">

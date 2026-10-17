@@ -62,7 +62,7 @@ Notes:
 ## Workflow
 
 1. Fork and clone, then `pnpm install` (Node 24, pnpm via Corepack). A pre-commit hook runs Biome on staged files.
-2. `pnpm dev` and work against the showcase. Check your change in all four themes, light and dark.
+2. `pnpm dev` and work against the docs (http://localhost:5174). Check your change in all four themes, light and dark.
 3. `pnpm check` before pushing.
 4. If a published package changed, run `pnpm changeset` and commit the generated file.
 5. Open a pull request. CI runs lint, typecheck, tests with coverage, build, export checks and the size budget, plus the e2e suite and the consumer smoke test.
