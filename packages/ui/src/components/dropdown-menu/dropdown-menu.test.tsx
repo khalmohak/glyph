@@ -64,3 +64,22 @@ describe('DropdownMenu', () => {
     )
   })
 })
+
+describe('DropdownMenuItem asChild', () => {
+  it('renders as its child with the icon inside', async () => {
+    render(
+      <DropdownMenu defaultOpen>
+        <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem asChild icon={<svg data-testid="icon" />} shortcut="⌘S">
+            <a href="/settings">Settings</a>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>,
+    )
+    const item = await screen.findByRole('menuitem', { name: /Settings/ })
+    expect(item.tagName).toBe('A')
+    expect(item).toHaveAttribute('href', '/settings')
+    expect(item).toContainElement(screen.getByTestId('icon'))
+  })
+})

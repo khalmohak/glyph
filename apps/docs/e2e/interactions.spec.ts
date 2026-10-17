@@ -519,5 +519,39 @@ test.describe('DataTable v2', () => {
       )
       .toContain('INV-11039')
     expect(await bodyRows(preview).count()).toBeLessThan(60)
+
+test.describe('Auth', () => {
+  test('signs in, showing the server error first', async ({ page }) => {
+    const preview = await example(page, 'sign-in-form/basic')
+    await preview.getByRole('textbox', { name: 'Email' }).fill('ada@example.com')
+    const password = preview.getByRole('textbox', { name: 'Password', exact: true })
+    await password.fill('nope')
+    await preview.getByRole('button', { name: 'Sign in', exact: true }).click()
+    await expect(preview.getByText('That email and password don’t match.')).toBeVisible()
+    await password.fill('correct horse')
+    await preview.getByRole('button', { name: 'Sign in', exact: true }).click()
+    await expect(page.getByText('Signed in as Ada Lovelace')).toBeVisible()
+  })
+
+  test('the expired-session dialog signs the user back in', async ({ page }) => {
+    const preview = await example(page, 'session-dialogs/expired')
+    await preview.getByRole('button', { name: 'Sign in as Ada' }).click()
+    await preview.getByRole('button', { name: 'Revoke session' }).click()
+    await preview.getByRole('button', { name: 'Call the API' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Your session expired' })
+    await expect(dialog).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeVisible()
+    await dialog.getByRole('textbox', { name: 'Password', exact: true }).fill('pw')
+    await dialog.getByRole('button', { name: 'Sign in' }).click()
+    await expect(dialog).toBeHidden()
+  })
+
+  test('role gates switch with the user', async ({ page }) => {
+    const preview = await example(page, 'protected-routes/role-gate')
+    await preview.getByRole('radio', { name: 'Admin' }).click()
+    await expect(preview.getByText('Only admins see this card.')).toBeVisible()
+    await preview.getByRole('radio', { name: 'Member' }).click()
+    await expect(preview.getByText('You don’t have access to this page')).toBeVisible()
   })
 })

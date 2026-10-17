@@ -69,6 +69,23 @@ const entries = [
   },
   { name: '@glyphui/ui/chart', pkg: 'ui', code: `export * from '${distFile('ui', './chart')}'` },
   { name: '@glyphui/blocks', pkg: 'blocks', code: `export * from '${distFile('blocks', '.')}'` },
+  { name: '@glyphui/auth', pkg: 'auth', code: `export * from '${distFile('auth', '.')}'` },
+  {
+    name: '@glyphui/auth/rest',
+    pkg: 'auth',
+    code: `export * from '${distFile('auth', './rest')}'`,
+  },
+  {
+    name: '@glyphui/auth/react-router',
+    pkg: 'auth',
+    code: `export * from '${distFile('auth', './react-router')}'`,
+  },
+  { name: '@glyphui/auth/ui', pkg: 'auth', code: `export * from '${distFile('auth', './ui')}'` },
+  {
+    name: '@glyphui/auth/ui (SignInForm only)',
+    pkg: 'auth',
+    code: `export { SignInForm } from '${distFile('auth', './ui')}'`,
+  },
 ]
 
 const scratch = mkdtempSync(join(tmpdir(), 'glyph-size-'))

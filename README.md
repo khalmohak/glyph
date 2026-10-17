@@ -19,6 +19,7 @@ React components on Tailwind CSS v4 that take their whole look from one typed th
 ```sh
 pnpm add @glyphui/ui
 pnpm add @glyphui/blocks                                                   # optional: page sections
+pnpm add @glyphui/auth                                                     # optional: auth and protected routes
 pnpm add react-hook-form @hookform/resolvers zod @tanstack/react-table@8   # optional: forms and data tables
 pnpm add recharts                                                          # optional: charts
 ```
@@ -29,6 +30,7 @@ pnpm add recharts                                                          # opt
 @import "tailwindcss";
 @import "@glyphui/ui/styles.css";
 @import "@glyphui/blocks/styles.css"; /* only with @glyphui/blocks */
+@import "@glyphui/auth/styles.css";   /* only with @glyphui/auth screens */
 ```
 
 ```ts
@@ -91,6 +93,25 @@ const form = useForm({ schema, defaultValues })   // zod, valibot, arktype: any 
 </Form>
 ```
 
+```tsx
+import { AuthProvider, createAuthClient } from '@glyphui/auth'
+import { restAdapter } from '@glyphui/auth/rest'
+import { RequireAuth, useRedirectAfterSignIn } from '@glyphui/auth/react-router'
+import { SignInForm } from '@glyphui/auth/ui'
+
+const auth = createAuthClient(restAdapter({ baseUrl: '/api' }))   // or firebase, clerk
+
+function SignInPage() {
+  const continueToApp = useRedirectAfterSignIn('/app')               // back to ?next=, same-origin only
+  return <SignInForm signUpHref="/sign-up" onSuccess={continueToApp} /> // codes, 2FA, OAuth included
+}
+
+<AuthProvider client={auth}>
+  <Route path="/sign-in" element={<SignInPage />} />
+  <Route path="/app" element={<RequireAuth />}>{/* signed-out users go to /sign-in?next=… */}</Route>
+</AuthProvider>
+```
+
 `<FormSubmit form={form}>` also works outside the form, for example in a `Modal` footer. Confirmations are one line: `if (await confirm({ title: 'Delete project?', tone: 'danger' })) ...` with `useConfirm()`.
 
 | Import | What you get |
@@ -103,11 +124,12 @@ const form = useForm({ schema, defaultValues })   // zod, valibot, arktype: any 
 | `@glyphui/ui/vite` | `glyphColorMode()` Vite plugin that prevents the dark-mode flash |
 | `@glyphui/ui/fonts.css` | Geist and Geist Mono for the default theme |
 | `@glyphui/blocks` | Page sections: Hero, Pricing, FAQ, Testimonials, Newsletter, AuthCard, SiteFooter and more |
+| `@glyphui/auth` | `AuthProvider`, `useAuth`, roles and permissions, session refresh, tab sync and idle timeout; adapters for your REST API, Firebase and Clerk (`/rest`, `/firebase`, `/clerk`, `/memory`); React Router guards and loaders (`/react-router`); sign-in, sign-up, reset, code, user-menu and session screens (`/ui`) |
 | `@glyphui/tokens` | The framework-free theme engine, if you only need the CSS variables |
 
 ## Components
 
-| Category | Components (107) |
+| Category | Components (120) |
 |---|---|
 | Actions | Button · CopyButton · Toggle |
 | Forms | Calendar · Checkbox · Combobox · DatePicker · Field · FileUpload · Input · InputOTP · Label · NumberInput · PasswordInput · RadioGroup · SegmentedControl · Select · Slider · Switch · TagInput · Textarea |
@@ -117,7 +139,8 @@ const form = useForm({ schema, defaultValues })   // zod, valibot, arktype: any 
 | Data display | Accordion · Avatar · Badge · Carousel · Chart · ChartCard · Collapsible · DescriptionList · FunnelChart · Gauge · Heatmap · Kbd · PieChart · RadarChart · SankeyChart · ScatterChart · Sparkline · StatCard · Table · Timeline · Treemap · TreeView |
 | Typography | Blockquote · Code · Eyebrow · Heading · Prose · Text |
 | Layout | AspectRatio · Card · Container · Grid · Resizable · ScrollArea · Section · Separator · Stack · VisuallyHidden |
-| Patterns | AppShell · Async · DataTable · Form · Motion · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Virtual rows · Vite plugin |
+| Patterns | AppShell · Async · DataTable · Form · Motion · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Vite plugin |
+| Auth | Auth provider · AuthLayout · Clerk bridge · Code forms · Firebase adapter · Memory adapter · Password reset · Protected routes · REST adapter · Session dialogs · SignInForm · SignUpForm · SocialButtons · UserMenu |
 | Blocks (`@glyphui/blocks`) | AuthCard · Cta · Faq · FeatureGrid · FeatureSplit · Hero · LogoCloud · Newsletter · Pricing · SectionHeader · SiteFooter · Stats · Testimonials |
 
 Every component has a page with live examples, props and theming slots in the [docs](https://khalmohak.github.io/glyph/components). Regenerate this table with `pnpm -C apps/docs readme:components`.

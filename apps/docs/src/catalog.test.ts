@@ -1,3 +1,10 @@
+import * as auth from '@glyphui/auth'
+import * as authClerk from '@glyphui/auth/clerk'
+import * as authFirebase from '@glyphui/auth/firebase'
+import * as authMemory from '@glyphui/auth/memory'
+import * as authRouter from '@glyphui/auth/react-router'
+import * as authRest from '@glyphui/auth/rest'
+import * as authUi from '@glyphui/auth/ui'
 import * as blocks from '@glyphui/blocks'
 import * as ui from '@glyphui/ui'
 import * as chart from '@glyphui/ui/chart'
@@ -18,13 +25,33 @@ const entries = {
   '@glyphui/ui/react-router': reactRouter,
   '@glyphui/ui/vite': vite,
   '@glyphui/blocks': blocks,
+  '@glyphui/auth': auth,
+  '@glyphui/auth/rest': authRest,
+  '@glyphui/auth/memory': authMemory,
+  '@glyphui/auth/firebase': authFirebase,
+  '@glyphui/auth/clerk': authClerk,
+  '@glyphui/auth/react-router': authRouter,
+  '@glyphui/auth/ui': authUi,
 } as const
 
 const exampleFiles = Object.keys(import.meta.glob('./content/*/examples/*.tsx')).map((path) =>
   path.replace('./content/', '').replace('/examples/', '/').replace('.tsx', ''),
 )
 
+const snippetFiles = Object.keys(import.meta.glob('./content/*/snippets/*.{ts,tsx}')).map((path) =>
+  path
+    .replace('./content/', '')
+    .replace('/snippets/', '/')
+    .replace(/\.tsx?$/, ''),
+)
+
 describe('component catalog', () => {
+  it('has a file for every listed snippet, and lists every snippet file', () => {
+    const listed = docs.flatMap((doc) => (doc.snippets ?? []).map((e) => `${doc.slug}/${e.file}`))
+    expect(listed.filter((key) => !snippetFiles.includes(key))).toEqual([])
+    expect(snippetFiles.filter((key) => !listed.includes(key))).toEqual([])
+  })
+
   it('documents every runtime export of every entry point', () => {
     const documented = new Set(docs.flatMap((doc) => doc.exports ?? []))
     const missing = Object.entries(entries).flatMap(([entry, mod]) =>

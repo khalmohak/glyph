@@ -6,7 +6,10 @@ packages:
 # Supply-chain guard: never install a version published in the last 14 days.
 minimumReleaseAge: 20160
 
-# Dependencies allowed to run install scripts.
+# Dependencies allowed to run install scripts. Firebase's (a dev and optional peer
+# dependency of @glyphui/auth) only print notices or build optional bits we don't use.
 allowBuilds:
+  '@firebase/util': false
   esbuild: true
+  protobufjs: false
   simple-git-hooks: true

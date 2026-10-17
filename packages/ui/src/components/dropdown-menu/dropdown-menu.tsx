@@ -1,4 +1,4 @@
-import { DropdownMenu as MenuPrimitive } from 'radix-ui'
+import { DropdownMenu as MenuPrimitive, Slot } from 'radix-ui'
 import type { ComponentProps, ReactNode, SVGProps } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { dropdownMenuStyles } from './dropdown-menu.styles'
@@ -68,11 +68,16 @@ export interface DropdownMenuItemProps extends ComponentProps<typeof MenuPrimiti
   inset?: boolean
 }
 
+/**
+ * A menu action. With `asChild`, the item renders as its child (e.g. a router link) and the
+ * icon and shortcut go inside it.
+ */
 export function DropdownMenuItem({
   icon,
   shortcut,
   tone,
   inset,
+  asChild,
   className,
   children,
   ...props
@@ -83,6 +88,7 @@ export function DropdownMenuItem({
       data-slot="dropdown-menu-item"
       data-tone={tone ?? 'default'}
       className={s.item({ class: [slots.item, className] })}
+      {...(asChild && { asChild })}
       {...props}
     >
       {icon && (
@@ -90,7 +96,7 @@ export function DropdownMenuItem({
           {icon}
         </span>
       )}
-      {children}
+      {asChild ? <Slot.Slottable>{children}</Slot.Slottable> : children}
       {shortcut && <DropdownMenuShortcut>{shortcut}</DropdownMenuShortcut>}
     </MenuPrimitive.Item>
   )

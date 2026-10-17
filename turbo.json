@@ -5,7 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"],
-      "env": ["DOCS_BASE", "DEMO_BASE"]
+      "env": ["DOCS_BASE", "DEMO_BASE", "AUTH_EXAMPLE_BASE"]
     },
     "dev": {
       "cache": false,

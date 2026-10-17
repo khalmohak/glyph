@@ -15,6 +15,7 @@ export const categories = [
   'Typography',
   'Layout',
   'Patterns',
+  'Auth',
   'Blocks',
 ] as const
 
@@ -36,6 +37,13 @@ export type Entry =
   | '@glyphui/ui/react-router'
   | '@glyphui/ui/vite'
   | '@glyphui/blocks'
+  | '@glyphui/auth'
+  | '@glyphui/auth/rest'
+  | '@glyphui/auth/memory'
+  | '@glyphui/auth/firebase'
+  | '@glyphui/auth/clerk'
+  | '@glyphui/auth/react-router'
+  | '@glyphui/auth/ui'
 
 export interface ExampleMeta {
   /** File name in `examples/` without `.tsx`. */
@@ -63,6 +71,11 @@ export interface DocMeta {
   /** Link to the Radix primitive it builds on. */
   radix?: string
   examples?: readonly ExampleMeta[]
+  /**
+   * Code shown but not run, from `snippets/<file>.ts(x)`: setup for services the docs can't
+   * reach (Firebase, Clerk, your API). Type-checked like examples.
+   */
+  snippets?: readonly ExampleMeta[]
   /** Usage and accessibility notes, one sentence each. */
   notes?: readonly string[]
 }

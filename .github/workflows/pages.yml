@@ -1,4 +1,4 @@
-name: Docs, showcase and demo
+name: Docs, showcase and demos
 
 on:
   push:
@@ -25,11 +25,13 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo run build --filter=docs --filter=showcase --filter=demo-saas
+      - run: pnpm turbo run build --filter=docs --filter=showcase --filter=demo-saas --filter=auth-example
         env:
           DOCS_BASE: /glyph/
           DEMO_BASE: /glyph/demo/
-      # Docs at /glyph/, showcase at /glyph/showcase/, demo app at /glyph/demo/.
+          AUTH_EXAMPLE_BASE: /glyph/auth/
+      # Docs at /glyph/, showcase at /glyph/showcase/, demo app at /glyph/demo/, auth example
+      # at /glyph/auth/.
       # 404.html lets docs deep links load; the demo gets an index.html per route instead.
       - run: |
           mkdir -p site
@@ -42,6 +44,12 @@ jobs:
           for route in sign-in app app/invoices app/customers app/settings; do
             mkdir -p "site/demo/$route"
             cp site/demo/index.html "site/demo/$route/index.html"
+          done
+          mkdir -p site/auth
+          cp -R apps/auth-example/dist/. site/auth/
+          for route in sign-in sign-up forgot-password reset-password app app/admin app/billing; do
+            mkdir -p "site/auth/$route"
+            cp site/auth/index.html "site/auth/$route/index.html"
           done
       - uses: actions/upload-pages-artifact@v3
         with:
