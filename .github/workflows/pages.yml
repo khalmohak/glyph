@@ -51,7 +51,7 @@ jobs:
             mkdir -p "site/auth/$route"
             cp site/auth/index.html "site/auth/$route/index.html"
           done
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
