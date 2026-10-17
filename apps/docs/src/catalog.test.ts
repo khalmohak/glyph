@@ -2,6 +2,7 @@ import * as blocks from '@glyphui/blocks'
 import * as ui from '@glyphui/ui'
 import * as chart from '@glyphui/ui/chart'
 import * as dataTable from '@glyphui/ui/data-table'
+import * as dataTableVirtual from '@glyphui/ui/data-table/virtual'
 import * as form from '@glyphui/ui/form'
 import * as reactRouter from '@glyphui/ui/react-router'
 import * as vite from '@glyphui/ui/vite'
@@ -12,6 +13,7 @@ const entries = {
   '@glyphui/ui': ui,
   '@glyphui/ui/form': form,
   '@glyphui/ui/data-table': dataTable,
+  '@glyphui/ui/data-table/virtual': dataTableVirtual,
   '@glyphui/ui/chart': chart,
   '@glyphui/ui/react-router': reactRouter,
   '@glyphui/ui/vite': vite,

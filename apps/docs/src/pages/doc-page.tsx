@@ -20,8 +20,9 @@ export function DocPage() {
   const importLine = `import { ${(named.length ? named : [doc.name]).slice(0, 4).join(', ')} } from '${doc.entry ?? '@glyphui/ui'}'`
 
   return (
-    <article className="grid gap-10">
-      <header className="grid gap-4">
+    // minmax(0, 1fr) lets wide examples and code scroll instead of widening the page on phones.
+    <article className="grid grid-cols-[minmax(0,1fr)] gap-10">
+      <header className="grid grid-cols-[minmax(0,1fr)] gap-4">
         <Link
           to="/components"
           className="flex w-fit items-center gap-1.5 text-small text-muted-foreground hover:text-foreground"

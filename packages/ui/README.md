@@ -87,7 +87,7 @@ The same tokens work in your own markup: `bg-primary`, `text-muted-foreground`, 
 
 ## Components
 
-| Category | Components (106) |
+| Category | Components (107) |
 |---|---|
 | Actions | Button · CopyButton · Toggle |
 | Forms | Calendar · Checkbox · Combobox · DatePicker · Field · FileUpload · Input · InputOTP · Label · NumberInput · PasswordInput · RadioGroup · SegmentedControl · Select · Slider · Switch · TagInput · Textarea |
@@ -97,7 +97,7 @@ The same tokens work in your own markup: `bg-primary`, `text-muted-foreground`, 
 | Data display | Accordion · Avatar · Badge · Carousel · Chart · ChartCard · Collapsible · DescriptionList · FunnelChart · Gauge · Heatmap · Kbd · PieChart · RadarChart · SankeyChart · ScatterChart · Sparkline · StatCard · Table · Timeline · Treemap · TreeView |
 | Typography | Blockquote · Code · Eyebrow · Heading · Prose · Text |
 | Layout | AspectRatio · Card · Container · Grid · Resizable · ScrollArea · Section · Separator · Stack · VisuallyHidden |
-| Patterns | AppShell · Async · DataTable · Form · Motion · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Vite plugin |
+| Patterns | AppShell · Async · DataTable · Form · Motion · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Virtual rows · Vite plugin |
 | Blocks (`@glyphui/blocks`) | AuthCard · Cta · Faq · FeatureGrid · FeatureSplit · Hero · LogoCloud · Newsletter · Pricing · SectionHeader · SiteFooter · Stats · Testimonials |
 
 Every component has a page with live examples and props in the [docs](https://khalmohak.github.io/glyph/components). Accessible behavior comes from [Radix UI](https://www.radix-ui.com/). Every component accepts `className`, and most accept `asChild`.
@@ -155,19 +155,26 @@ For a plain form, pass `onSubmit` to `Modal` and a `type="submit"` button in the
 ### Data tables: `@glyphui/ui/data-table`
 
 ```tsx
-import { createColumnHelper, DataTable } from '@glyphui/ui/data-table'
+import { createColumnHelper, DataTable, useTableUrlState } from '@glyphui/ui/data-table'
 
 const col = createColumnHelper<Invoice>()
 const columns = [
   col.accessor('number', { header: 'Invoice' }),
-  col.accessor('total', { header: 'Total', meta: { align: 'right' } }),
+  col.accessor('status', { header: 'Status', meta: { filter: { type: 'multi', options } } }),
+  col.accessor('total', { header: 'Total', meta: { align: 'right', filter: { type: 'range' } } }),
 ]
 
-<DataTable data={invoices} columns={columns} loading={isLoading} error={error}
-  onRetry={refetch} search selectable pageSize={20} />
+// Client mode: pass every row; the table searches, filters, sorts and pages them.
+<DataTable data={invoices} columns={columns} search selectable exportCsv
+  bulkActions={(selection) => <Button onClick={() => archive(selection.ids)}>Archive</Button>} />
+
+// Server mode: the table hands you its state; you pass back one page and the total.
+const url = useTableUrlState() // page, sort, search and filters in the URL
+<DataTable mode="server" data={page?.rows} rowCount={page?.total} loading={isFetching}
+  columns={columns} {...url} />
 ```
 
-Includes sorting, search, row selection and pages, plus loading, empty, no-results and error states.
+Filter chips (select, multi with counts, range, date range, text), multi-column sorting, page numbers and page size, select-all across pages with a floating bulk bar, column hiding, resizing, pinning and reordering, density, clickable or linked rows, expandable rows, inline editing with `editableCell()`, CSV export, cards on phones, and loading, empty, no-results and error states. For 10,000+ rows, pass a `virtualRows()` virtualizer from `@glyphui/ui/data-table/virtual` to `virtualize`.
 
 ### Charts: `@glyphui/ui/chart`
 

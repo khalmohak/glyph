@@ -327,3 +327,197 @@ test.describe('Charts', () => {
     await expect(preview).toContainText('Opened Sep 23, 2026')
   })
 })
+
+test.describe('DataTable v2', () => {
+  const bodyRows = (preview: import('@playwright/test').Locator) =>
+    preview.locator('tbody tr:not([aria-hidden])')
+
+  test('server mode pages, sorts and filters through the API, keeping rows while loading', async ({
+    page,
+  }) => {
+    const preview = await example(page, 'data-table/server')
+    await expect(preview).toContainText('1–10 of 312')
+    await preview.getByRole('button', { name: 'Page 2' }).click()
+    // The current rows stay under a progress bar until the next page arrives.
+    await expect(preview.locator('table')).toHaveAttribute('aria-busy', 'true')
+    await expect(bodyRows(preview)).toHaveCount(10)
+    await expect(preview).toContainText('11–20 of 312')
+    await expect(preview.locator('table')).not.toHaveAttribute('aria-busy', 'true')
+
+    await preview.getByRole('button', { name: 'Filter', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Status' }).click()
+    await page.getByRole('option', { name: /Overdue/ }).click()
+    await page.keyboard.press('Escape')
+    await expect(preview.getByRole('button', { name: 'Edit Status filter' })).toHaveText('Overdue')
+    await expect(preview).toContainText(/1–10 of 4\d(?!\d)/)
+    for (const badge of await preview.locator('tbody [data-slot="badge"]').all())
+      await expect(badge).toHaveText('overdue')
+
+    await preview.getByRole('checkbox', { name: 'Select all rows on this page' }).click()
+    await preview.getByRole('button', { name: /^Select all \d+$/ }).click()
+    await expect(preview.getByRole('toolbar', { name: 'Bulk actions' })).toContainText(
+      /All \d+ selected/,
+    )
+  })
+
+  test('keeps filters, page and sort in the URL, and the back button works', async ({ page }) => {
+    const preview = await example(page, 'data-table/url-state')
+    await preview.getByRole('button', { name: 'Page 2' }).click()
+    await expect(page).toHaveURL(/orders\.page=2/)
+    const firstOnPage2 = await bodyRows(preview).first().textContent()
+
+    await preview.getByRole('button', { name: 'Customer', exact: true }).click()
+    await expect(page).toHaveURL(/orders\.sort=customer/)
+    await expect(page).not.toHaveURL(/orders\.page=/)
+
+    await preview.getByRole('button', { name: 'Filter', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Status' }).click()
+    await page.getByRole('option', { name: /Paid/ }).click()
+    await page.keyboard.press('Escape')
+    await expect(page).toHaveURL(/orders\.f\.status=paid/)
+
+    // Reload: the view comes back from the URL.
+    await page.reload({ waitUntil: 'networkidle' })
+    const restored = page.locator('[data-example="data-table/url-state"]')
+    await expect(restored.getByRole('button', { name: 'Edit Status filter' })).toHaveText('Paid')
+
+    await page.goBack()
+    await page.goBack()
+    await expect(page).toHaveURL(/orders\.page=2/)
+    await expect(bodyRows(restored).first()).toHaveText(firstOnPage2 ?? '')
+  })
+
+  test('hides, resizes and pins columns', async ({ page }) => {
+    const preview = await example(page, 'data-table/columns')
+    const header = preview.getByRole('columnheader', { name: /Billing email/ })
+    await header.hover()
+    await preview.getByRole('button', { name: 'Billing email column options' }).click()
+    await page.getByRole('menuitem', { name: 'Hide column' }).click()
+    await expect(header).toHaveCount(0)
+
+    const plan = preview.getByRole('columnheader', { name: /Plan/ })
+    const before = (await plan.boundingBox())!.width
+    const handle = preview.getByRole('separator', { name: 'Resize Plan column' })
+    const box = (await handle.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + 80, box.y + box.height / 2, { steps: 5 })
+    await page.mouse.up()
+    await expect.poll(async () => (await plan.boundingBox())!.width).toBeGreaterThan(before + 60)
+
+    // The pinned Invoice column stays put while the table scrolls sideways.
+    const pinned = preview.getByRole('columnheader', { name: /Invoice/ })
+    const x = (await pinned.boundingBox())!.x
+    await preview.locator('[data-slot="data-table-scroller"]').evaluate((el) => {
+      el.scrollLeft = 300
+    })
+    await expect(pinned).toHaveAttribute('data-scrolled', 'true')
+    expect((await pinned.boundingBox())!.x).toBeCloseTo(x, 0)
+  })
+
+  test('bulk-deletes selected rows after confirming', async ({ page }) => {
+    const preview = await example(page, 'data-table/bulk-actions')
+    const boxes = preview.getByRole('checkbox', { name: 'Select row' })
+    await boxes.nth(0).click()
+    await boxes.nth(1).click()
+    const bar = preview.getByRole('toolbar', { name: 'Bulk actions' })
+    await expect(bar).toContainText('2 selected')
+    await bar.getByRole('button', { name: 'Delete' }).click()
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
+    await expect(page.getByText('2 invoices deleted')).toBeVisible()
+    await expect(bar).toHaveCount(0)
+    await expect(preview).toContainText('of 46')
+  })
+
+  test('downloads the visible page as CSV', async ({ page }) => {
+    const preview = await example(page, 'data-table/export')
+    await preview.getByRole('button', { name: 'Export' }).click()
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('menuitem', { name: /This page/ }).click(),
+    ])
+    expect(download.suggestedFilename()).toBe('invoices.csv')
+    let csv = ''
+    for await (const chunk of await download.createReadStream()) csv += chunk
+    const lines = csv.replace(/^﻿/, '').split('\r\n')
+    expect(lines[0]).toBe('Invoice,Customer,Billing email,Total')
+    expect(lines).toHaveLength(6)
+    expect(lines[1]).toMatch(/^INV-\d+,[^,]+,billing@[a-z]+\.com,\d+\.\d{2}$/)
+  })
+
+  test('a row click opens details; checkboxes keep their own clicks', async ({ page }) => {
+    const preview = await example(page, 'data-table/row-click')
+    await preview.getByRole('checkbox', { name: 'Select row' }).first().click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await bodyRows(preview).nth(1).getByRole('cell').nth(2).click()
+    await expect(page.getByRole('dialog', { name: 'INV-1041' })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await bodyRows(preview).nth(2).focus()
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('dialog', { name: 'INV-1042' })).toBeVisible()
+  })
+
+  test('expands a row and edits a cell in place', async ({ page }) => {
+    const expand = await example(page, 'data-table/expandable')
+    await expand.getByRole('button', { name: 'Show details' }).first().click()
+    await expect(expand.getByText('billing@northwind.com')).toBeVisible()
+    await expand.getByRole('button', { name: 'Hide details' }).click()
+    await expect(expand.getByText('billing@northwind.com')).toHaveCount(0)
+
+    const edit = page.locator('[data-example="data-table/editing"]')
+    await edit.scrollIntoViewIfNeeded()
+    await edit.getByRole('button', { name: 'Edit Seats' }).first().click()
+    await page.keyboard.type('80')
+    await page.keyboard.press('Enter')
+    // Rejected by the "server": rolls back to 8.
+    await expect(edit.getByRole('button', { name: 'Edit Seats' }).first()).toHaveText('8')
+    await edit.getByRole('button', { name: 'Edit Seats' }).first().click()
+    await page.keyboard.type('12')
+    await page.keyboard.press('Enter')
+    await expect(edit.getByRole('button', { name: 'Edit Seats' }).first()).toHaveText('12')
+  })
+
+  test('shows rows as cards on a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    const preview = await example(page, 'data-table/mobile-cards')
+    await expect(preview.locator('table')).toHaveCount(0)
+    const cards = preview.locator('[data-slot="data-table-cards"] > li')
+    await expect(cards).toHaveCount(4)
+    await expect(cards.first()).toContainText('Northwind')
+    await expect(cards.first()).not.toContainText('Billing email')
+  })
+
+  test('scrolls 10,000 virtualized rows smoothly', async ({ page }) => {
+    const preview = await example(page, 'data-table-virtual/ten-thousand')
+    const table = preview.getByRole('table')
+    await expect(table).toHaveAttribute('aria-rowcount', '10001')
+    const rendered = await bodyRows(preview).count()
+    expect(rendered).toBeLessThan(60)
+    const scroller = preview.locator('[data-slot="data-table-scroller"]')
+    const elapsed = await scroller.evaluate(async (el) => {
+      const start = performance.now()
+      for (let i = 1; i <= 20; i++) {
+        el.scrollTop = (el.scrollHeight / 20) * i
+        await new Promise(requestAnimationFrame)
+      }
+      return performance.now() - start
+    })
+    // 20 jumps across the list in well under a second, about one frame each.
+    expect(elapsed).toBeLessThan(1500)
+    // Rows are measured as they render, so the list's height settles; follow it to the end.
+    await expect
+      .poll(() =>
+        scroller.evaluate((el) => {
+          el.scrollTop = el.scrollHeight
+          return bodyRowsText(el)
+          function bodyRowsText(root: Element) {
+            const rows = root.querySelectorAll('tbody tr:not([aria-hidden])')
+            return rows[rows.length - 1]?.textContent ?? ''
+          }
+        }),
+      )
+      .toContain('INV-11039')
+    expect(await bodyRows(preview).count()).toBeLessThan(60)
+  })
+})

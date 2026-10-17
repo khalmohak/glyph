@@ -2,6 +2,8 @@ import {
   Badge,
   Button,
   DatePicker,
+  DescriptionItem,
+  DescriptionList,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -13,49 +15,118 @@ import {
   ModalClose,
   NumberInput,
   PageHeader,
-  SegmentedControl,
   Select,
   SelectItem,
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
   toast,
   useConfirm,
 } from '@glyphui/ui'
-import { createColumnHelper, DataTable } from '@glyphui/ui/data-table'
+import {
+  createColumnHelper,
+  DataTable,
+  type TableSelection,
+  useTableUrlState,
+} from '@glyphui/ui/data-table'
 import { Form, FormError, FormField, FormSubmit, useForm } from '@glyphui/ui/form'
+import { useRouterUrlAdapter } from '@glyphui/ui/react-router'
 import { Copy, MoreHorizontal, Plus, Send, Trash2 } from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { z } from 'zod'
-import { customers, type Invoice, type InvoiceStatus, invoices as seed, usd } from '../data'
+import {
+  createInvoice,
+  deleteInvoices,
+  exportInvoices,
+  type InvoicePage,
+  invoiceSummary,
+  listInvoices,
+} from '../api'
+import { customers, type Invoice, usd } from '../data'
 
 const tone = { draft: 'neutral', open: 'info', paid: 'success', overdue: 'danger' } as const
 const date = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
-
-type Filter = 'all' | InvoiceStatus
+const defaultSort = [{ id: 'due', desc: true }]
+const statusLabels = { open: 'Open', overdue: 'Overdue', paid: 'Paid', draft: 'Draft' } as const
 
 export function InvoicesPage() {
-  const [rows, setRows] = useState<Invoice[]>(seed)
-  const [filter, setFilter] = useState<Filter>('all')
-  const [selected, setSelected] = useState<Invoice[]>([])
+  // Page, sort, search and filters live in the URL, through the router, so ⌘K can link to
+  // `?q=INV-1043` and the back button walks through views.
+  const url = useTableUrlState({ adapter: useRouterUrlAdapter(), pageSize: 10 })
   const [params, setParams] = useSearchParams()
   const confirm = useConfirm()
+  const [page, setPage] = useState<InvoicePage>()
+  const [summary, setSummary] = useState<{ count: number; billed: number }>()
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<unknown>()
+  const [version, setVersion] = useState(0)
+  const [detail, setDetail] = useState<Invoice | null>(null)
 
-  const visible = filter === 'all' ? rows : rows.filter((r) => r.status === filter)
+  const sorting = url.state.sorting?.length ? url.state.sorting : defaultSort
+  const query = useMemo(
+    () => ({
+      pageIndex: url.state.pagination?.pageIndex ?? 0,
+      pageSize: url.state.pagination?.pageSize ?? 10,
+      sorting,
+      search: url.state.search ?? '',
+      filters: url.state.columnFilters ?? [],
+    }),
+    [url.state, sorting],
+  )
+  const queryKey = JSON.stringify(query)
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refetch when the query or data version changes
+  useEffect(() => {
+    let current = true
+    setLoading(true)
+    listInvoices(query).then(
+      (result) => {
+        if (!current) return
+        setPage(result)
+        setError(undefined)
+        setLoading(false)
+      },
+      (reason: unknown) => {
+        if (!current) return
+        setError(reason)
+        setLoading(false)
+      },
+    )
+    return () => {
+      current = false
+    }
+  }, [queryKey, version])
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refresh the totals after changes
+  useEffect(() => {
+    invoiceSummary().then(setSummary)
+  }, [version])
+
+  const refresh = () => setVersion((v) => v + 1)
 
   const remove = useCallback(
-    async (targets: Invoice[]) => {
+    async (target: { ids: string[] } | { all: number }) => {
+      const count = 'all' in target ? target.all : target.ids.length
       const ok = await confirm({
         title:
-          targets.length === 1 ? `Delete ${targets[0]!.id}?` : `Delete ${targets.length} invoices?`,
+          count === 1 && 'ids' in target ? `Delete ${target.ids[0]}?` : `Delete ${count} invoices?`,
         description: 'Deleted invoices can’t be recovered. Customers keep any PDFs already sent.',
         tone: 'danger',
         confirmLabel: 'Delete',
       })
-      if (!ok) return
-      const ids = new Set(targets.map((t) => t.id))
-      setRows((current) => current.filter((r) => !ids.has(r.id)))
-      toast.success(targets.length === 1 ? 'Invoice deleted' : `${targets.length} invoices deleted`)
+      if (!ok) return false
+      const deleted = await deleteInvoices(
+        'all' in target ? { query: { search: query.search, filters: query.filters } } : target,
+      )
+      toast.success(deleted === 1 ? 'Invoice deleted' : `${deleted} invoices deleted`)
+      setVersion((v) => v + 1)
+      return true
     },
-    [confirm],
+    [confirm, query.search, query.filters],
   )
 
   const columns = useMemo(() => {
@@ -68,21 +139,32 @@ export function InvoicesPage() {
       col.accessor('customer', { header: 'Customer' }),
       col.accessor('status', {
         header: 'Status',
+        enableSorting: false,
         cell: (info) => (
           <Badge tone={tone[info.getValue()]} dot className="capitalize">
             {info.getValue()}
           </Badge>
         ),
+        meta: {
+          filter: {
+            type: 'multi',
+            options: (Object.keys(statusLabels) as (keyof typeof statusLabels)[]).map((value) => ({
+              value,
+              label: statusLabels[value],
+              count: page?.statusCounts[value] ?? 0,
+            })),
+          },
+        },
       }),
       col.accessor('due', {
         header: 'Due',
         cell: (info) => date.format(info.getValue()),
-        sortingFn: 'datetime',
+        meta: { csv: (value) => value.toISOString().slice(0, 10) },
       }),
       col.accessor('total', {
         header: 'Total',
         cell: (info) => usd.format(info.getValue()),
-        meta: { align: 'right' },
+        meta: { align: 'right', csv: (value) => value.toFixed(2) },
       }),
       col.display({
         id: 'actions',
@@ -114,67 +196,120 @@ export function InvoicesPage() {
               <DropdownMenuItem
                 icon={<Trash2 />}
                 tone="danger"
-                onSelect={() => remove([row.original])}
+                onSelect={() => remove({ ids: [row.original.id] })}
               >
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ),
+        meta: { align: 'right' },
       }),
     ]
-  }, [remove])
+  }, [remove, page?.statusCounts])
+
+  const bulkActions = (selection: TableSelection<Invoice>) => (
+    <>
+      <Button
+        size="sm"
+        variant="outline"
+        leftIcon={<Send />}
+        onClick={() => toast.success(`Sent ${selection.count} reminders`)}
+      >
+        Remind
+      </Button>
+      <Button
+        size="sm"
+        variant="danger"
+        leftIcon={<Trash2 />}
+        onClick={async () => {
+          const done = await remove(
+            selection.allMatching ? { all: selection.count } : { ids: selection.ids },
+          )
+          if (done) selection.clear()
+        }}
+      >
+        Delete {selection.count}
+      </Button>
+    </>
+  )
+
+  const setModalOpen = (open: boolean) =>
+    setParams(
+      (current) => {
+        if (open) current.set('new', '1')
+        else current.delete('new')
+        return current
+      },
+      { replace: true },
+    )
 
   return (
     <>
       <PageHeader
         title="Invoices"
-        description={`${rows.length} invoices · ${usd.format(rows.reduce((s, r) => s + r.total, 0))} billed`}
+        description={
+          summary ? `${summary.count} invoices · ${usd.format(summary.billed)} billed` : '\u00a0'
+        }
         actions={
           <NewInvoiceModal
             open={params.get('new') === '1'}
-            onOpenChange={(open) => setParams(open ? { new: '1' } : {})}
-            onCreate={(invoice) => setRows((current) => [invoice, ...current])}
+            onOpenChange={setModalOpen}
+            onCreate={async (invoice) => {
+              await createInvoice(invoice)
+              refresh()
+            }}
           />
         }
       />
       <DataTable
         aria-label="Invoices"
-        data={visible}
+        mode="server"
+        data={page?.rows}
+        rowCount={page?.total}
+        loading={loading}
+        error={error}
+        onRetry={refresh}
         columns={columns}
         getRowId={(row) => row.id}
+        state={{ ...url.state, sorting }}
+        onStateChange={url.onStateChange}
         search={{ placeholder: 'Search invoices…' }}
         selectable
-        onSelectionChange={setSelected}
-        initialSorting={[{ id: 'due', desc: true }]}
-        toolbar={
-          <div className="flex flex-wrap items-center gap-2">
-            {selected.length > 0 && (
-              <Button
-                variant="danger"
-                size="sm"
-                leftIcon={<Trash2 />}
-                onClick={() => remove(selected)}
-              >
-                Delete {selected.length}
-              </Button>
-            )}
-            <SegmentedControl<Filter>
-              aria-label="Status"
-              size="sm"
-              value={filter}
-              onValueChange={setFilter}
-              options={[
-                { value: 'all', label: 'All' },
-                { value: 'open', label: 'Open' },
-                { value: 'overdue', label: 'Overdue' },
-                { value: 'paid', label: 'Paid' },
-                { value: 'draft', label: 'Draft' },
-              ]}
-            />
-          </div>
-        }
+        bulkActions={bulkActions}
+        exportCsv={{
+          fileName: 'invoices.csv',
+          fetchAll: () => exportInvoices({ search: query.search, filters: query.filters }),
+        }}
+        onRowClick={setDetail}
+        mobile="cards"
       />
+      <Sheet open={detail !== null} onOpenChange={(open) => !open && setDetail(null)}>
+        <SheetContent>
+          {detail && (
+            <>
+              <SheetHeader>
+                <SheetTitle>{detail.id}</SheetTitle>
+                <SheetDescription>
+                  {detail.customer} · {detail.email}
+                </SheetDescription>
+              </SheetHeader>
+              <SheetBody>
+                <DescriptionList>
+                  <DescriptionItem term="Status">
+                    <Badge tone={tone[detail.status]} dot className="capitalize">
+                      {detail.status}
+                    </Badge>
+                  </DescriptionItem>
+                  <DescriptionItem term="Total">{usd.format(detail.total)}</DescriptionItem>
+                  <DescriptionItem term="Issued">{date.format(detail.issued)}</DescriptionItem>
+                  <DescriptionItem term="Due">{date.format(detail.due)}</DescriptionItem>
+                </DescriptionList>
+              </SheetBody>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </>
   )
 }
@@ -193,7 +328,7 @@ function NewInvoiceModal({
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreate: (invoice: Invoice) => void
+  onCreate: (invoice: Invoice) => Promise<void>
 }) {
   const form = useForm({
     schema,
@@ -227,11 +362,10 @@ function NewInvoiceModal({
         form={form}
         className="grid gap-4"
         onSubmit={async (values) => {
-          await new Promise((resolve) => setTimeout(resolve, 600))
           if (values.amount > 50_000)
             return { errors: { amount: 'Invoices over $50,000 need approval.' } }
           const customer = customers.find((c) => c.name === values.customer)!
-          onCreate({
+          await onCreate({
             id: `INV-${2000 + Math.floor(Math.random() * 1000)}`,
             customer: customer.name,
             email: customer.email,

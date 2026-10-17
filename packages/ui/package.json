@@ -47,6 +47,11 @@
       "types": "./dist/data-table.d.ts",
       "default": "./dist/data-table.js"
     },
+    "./data-table/virtual": {
+      "@glyphui/source": "./src/patterns/data-table/virtual.ts",
+      "types": "./dist/data-table-virtual.d.ts",
+      "default": "./dist/data-table-virtual.js"
+    },
     "./chart": {
       "@glyphui/source": "./src/patterns/chart/index.ts",
       "types": "./dist/chart.d.ts",
@@ -103,6 +108,7 @@
   "peerDependencies": {
     "@hookform/resolvers": ">=5.1.0",
     "@tanstack/react-table": "^8.20.0",
+    "@tanstack/react-virtual": "^3.10.0",
     "react": ">=19",
     "react-dom": ">=19",
     "react-hook-form": "^7.55.0",
@@ -116,6 +122,9 @@
       "optional": true
     },
     "@tanstack/react-table": {
+      "optional": true
+    },
+    "@tanstack/react-virtual": {
       "optional": true
     },
     "react-hook-form": {
@@ -136,6 +145,7 @@
     "@glyphui/tsconfig": "workspace:*",
     "@hookform/resolvers": "^5.9.1",
     "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.14.13",
     "@testing-library/jest-dom": "^6.10.0",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",

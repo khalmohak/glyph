@@ -1,4 +1,6 @@
-import { Link, useLocation } from 'react-router'
+import { useEffect, useMemo, useRef } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router'
+import type { UrlAdapter } from '../patterns/data-table/use-url-state'
 import type { GlyphRouter, IsActiveOptions, LinkComponentProps } from '../provider/glyph-context'
 
 const isOutsideApp = (href: string) =>
@@ -37,3 +39,41 @@ export function useRouterIsActive(href: string, options?: IsActiveOptions): bool
  * and NavigationMenu items mark the current page automatically. Must render inside a router.
  */
 export const reactRouter: GlyphRouter = { Link: RouterLink, useIsActive: useRouterIsActive }
+
+/**
+ * Reads and writes table URL state through React Router, so the router's location (and
+ * `useSearchParams`) always agree with the table:
+ *
+ * ```tsx
+ * const url = useTableUrlState({ adapter: useRouterUrlAdapter() })
+ * ```
+ */
+export function useRouterUrlAdapter(): UrlAdapter {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const current = useRef(location.search)
+  current.current = location.search
+  const listeners = useRef(new Set<() => void>())
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: notify subscribers whenever the search changes
+  useEffect(() => {
+    for (const listener of listeners.current) listener()
+  }, [location.search])
+
+  return useMemo(
+    () => ({
+      getSearch: () => current.current,
+      setSearch: (search, mode) => {
+        current.current = search
+        navigate({ search }, { replace: mode === 'replace', preventScrollReset: true })
+      },
+      subscribe: (onChange) => {
+        listeners.current.add(onChange)
+        return () => {
+          listeners.current.delete(onChange)
+        }
+      },
+    }),
+    [navigate],
+  )
+}
