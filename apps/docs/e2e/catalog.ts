@@ -2,6 +2,7 @@ import { existsSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { DocMeta } from '../src/lib/doc'
+import { staticRoutes } from '../src/lib/site'
 
 const contentRoot = join(dirname(fileURLToPath(import.meta.url)), '../src/content')
 
@@ -20,8 +21,7 @@ const { roadmap } = (await import(join(contentRoot, 'roadmap.ts'))) as { roadmap
 /** Every route the docs prerender: static pages, component pages and planned pages. */
 export const routes: string[] = [
   '/',
-  '/getting-started/',
-  '/components/',
+  ...staticRoutes.map((route) => `/${route.path}/`),
   ...docs.map((d) => `/components/${d.slug}/`),
   ...roadmap.filter((r) => !slugs.includes(r.slug)).map((r) => `/components/${r.slug}/`),
 ]

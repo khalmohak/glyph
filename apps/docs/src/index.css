@@ -37,3 +37,10 @@ body {
   margin: 0;
   background: transparent !important;
 }
+
+/* Gallery thumbnails are static: show revealed and staggered content straight away. */
+[data-preview] [data-reveal],
+[data-preview] [data-stagger-item] {
+  opacity: 1 !important;
+  animation: none !important;
+}

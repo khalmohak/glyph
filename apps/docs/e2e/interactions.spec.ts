@@ -17,6 +17,103 @@ test.describe('Docs navigation', () => {
       await expect(page.getByRole('heading', { level: 1, name })).toBeVisible()
     }
   })
+
+  test('reaches every section from the header', async ({ page }) => {
+    await open(page, '/')
+    const header = page.getByRole('navigation', { name: 'Main' })
+    for (const [link, heading] of [
+      ['Docs', 'Build with Glyph'],
+      ['Components', 'Components'],
+      ['Blocks', 'Blocks'],
+      ['Themes', 'Theme studio'],
+      ['Templates', 'Templates'],
+    ] as const) {
+      await header.getByRole('link', { name: link, exact: true }).click()
+      await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible()
+      await expect(header.getByRole('link', { name: link, exact: true })).toHaveAttribute(
+        'aria-current',
+        'page',
+      )
+    }
+  })
+
+  test('guides without a page yet point to their reference', async ({ page }) => {
+    await open(page, '/docs/forms/')
+    await expect(page.getByRole('heading', { level: 1, name: 'Forms' })).toBeVisible()
+    await page.getByRole('link', { name: 'Form', exact: true }).click()
+    await expect(page.getByRole('heading', { level: 1, name: 'Form' })).toBeVisible()
+  })
+})
+
+test.describe('Gallery', () => {
+  test('filters by search, status and category, kept in the URL', async ({ page }) => {
+    await open(page, '/components/')
+    const search = page.getByRole('searchbox', { name: 'Search components' })
+    await search.fill('date')
+    await expect(page).toHaveURL(/[?&]q=date/)
+    const cards = page.getByRole('main').getByRole('listitem')
+    await expect(cards.getByRole('link', { name: /^DatePicker:/ })).toBeVisible()
+    await expect(cards.getByRole('link', { name: /^Button:/ })).toHaveCount(0)
+
+    await search.fill('zzzz')
+    await expect(page.getByText('No components match')).toBeVisible()
+    await page.getByRole('button', { name: 'Clear filters' }).first().click()
+    await expect(search).toHaveValue('')
+
+    await page
+      .getByRole('radiogroup', { name: 'Category' })
+      .getByRole('radio', { name: 'Viewers' })
+      .click()
+    await expect(page).toHaveURL(/category=Viewers/)
+    await expect(cards.getByRole('link', { name: /^PdfViewer:/ })).toBeVisible()
+    await expect(cards.getByRole('link', { name: /^Button:/ })).toHaveCount(0)
+
+    // A shared link restores the same view.
+    await page.reload()
+    await expect(
+      page.getByRole('radiogroup', { name: 'Category' }).getByRole('radio', { name: 'Viewers' }),
+    ).toHaveAttribute('aria-checked', 'true')
+    await cards.getByRole('link', { name: /^PdfViewer:/ }).click()
+    await expect(page.getByRole('heading', { level: 1, name: 'PdfViewer' })).toBeVisible()
+  })
+
+  test('renders live previews as cards scroll into view', async ({ page }) => {
+    await open(page, '/components/?category=Actions')
+    const preview = page.locator('[data-preview]').first()
+    await expect(preview).toBeAttached()
+    // Previews are aria-hidden (the card carries the name), so query the DOM, not roles.
+    await expect(preview.locator('button').first()).toBeAttached()
+  })
+})
+
+test.describe('Home', () => {
+  test('restyles the live mock, and can apply that theme to the whole site', async ({ page }) => {
+    await open(page, '/')
+    const mock = page
+      .locator('[data-glyph-theme]')
+      .filter({ has: page.getByText('Ledgerline') })
+      .first()
+    await expect(mock).toHaveAttribute('data-glyph-theme', 'glyph')
+    await page
+      .getByRole('radiogroup', { name: 'Preview theme' })
+      .getByRole('radio', { name: 'Brutalist' })
+      .click()
+    await expect(mock).toHaveAttribute('data-glyph-theme', 'brutalist')
+
+    await page.getByRole('button', { name: 'Use Brutalist for the whole site' }).click()
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem('glyph-docs-theme')))
+      .toBe('brutalist')
+  })
+
+  test('the mock is interactive: its modal opens and creates an invoice', async ({ page }) => {
+    await open(page, '/')
+    await page.getByRole('button', { name: 'New invoice' }).click()
+    const dialog = page.getByRole('dialog', { name: 'New invoice' })
+    await expect(dialog).toBeVisible()
+    await dialog.getByRole('button', { name: 'Create invoice' }).click()
+    await expect(page.getByText('Invoice created')).toBeVisible()
+  })
 })
 
 test.describe('DataTable', () => {
@@ -151,8 +248,8 @@ test.describe('Sheet', () => {
     await preview.getByRole('button', { name: 'left' }).click()
     const sheet = page.getByRole('dialog', { name: /left sheet/i })
     await expect(sheet).toBeVisible()
-    const box = await sheet.boundingBox()
-    expect(box?.x).toBe(0)
+    // It slides in from the left edge; wait for the entrance to finish before measuring.
+    await expect.poll(async () => (await sheet.boundingBox())?.x).toBe(0)
     await page.keyboard.press('Escape')
     await expect(sheet).toBeHidden()
   })

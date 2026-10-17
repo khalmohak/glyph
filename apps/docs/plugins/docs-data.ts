@@ -3,6 +3,7 @@ import { join, relative, resolve } from 'node:path'
 import { withCustomConfig } from 'react-docgen-typescript'
 import { codeToHtml, createCssVariablesTheme } from 'shiki'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
+import { staticRoutes } from '../src/lib/site'
 
 /**
  * Build-time data for the docs:
@@ -96,18 +97,12 @@ const SITE_DESCRIPTION =
 function routeMetas(contentRoot: string): RouteMeta[] {
   const field = (src: string, key: string) =>
     src.match(new RegExp(`${key}:\\s*(?:\\n\\s*)?(['"\`])((?:\\\\.|(?!\\1).)*)\\1`))?.[2]
-  const routes: RouteMeta[] = [
-    {
-      path: 'components',
-      title: `Components · ${SITE}`,
-      description: 'Every Glyph component, its status, and the roadmap.',
-    },
-    {
-      path: 'getting-started',
-      title: `Getting started · ${SITE}`,
-      description: 'Install Glyph, add a theme file, and wrap your app.',
-    },
-  ]
+  // Static sections and guides come from the site map; component pages from content/.
+  const routes: RouteMeta[] = staticRoutes.map(({ path, title, description }) => ({
+    path,
+    title,
+    description,
+  }))
   for (const dir of readdirSync(contentRoot, { withFileTypes: true })) {
     const meta = join(contentRoot, dir.name, 'meta.ts')
     if (!dir.isDirectory() || !existsSync(meta)) continue
