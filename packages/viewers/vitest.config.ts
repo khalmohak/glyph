@@ -5,10 +5,11 @@ export default defineConfig({
   resolve: { conditions: ['@glyphui/source', 'module', 'browser', 'development|production'] },
   test: {
     environment: 'jsdom',
+    // CI runners run every package's suite at once; interaction tests need headroom there.
+    testTimeout: 20_000,
+    hookTimeout: 30_000,
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
-    // Cold imports of lazy viewer modules are slow on busy CI runners.
-    hookTimeout: 30_000,
     css: false,
     coverage: {
       provider: 'v8',
