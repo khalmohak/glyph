@@ -2,7 +2,7 @@
 
 Authentication for [Glyph](https://github.com/khalmohak/glyph) apps: session state, protected routes and ready sign-in screens, on your own REST API, Firebase or Clerk.
 
-[Docs](https://khalmohak.github.io/glyph/components/auth) · [Live example](https://khalmohak.github.io/glyph/auth/) · [Changelog](https://github.com/khalmohak/glyph/blob/main/packages/auth/CHANGELOG.md)
+[Docs](https://glyphui.xyz/components/auth) · [Live example](https://auth.glyphui.xyz/) · [Changelog](https://github.com/khalmohak/glyph/blob/main/packages/auth/CHANGELOG.md)
 
 ## Install
 

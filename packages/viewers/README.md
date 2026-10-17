@@ -2,7 +2,7 @@
 
 File and data viewers for [Glyph](https://github.com/khalmohak/glyph): PDF, CSV, spreadsheets, JSON, code, Markdown, diffs, images, video and audio, themed by your Glyph theme in light and dark.
 
-[Docs](https://khalmohak.github.io/glyph/components) · [GitHub](https://github.com/khalmohak/glyph)
+[Docs](https://glyphui.xyz/components) · [GitHub](https://github.com/khalmohak/glyph)
 
 ## Install
 

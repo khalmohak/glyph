@@ -10,18 +10,15 @@ export const NPM_URL = 'https://www.npmjs.com/package/@glyphui/ui'
 /**
  * The deployed site, without a trailing slash: canonical URLs, the sitemap, llms.txt and links
  * to the demo apps that live beside the docs. Set SITE_URL at build time to move the site
- * (e.g. SITE_URL=https://glyphui.dev with DOCS_BASE=/); Vite inlines it for the browser.
+ * (e.g. a preview host); Vite inlines it for the browser.
  */
-export const LIVE_URL = (process.env.SITE_URL || 'https://khalmohak.github.io/glyph').replace(
-  /\/+$/,
-  '',
-)
+export const LIVE_URL = (process.env.SITE_URL || 'https://glyphui.xyz').replace(/\/+$/, '')
 
-/** The Ledgerline demo app: beside the docs on GitHub Pages, its own subdomain on Cloudflare. */
-export const DEMO_URL = (process.env.DEMO_URL || `${LIVE_URL}/demo`).replace(/\/+$/, '')
+/** The Ledgerline demo app, on its own subdomain. */
+export const DEMO_URL = (process.env.DEMO_URL || 'https://demo.glyphui.xyz').replace(/\/+$/, '')
 
 /** The auth example app, deployed like the demo. */
-export const AUTH_URL = (process.env.AUTH_URL || `${LIVE_URL}/auth`).replace(/\/+$/, '')
+export const AUTH_URL = (process.env.AUTH_URL || 'https://auth.glyphui.xyz').replace(/\/+$/, '')
 
 export interface NavSection {
   label: string

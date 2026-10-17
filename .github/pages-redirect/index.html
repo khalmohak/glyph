@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Glyph has moved to glyphui.xyz</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="https://glyphui.xyz/" />
+    <script>
+      // khalmohak.github.io/glyph/<path> → glyphui.xyz/<path>; /glyph/demo and /glyph/auth go to
+      // their subdomains. GitHub Pages serves this file for every path (as index and 404.html).
+      ;(() => {
+        let path = location.pathname.replace(/^\/glyph(?=\/|$)/, '') || '/'
+        let host = 'https://glyphui.xyz'
+        const app = /^\/(demo|auth)(?=\/|$)/.exec(path)
+        if (app) {
+          host = `https://${app[1]}.glyphui.xyz`
+          path = path.slice(app[0].length) || '/'
+        } else if (/^\/showcase(?=\/|$)/.test(path)) {
+          path = '/'
+        }
+        location.replace(host + path + location.search + location.hash)
+      })()
+    </script>
+    <meta http-equiv="refresh" content="1; url=https://glyphui.xyz/" />
+  </head>
+  <body>
+    <p>Glyph's docs moved to <a href="https://glyphui.xyz/">glyphui.xyz</a>.</p>
+  </body>
+</html>
