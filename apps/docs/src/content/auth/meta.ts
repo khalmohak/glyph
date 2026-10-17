@@ -47,7 +47,7 @@ export default defineDoc({
       file: 'setup',
       title: 'Set up',
       description:
-        'Create the client once and pass it to AuthProvider. Route loaders use the same client.',
+        'Create the client once; AuthProvider and route loaders share it. GlyphProvider goes outermost, then AuthProvider, then RouterProvider.',
     },
     {
       file: 'register',

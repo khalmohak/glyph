@@ -34,8 +34,19 @@ const ChevronRightIcon = () => (
   </svg>
 )
 
-/** A menu of actions opened from a button: row actions, account menus, "more" buttons. */
-export const DropdownMenu = MenuPrimitive.Root
+/**
+ * A menu of actions opened from a button: row actions, account menus, "more" buttons.
+ *
+ * Not modal by default: focus moves into the menu and Escape or an outside click closes it,
+ * but the rest of the page isn't hidden from assistive tech or locked. A modal menu would
+ * set `aria-hidden` on a page that stays focusable. Pass `modal` for Radix's modal behavior.
+ */
+export function DropdownMenu({
+  modal = false,
+  ...props
+}: ComponentProps<typeof MenuPrimitive.Root>) {
+  return <MenuPrimitive.Root modal={modal} {...props} />
+}
 export const DropdownMenuTrigger = MenuPrimitive.Trigger
 export const DropdownMenuGroup = MenuPrimitive.Group
 export const DropdownMenuRadioGroup = MenuPrimitive.RadioGroup

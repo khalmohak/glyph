@@ -6,6 +6,7 @@ import type { ToasterProps } from '../components/toast/toast'
 import { MotionRootAttribute, MotionScope } from '../motion/motion-root'
 import { glyph } from '../themes'
 import { type ColorModePreference, ColorModeProvider } from './color-mode'
+import { useContrastWarning } from './contrast-warning'
 import { GlyphContext, type GlyphRouter, type LinkComponent, neverActive } from './glyph-context'
 import { ThemeStyle } from './theme-style'
 
@@ -55,6 +56,7 @@ export function GlyphProvider({
 }: GlyphProviderProps) {
   const Link = router?.Link ?? linkComponent ?? 'a'
   const useIsActive = router?.useIsActive ?? neverActive
+  useContrastWarning(theme)
   const value = useMemo(
     () => ({ theme, linkComponent: Link, useIsActive, motion }),
     [theme, Link, useIsActive, motion],

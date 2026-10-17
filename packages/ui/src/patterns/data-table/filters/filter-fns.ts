@@ -1,4 +1,4 @@
-import type { ColumnDef, FilterFn, Row } from '@tanstack/react-table'
+import type { ColumnDef, ColumnFiltersState, FilterFn, Row } from '@tanstack/react-table'
 import type {
   ColumnFilterConfig,
   DateRangeFilterValue,
@@ -11,6 +11,52 @@ export function toList(value: unknown): string[] {
   if (Array.isArray(value)) return value.map(String)
   if (value === undefined || value === null || value === '') return []
   return [String(value)]
+}
+
+/**
+ * The values of a `multi` (or `select`) filter as an array, whatever shape it arrived in.
+ * Use it in server-mode fetchers: `getFilterList(state.columnFilters, 'status')`.
+ */
+export function getFilterList(filters: ColumnFiltersState | undefined, id: string): string[] {
+  return toList(filters?.find((filter) => filter.id === id)?.value)
+}
+
+/** Filter types by column id, from each column's `meta.filter` (ids resolved like TanStack's). */
+export function filterTypesOf(
+  // biome-ignore lint/suspicious/noExplicitAny: TanStack's own convention for mixed column value types
+  columns: readonly ColumnDef<any, any>[],
+  into: Record<string, FilterType> = {},
+): Record<string, FilterType> {
+  for (const column of columns) {
+    const nested = (column as { columns?: ColumnDef<unknown, unknown>[] }).columns
+    if (nested) {
+      filterTypesOf(nested, into)
+      continue
+    }
+    const type = (column.meta as { filter?: ColumnFilterConfig } | undefined)?.filter?.type
+    if (!type) continue
+    const accessorKey = (column as { accessorKey?: unknown }).accessorKey
+    const id =
+      column.id ??
+      (typeof accessorKey === 'string' ? accessorKey.replaceAll('.', '_') : undefined) ??
+      (typeof column.header === 'string' ? column.header : undefined)
+    if (id) into[id] = type
+  }
+  return into
+}
+
+/** Puts filter values in the shape their filter type expects: `multi` values become arrays. */
+export function normalizeFilters(
+  filters: ColumnFiltersState,
+  types: Record<string, FilterType>,
+): ColumnFiltersState {
+  let changed = false
+  const next = filters.map((filter) => {
+    if (types[filter.id] !== 'multi' || Array.isArray(filter.value)) return filter
+    changed = true
+    return { ...filter, value: toList(filter.value) }
+  })
+  return changed ? next : filters
 }
 
 function toNumber(value: unknown): number | undefined {

@@ -90,12 +90,12 @@
     "check:exports": "attw --pack . --profile esm-only --exclude-entrypoints ./styles.css"
   },
   "dependencies": {
-    "@glyphui/tokens": "workspace:^",
-    "@glyphui/ui": "workspace:^",
     "tailwind-merge": "^3.7.0",
     "tailwind-variants": "^3.3.1"
   },
   "peerDependencies": {
+    "@glyphui/tokens": ">=0.7.0",
+    "@glyphui/ui": ">=0.7.0",
     "@tanstack/react-table": "^8.20.0",
     "@tanstack/react-virtual": "^3.10.0",
     "diff": ">=8.0.0",
@@ -140,7 +140,9 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
+    "@glyphui/tokens": "workspace:*",
     "@glyphui/tsconfig": "workspace:*",
+    "@glyphui/ui": "workspace:*",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.14.13",
     "@testing-library/jest-dom": "^6.10.0",

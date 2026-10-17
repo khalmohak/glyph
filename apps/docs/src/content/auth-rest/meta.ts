@@ -32,7 +32,7 @@ export default defineDoc({
   ],
   notes: [
     'Endpoints default to /auth/session, /auth/sign-in, /auth/sign-up, /auth/sign-out, /auth/refresh, /auth/password/forgot, /auth/password/reset and /auth/verify; override any with endpoints.',
-    'GET session must return 401 when signed out. A 401 with a refresh token tries one refresh first.',
+    'When signed out, GET session should return 200 with { user: null }. A 401 also works, but browsers log it as an error on every signed-out page view. A 401 while holding a refresh token tries one refresh first.',
     'Return 202 with { status: "needs-verification" } or "needs-second-factor" and the screens show the next step.',
     'Error bodies with { errors: { email: "…" } } show next to the matching form fields.',
     'storage: "memory" keeps bearer tokens out of web storage, at the cost of signing in again after a reload.',

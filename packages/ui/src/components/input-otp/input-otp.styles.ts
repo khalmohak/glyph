@@ -4,7 +4,7 @@ import { tv, type VariantProps } from '../../utils/tv'
 
 export const inputOtpStyles = /* @__PURE__ */ tv({
   slots: {
-    root: 'flex items-center gap-2 has-disabled:opacity-50',
+    root: 'flex items-center gap-1.5 has-disabled:opacity-50 sm:gap-2',
     input: 'disabled:cursor-not-allowed',
     group: 'flex items-center',
     slot: [
@@ -21,9 +21,10 @@ export const inputOtpStyles = /* @__PURE__ */ tv({
   },
   variants: {
     size: {
+      // One step smaller on phones, so eight slots in two groups fit a 390px screen.
       sm: { slot: 'size-8 text-small' },
-      md: { slot: 'size-10 text-body' },
-      lg: { slot: 'size-12 text-h4' },
+      md: { slot: 'size-10 text-body max-sm:size-8' },
+      lg: { slot: 'size-12 text-h4 max-sm:size-10' },
     },
   },
   defaultVariants: { size: 'md' },

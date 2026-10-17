@@ -34,8 +34,17 @@ const ChevronRightIcon = () => (
   </svg>
 )
 
-/** A menu opened by right-click or long-press on an area. Same items as DropdownMenu. */
-export const ContextMenu = MenuPrimitive.Root
+/**
+ * A menu opened by right-click or long-press on an area. Same items as DropdownMenu.
+ * Not modal by default, like DropdownMenu, so the page isn't hidden from assistive tech
+ * while it's open; pass `modal` for Radix's modal behavior.
+ */
+export function ContextMenu({
+  modal = false,
+  ...props
+}: ComponentProps<typeof MenuPrimitive.Root>) {
+  return <MenuPrimitive.Root modal={modal} {...props} />
+}
 export const ContextMenuTrigger = MenuPrimitive.Trigger
 export const ContextMenuGroup = MenuPrimitive.Group
 export const ContextMenuRadioGroup = MenuPrimitive.RadioGroup

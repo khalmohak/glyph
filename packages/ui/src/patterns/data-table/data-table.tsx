@@ -43,7 +43,7 @@ import { type ColumnControls, HeaderCell, INTERNAL_COLUMNS } from './column-head
 import { type DataTableVariants, dataTableStyles, densityClasses } from './data-table.styles'
 import type { CellEditState, GlyphTableMeta } from './editable-cell'
 import { FilterBar } from './filters/filter-bar'
-import { withFilterFns } from './filters/filter-fns'
+import { filterTypesOf, normalizeFilters, withFilterFns } from './filters/filter-fns'
 import { MobileCards } from './mobile-cards'
 import { TableFooter } from './pagination'
 import { TableToolbarMenus } from './toolbar'
@@ -372,8 +372,16 @@ export function DataTable<T>(inProps: DataTableProps<T>) {
     onSearchChange,
     onColumnFiltersChange,
   }
-  const handleStateChange = useCallback((next: DataTableState, changed: DataTableStateKey) => {
+  // A filter from a URL can arrive as a string where its type needs an array; everything
+  // reported back to the app is in the shape the filter type promises.
+  const filterTypes = useMemo(() => filterTypesOf(columns), [columns])
+  const filterTypesRef = useRef(filterTypes)
+  filterTypesRef.current = filterTypes
+  const handleStateChange = useCallback((reported: DataTableState, changed: DataTableStateKey) => {
     const c = callbacks.current
+    const columnFilters = normalizeFilters(reported.columnFilters, filterTypesRef.current)
+    const next =
+      columnFilters === reported.columnFilters ? reported : { ...reported, columnFilters }
     c.onStateChange?.(next, changed)
     if (changed === 'sorting') c.onSortingChange?.(next.sorting)
     if (changed === 'pagination') c.onPaginationChange?.(next.pagination)

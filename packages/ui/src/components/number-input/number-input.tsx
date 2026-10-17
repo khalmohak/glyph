@@ -1,6 +1,14 @@
-import { type ComponentProps, type KeyboardEvent, type ReactNode, useRef, useState } from 'react'
+import {
+  type ComponentProps,
+  type KeyboardEvent,
+  type ReactNode,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { useControllableState } from '../../hooks/use-controllable-state'
+import { composeRefs } from '../../utils/compose-refs'
 import { useFieldControl } from '../field/field-context'
 import { type NumberInputVariants, numberInputStyles } from './number-input.styles'
 
@@ -88,6 +96,8 @@ export function NumberInput(inProps: NumberInputProps) {
     onBlur,
     onFocus,
     onKeyDown,
+    onPointerDown,
+    ref,
     ...rest
   } = props
   const [value, setValue] = useControllableState<number | null>({
@@ -99,6 +109,18 @@ export function NumberInput(inProps: NumberInputProps) {
   // the formatted one.
   const [draft, setDraft] = useState<string | null>(null)
   const focused = useRef(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  // Focus swaps the formatted text for the raw number, which moves the caret to the end.
+  // A keyboard focus (or a focus that arrived with everything selected) must keep the whole
+  // value selected, so typing replaces it instead of appending ($90,000 → $900,001,250).
+  const pointerFocus = useRef(false)
+  const selectAllOnFocus = useRef(false)
+  useLayoutEffect(() => {
+    const input = inputRef.current
+    if (!selectAllOnFocus.current || !input || document.activeElement !== input) return
+    selectAllOnFocus.current = false
+    input.setSelectionRange(0, input.value.length)
+  })
   const decimal = decimalSeparator(locale)
   const raw = (n: number | null | undefined) =>
     n === null || n === undefined ? '' : String(n).replace('.', decimal)
@@ -168,12 +190,29 @@ export function NumberInput(inProps: NumberInputProps) {
         readOnly={readOnly}
         value={display}
         className={s.input({ class: [slots.input, inputClassName] })}
+        ref={composeRefs(inputRef, ref)}
+        onPointerDown={(event) => {
+          pointerFocus.current = true
+          onPointerDown?.(event)
+        }}
         onFocus={(event) => {
+          const el = event.currentTarget
+          const allSelected =
+            el.value.length > 0 && el.selectionStart === 0 && el.selectionEnd === el.value.length
+          selectAllOnFocus.current = allSelected || !pointerFocus.current
+          pointerFocus.current = false
           focused.current = true
           setDraft(raw(value))
           onFocus?.(event)
         }}
-        onChange={(event) => setDraft(event.target.value)}
+        onChange={(event) => {
+          const text = event.target.value
+          setDraft(text)
+          // Report the number while typing, so validation updates before the field blurs.
+          // Clamping and step rounding still happen on blur.
+          const parsed = parse(text, decimal)
+          if (parsed !== (value ?? null)) setValue(parsed)
+        }}
         onBlur={(event) => {
           focused.current = false
           if (draft !== null) commit(parse(draft, decimal))

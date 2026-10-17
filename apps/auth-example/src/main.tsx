@@ -1,6 +1,6 @@
 import { AuthProvider } from '@glyphui/auth'
 import { guestLoader, protectedLoader } from '@glyphui/auth/react-router'
-import { GlyphProvider } from '@glyphui/ui'
+import { GlyphProvider, LoadingState } from '@glyphui/ui'
 import { reactRouter } from '@glyphui/ui/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -21,6 +21,8 @@ const router = createBrowserRouter(
   [
     {
       element: <Root />,
+      // Shown while the first loaders (the session check) run, instead of a blank page.
+      hydrateFallbackElement: <LoadingState label="Loading…" className="min-h-dvh" />,
       children: [
         { index: true, element: <HomePage /> },
         // Signed-in visitors skip these and continue to ?next= or the app.

@@ -1,4 +1,4 @@
-import type { ColumnFiltersState, SortingState } from '@glyphui/ui/data-table'
+import { type ColumnFiltersState, getFilterList, type SortingState } from '@glyphui/ui/data-table'
 import { type Invoice, type InvoiceStatus, invoices as seed } from './data'
 
 /**
@@ -30,8 +30,7 @@ function matching(
   withStatus = true,
 ) {
   const q = search.trim().toLowerCase()
-  const statuses = filters.find((f) => f.id === 'status')?.value
-  const wanted = Array.isArray(statuses) ? statuses : statuses ? [String(statuses)] : []
+  const wanted = getFilterList(filters, 'status')
   return store.filter(
     (invoice) =>
       (!q || invoice.id.toLowerCase().includes(q) || invoice.customer.toLowerCase().includes(q)) &&

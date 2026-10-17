@@ -25,6 +25,8 @@ pnpm add recharts                                                          # opt
 pnpm add @glyphui/viewers                                                  # optional: PDF, CSV, JSON, code, media viewers
 ```
 
+All `@glyphui/*` packages are released together with one version number; keep them on the same version. `blocks`, `auth` and `viewers` use your app's copy of `@glyphui/ui` (a peer dependency), so there is only ever one Glyph context in the app.
+
 ```css
 /* index.css */
 @import "@glyphui/ui/fonts.css";      /* Geist, used by the default theme */

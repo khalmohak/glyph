@@ -47,10 +47,8 @@
     "test:coverage": "vitest run --coverage",
     "check:exports": "attw --pack . --profile esm-only --exclude-entrypoints ./styles.css"
   },
-  "dependencies": {
-    "@glyphui/ui": "workspace:^"
-  },
   "peerDependencies": {
+    "@glyphui/ui": ">=0.7.0",
     "react": ">=19",
     "react-dom": ">=19",
     "tailwindcss": ">=4.1"
@@ -58,6 +56,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@glyphui/tsconfig": "workspace:*",
+    "@glyphui/ui": "workspace:*",
     "@testing-library/jest-dom": "^6.10.0",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",

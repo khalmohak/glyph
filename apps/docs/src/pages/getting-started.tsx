@@ -79,6 +79,11 @@ export function GettingStartedPage() {
         <Text size="small" tone="muted">
           Page sections: Hero, Pricing, FAQ, AuthCard and more.
         </Text>
+        <Text size="small" tone="muted">
+          Every <Code>@glyphui</Code> package is released with the same version number, so keep them
+          in step. Blocks, auth and viewers use your app's <Code>@glyphui/ui</Code> as a peer
+          dependency instead of bringing their own copy.
+        </Text>
         <Snippet code="npm install react-hook-form @hookform/resolvers zod @tanstack/react-table@8" />
         <Text size="small" tone="muted">
           Forms and data tables. The data table needs TanStack Table version 8; version 9 is not

@@ -14,6 +14,7 @@ export default defineDoc({
     'filterChipStyles',
     'createColumnHelper',
     'useTableUrlState',
+    'getFilterList',
     'parseTableSearch',
     'writeTableSearch',
     'historyAdapter',
@@ -78,6 +79,7 @@ export default defineDoc({
   notes: [
     'Columns are typed from your row type via createColumnHelper<T>(). Set meta: { align: "right" } on numeric columns.',
     'Requires @tanstack/react-table version 8 as a peer dependency (install @tanstack/react-table@8; version 9 is not supported yet).',
+    'Pass columns to useTableUrlState so filters decode by type: a shared link with one status still gives a multi filter an array. In server code, getFilterList(state.columnFilters, "status") always returns an array.',
     'Every piece of state (page, sort, search, filters, visibility, sizes, pinning, order, selection, expanded rows, density) can be controlled through state and onStateChange, or left to the table. Pass getRowId so selections survive paging and data changes.',
     'Server mode: pass the current page as data, the total as rowCount (or hasNextPage for cursor APIs), and keep loading true while fetching. With TanStack Query, use placeholderData: keepPreviousData so the old page stays until the new one arrives.',
     'Select-all across pages sets allMatchingSelected in state; in server mode act on the query rather than the row ids.',

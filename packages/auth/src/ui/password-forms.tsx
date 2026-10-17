@@ -20,12 +20,13 @@ export function ForgotPasswordForm({
   signInHref,
   defaultEmail = '',
   title = 'Reset your password',
-  description = 'Enter your account’s email and we’ll send you a reset link.',
+  description,
   headingLevel,
   footer,
   className,
 }: ForgotPasswordFormProps) {
   const auth = useAuth()
+  const byCode = auth.capabilities.passwordResetMethod === 'code'
   const [sent, setSent] = useState<string | null>(null)
   const [schema] = useState(() =>
     fields({ email: [required('Enter your email address.'), email()] }),
@@ -34,7 +35,7 @@ export function ForgotPasswordForm({
   const shared = { headingLevel, className }
   const backLink = signInHref ? <Link href={signInHref}>Back to sign in</Link> : undefined
 
-  if (sent && auth.capabilities.passwordResetMethod === 'code')
+  if (sent && byCode)
     return <ResetPasswordForm {...shared} email={sent} {...(signInHref && { signInHref })} />
   if (sent)
     return (
@@ -55,7 +56,12 @@ export function ForgotPasswordForm({
   return (
     <AuthCard
       title={title}
-      description={description}
+      description={
+        description ??
+        (byCode
+          ? 'Enter your account’s email and we’ll send you a code to reset your password.'
+          : 'Enter your account’s email and we’ll send you a reset link.')
+      }
       footer={footer ?? backLink}
       className={className}
       {...(headingLevel && { headingLevel })}
@@ -76,7 +82,7 @@ export function ForgotPasswordForm({
         <FormField control={form.control} name="email" label="Email" required>
           {(field) => <Input type="email" autoComplete="email" inputMode="email" {...field} />}
         </FormField>
-        <FormSubmit fullWidth>Send reset link</FormSubmit>
+        <FormSubmit fullWidth>{byCode ? 'Send reset code' : 'Send reset link'}</FormSubmit>
       </Form>
     </AuthCard>
   )

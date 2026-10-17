@@ -215,8 +215,10 @@ describe('password reset', () => {
     Object.assign(client.capabilities, { passwordResetMethod: 'code' })
     const resetPassword = vi.spyOn(client, 'resetPassword').mockResolvedValue()
     renderWithAuth(<ForgotPasswordForm />, client)
+    // The copy matches the method: a code, not a link.
+    expect(await screen.findByText(/send you a code/)).toBeInTheDocument()
     await user().type(await screen.findByRole('textbox', { name: /email/i }), ada.email)
-    await user().click(screen.getByRole('button', { name: 'Send reset link' }))
+    await user().click(screen.getByRole('button', { name: 'Send reset code' }))
     expect(await screen.findByText(/Enter the code we sent to/)).toBeInTheDocument()
     await typeCode('123456')
     await user().type(screen.getByLabelText(/^New password/), 'brand new pw')

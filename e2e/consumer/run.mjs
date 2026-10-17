@@ -88,10 +88,10 @@ const ui = JSON.parse(readFileSync(join(root, 'packages/ui/package.json'), 'utf8
 const viewers = JSON.parse(readFileSync(join(root, 'packages/viewers/package.json'), 'utf8'))
 // Every optional peer is installed, so each entry point is type-checked and bundled.
 const peers = Object.fromEntries(
-  Object.entries({ ...ui.peerDependencies, ...viewers.peerDependencies }).map(([name, range]) => [
-    name,
-    resolveVersion(name, range),
-  ]),
+  Object.entries({ ...ui.peerDependencies, ...viewers.peerDependencies })
+    // Glyph's own packages are peers of each other; they come from the local tarballs.
+    .filter(([name]) => !name.startsWith('@glyphui/'))
+    .map(([name, range]) => [name, resolveVersion(name, range)]),
 )
 const tailwind = peers.tailwindcss
 const tooling = {
@@ -112,8 +112,9 @@ const manifest = {
   type: 'module',
   dependencies: { ...tarball, ...runtimePeers, zod },
   devDependencies: { ...tooling, tailwindcss: tailwind },
-  // Packages depend on each other by version; point those at the local tarballs too.
-  overrides: tarball,
+  // No overrides: Glyph packages are peers of each other, so the root tarballs satisfy them,
+  // and ui's own dependency on tokens dedupes to the root tokens tarball. (Overriding a
+  // peer range makes npm fail with ERESOLVE.)
 }
 writeFileSync(join(app, 'package.json'), `${JSON.stringify(manifest, null, 2)}\n`)
 console.log('\nResolved versions:')

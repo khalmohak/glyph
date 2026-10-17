@@ -691,3 +691,25 @@ test.describe('Viewers', () => {
     await expect(preview.getByText('No preview for this file')).toBeVisible()
   })
 })
+
+test.describe('Layout and focus details', () => {
+  test('eight OTP slots fit a 390px screen', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 800 })
+    const preview = await example(page, 'input-otp/grouped')
+    const overflow = await preview.evaluate((el) => {
+      const root = el.querySelector('[data-slot="input-otp"]')
+      return root ? root.getBoundingClientRect().right - el.getBoundingClientRect().right : 0
+    })
+    expect(overflow).toBeLessThanOrEqual(0)
+  })
+
+  test('a tab panel that takes focus shows a ring', async ({ page }) => {
+    const preview = await example(page, 'tabs/underline')
+    const panel = preview.getByRole('tabpanel').first()
+    await preview.getByRole('tab').first().focus()
+    await page.keyboard.press('Tab')
+    await expect(panel).toBeFocused()
+    const ring = await panel.evaluate((el) => getComputedStyle(el).boxShadow)
+    expect(ring).not.toBe('none')
+  })
+})

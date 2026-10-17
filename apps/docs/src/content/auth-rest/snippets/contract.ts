@@ -16,7 +16,8 @@ export const nextStep = { status: 'needs-verification', email: 'ada@example.com'
 // or { status: 'needs-second-factor' }
 
 // 204 (or 200 without `user`) also works: the user is then read from GET /auth/session.
-// GET /auth/session — 401 or `{ user: null }` when signed out.
+// GET /auth/session — 200 `{ user: null }` when signed out (recommended). A 401 works too,
+// but browsers log every 401 as a console error, on each signed-out page view.
 
 // 4xx — shown above the form, or next to fields listed in `errors`
 export const failed = {

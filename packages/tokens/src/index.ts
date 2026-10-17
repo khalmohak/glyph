@@ -35,7 +35,7 @@ export {
   springEasing,
   springPosition,
 } from './spring'
-export { deriveTextColor } from './text-colors'
+export { deriveForeground, deriveTextColor, type SolidTone, solidTones } from './text-colors'
 export {
   modeVars,
   scopeSelector,

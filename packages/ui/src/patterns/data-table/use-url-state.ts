@@ -1,6 +1,12 @@
-import type { ColumnFiltersState, SortingState, VisibilityState } from '@tanstack/react-table'
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+} from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import type { DataTableState, DataTableStateKey } from './types'
+import { filterTypesOf } from './filters/filter-fns'
+import type { DataTableState, DataTableStateKey, FilterType } from './types'
 
 /** Where URL state is read from and written to. The default uses `window.history`. */
 export interface UrlAdapter {
@@ -50,6 +56,14 @@ export interface UseTableUrlStateOptions {
   searchDebounce?: number
   /** Swap in your router's search params. Defaults to the History API. */
   adapter?: UrlAdapter
+  /**
+   * The table's columns. Filters are then decoded by their `meta.filter` type, so a deep
+   * link like `?f.status=open` gives a `multi` filter the array `['open']`, not a string.
+   */
+  // biome-ignore lint/suspicious/noExplicitAny: TanStack's own convention for mixed column value types
+  columns?: readonly ColumnDef<any, any>[]
+  /** Filter types by column id, for filters without a column definition here. */
+  filterTypes?: Record<string, FilterType>
 }
 
 export interface TableUrlState {
@@ -81,7 +95,9 @@ function encodeFilter(value: unknown): string[] {
   return value === undefined || value === null || value === '' ? [] : [String(value)]
 }
 
-function decodeFilter(values: string[]): unknown {
+function decodeFilter(values: string[], type?: FilterType): unknown {
+  if (type === 'multi') return values
+  if (type === 'select' || type === 'text') return values[0] ?? ''
   if (values.length > 1) return values
   const [value = ''] = values
   const at = value.indexOf(RANGE)
@@ -103,7 +119,13 @@ function decodeFilter(values: string[]): unknown {
 /** Reads table state from a query string. Exported for tests and server-side rendering. */
 export function parseTableSearch(
   search: string,
-  { prefix = '', pageSize = 10, slices = ALL_SLICES }: UseTableUrlStateOptions = {},
+  {
+    prefix = '',
+    pageSize = 10,
+    slices = ALL_SLICES,
+    columns,
+    filterTypes,
+  }: UseTableUrlStateOptions = {},
 ): Partial<DataTableState> {
   const params = new URLSearchParams(search)
   const key = (name: string) => (prefix ? `${prefix}.${name}` : name)
@@ -132,12 +154,11 @@ export function parseTableSearch(
     const filterPrefix = key('f.')
     const ids = new Set<string>()
     for (const name of params.keys()) if (name.startsWith(filterPrefix)) ids.add(name)
+    const types = { ...(columns && filterTypesOf(columns)), ...filterTypes }
     const filters: ColumnFiltersState = []
     for (const name of ids) {
-      filters.push({
-        id: name.slice(filterPrefix.length),
-        value: decodeFilter(params.getAll(name)),
-      })
+      const id = name.slice(filterPrefix.length)
+      filters.push({ id, value: decodeFilter(params.getAll(name), types[id]) })
     }
     state.columnFilters = filters
   }

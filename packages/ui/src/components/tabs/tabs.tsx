@@ -20,7 +20,8 @@ export const tabsStyles = /* @__PURE__ */ tv({
     ],
     /** Slides to the active tab. Underline bar or pill background, by variant. */
     indicator: 'pointer-events-none absolute',
-    content: 'outline-none',
+    // Radix makes a panel a Tab stop when nothing inside is focusable, so show where focus is.
+    content: [focusRing, 'rounded-sm'],
   },
   variants: {
     variant: {
