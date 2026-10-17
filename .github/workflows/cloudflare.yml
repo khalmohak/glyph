@@ -1,0 +1,79 @@
+name: Cloudflare
+
+# Deploys the docs (glyphui.xyz) and the demo apps (demo. and auth. subdomains) to
+# Cloudflare Pages: production from main, a preview for every pull request from this repo.
+# Does nothing until the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets exist; see
+# CONTRIBUTING.md, "Hosting on Cloudflare". The domain comes from the CLOUDFLARE_DOMAIN
+# repository variable (default glyphui.xyz).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_DOMAIN: ${{ vars.CLOUDFLARE_DOMAIN || 'glyphui.xyz' }}
+    steps:
+      - id: ready
+        name: Check for Cloudflare credentials
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Cloudflare secrets are not set (or this is a fork); skipping the deploy."
+          fi
+      - if: steps.ready.outputs.ready == 'true'
+        uses: actions/checkout@v4
+      - if: steps.ready.outputs.ready == 'true'
+        uses: pnpm/action-setup@v4
+      - if: steps.ready.outputs.ready == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - if: steps.ready.outputs.ready == 'true'
+        name: Site location
+        run: |
+          {
+            echo "SITE_URL=https://$CLOUDFLARE_DOMAIN"
+            echo "DEMO_URL=https://demo.$CLOUDFLARE_DOMAIN"
+            echo "AUTH_URL=https://auth.$CLOUDFLARE_DOMAIN"
+            echo "DOCS_BASE=/"
+            echo "DEMO_BASE=/"
+            echo "AUTH_EXAMPLE_BASE=/"
+          } >> "$GITHUB_ENV"
+      - if: steps.ready.outputs.ready == 'true'
+        run: pnpm install --frozen-lockfile
+      - if: steps.ready.outputs.ready == 'true'
+        run: pnpm turbo run build --filter=docs --filter=demo-saas --filter=auth-example
+      # Projects, custom domains and DNS records; a no-op once they exist.
+      - if: steps.ready.outputs.ready == 'true'
+        name: Prepare Cloudflare
+        run: node scripts/cloudflare.mjs
+      - if: steps.ready.outputs.ready == 'true'
+        name: Deploy to Cloudflare Pages
+        env:
+          BRANCH: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'main' }}
+        run: |
+          echo "### Cloudflare Pages ($BRANCH)" >> "$GITHUB_STEP_SUMMARY"
+          for app in docs:glyph-docs demo-saas:glyph-demo auth-example:glyph-auth; do
+            dir="${app%%:*}"
+            project="${app##*:}"
+            # No top-level 404.html, so Pages serves index.html for client-side routes.
+            npx --yes wrangler@4.147.0 pages deploy "apps/$dir/dist" \
+              --project-name="$project" --branch="$BRANCH" --commit-dirty=true | tee deploy.log
+            url="$(grep -Eo 'https://[^ ]+\.pages\.dev' deploy.log | tail -1)"
+            echo "- \`$project\`: $url" >> "$GITHUB_STEP_SUMMARY"
+          done

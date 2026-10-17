@@ -17,6 +17,12 @@ export const LIVE_URL = (process.env.SITE_URL || 'https://khalmohak.github.io/gl
   '',
 )
 
+/** The Ledgerline demo app: beside the docs on GitHub Pages, its own subdomain on Cloudflare. */
+export const DEMO_URL = (process.env.DEMO_URL || `${LIVE_URL}/demo`).replace(/\/+$/, '')
+
+/** The auth example app, deployed like the demo. */
+export const AUTH_URL = (process.env.AUTH_URL || `${LIVE_URL}/auth`).replace(/\/+$/, '')
+
 export interface NavSection {
   label: string
   href: string

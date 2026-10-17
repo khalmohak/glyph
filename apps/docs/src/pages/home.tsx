@@ -35,7 +35,7 @@ import { BrowserFrame } from '../components/home/browser-frame'
 import { ThemeTeaser } from '../components/home/theme-teaser'
 import { Snippet } from '../components/snippet'
 import { docs } from '../lib/catalog'
-import { LIVE_URL } from '../lib/site'
+import { AUTH_URL, DEMO_URL } from '../lib/site'
 import { version } from '../lib/version'
 import { presetLabel, presetNames } from '../shell/theme-controls'
 import { useThemeChoice } from '../theme-choice'
@@ -168,13 +168,13 @@ export function HomePage() {
           <DemoCard
             title="Ledgerline"
             description="A billing SaaS: dashboard charts, a server-side invoices table with URL state and bulk actions, forms in modals, and a ⌘K menu."
-            href={`${LIVE_URL}/demo/`}
+            href={`${DEMO_URL}/`}
             uses={['AppShell', 'DataTable', 'Charts', 'Modal', 'Form', 'CommandMenu']}
           />
           <DemoCard
             title="Auth example"
             description="Sign-up with an emailed code, protected routes with redirect-back, roles, organizations and an expiring session."
-            href={`${LIVE_URL}/auth/`}
+            href={`${AUTH_URL}/`}
             uses={['AuthProvider', 'SignInForm', 'RequireAuth', 'UserMenu', 'OrganizationSwitcher']}
           />
         </Stagger>

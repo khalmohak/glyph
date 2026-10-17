@@ -11,7 +11,7 @@ import {
 } from '@glyphui/ui'
 import { ArrowUpRight, Github } from 'lucide-react'
 import { Link } from 'react-router'
-import { LIVE_URL, REPO_URL } from '../lib/site'
+import { AUTH_URL, DEMO_URL, REPO_URL } from '../lib/site'
 
 interface Template {
   name: string
@@ -30,7 +30,7 @@ const templates: Template[] = [
     description:
       'A billing SaaS: a dashboard with charts, a server-side invoices table with URL state, filter chips and bulk actions, forms in modals, a customer sheet and a ⌘K menu.',
     image: 'templates/ledgerline.jpg',
-    live: { href: `${LIVE_URL}/demo/` },
+    live: { href: `${DEMO_URL}/` },
     source: `${REPO_URL}/tree/main/apps/demo-saas`,
     tags: ['SaaS dashboard', 'Data tables', 'Charts'],
     uses: [
@@ -48,7 +48,7 @@ const templates: Template[] = [
     description:
       'Sign-up with an emailed code, two-step sign-in, protected routes with redirect-back, roles, organizations, an expiring session and cross-tab sign-out, against a REST API.',
     image: 'templates/auth.jpg',
-    live: { href: `${LIVE_URL}/auth/` },
+    live: { href: `${AUTH_URL}/` },
     source: `${REPO_URL}/tree/main/apps/auth-example`,
     tags: ['Authentication', 'React Router'],
     uses: [
