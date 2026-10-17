@@ -37,27 +37,86 @@ test.describe('invoices', () => {
   })
 
   test('deletes a row after confirming', async ({ page }) => {
+    const table = page.getByRole('table', { name: 'Invoices' })
     await page.getByRole('button', { name: 'Actions for INV-1040' }).click()
     await page.getByRole('menuitem', { name: 'Delete' }).click()
     const confirm = page.getByRole('alertdialog')
     await confirm.getByRole('button', { name: 'Cancel' }).click()
-    await expect(page.getByText('INV-1040', { exact: true })).toBeVisible()
+    await expect(table.getByText('INV-1040', { exact: true })).toBeVisible()
 
     await page.getByRole('button', { name: 'Actions for INV-1040' }).click()
     await page.getByRole('menuitem', { name: 'Delete' }).click()
     await confirm.getByRole('button', { name: 'Delete' }).click()
     await expect(page.getByText('Invoice deleted')).toBeVisible()
-    await expect(page.getByText('INV-1040', { exact: true })).toBeHidden()
+    await expect(table.getByText('INV-1040', { exact: true })).toBeHidden()
   })
 
-  test('filters by status and bulk-deletes the selection', async ({ page }) => {
-    await page.getByRole('radio', { name: 'Overdue' }).click()
-    await expect(page.locator('tbody tr')).toHaveCount(5)
+  test('filters by status with a chip and bulk-deletes the selection', async ({ page }) => {
+    const table = page.getByRole('table', { name: 'Invoices' })
+    await expect(table.locator('tbody tr')).toHaveCount(10)
+    await page.getByRole('button', { name: 'Filter', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Status' }).click()
+    // Counts come from the server.
+    await expect(page.getByRole('option', { name: /Overdue/ })).toContainText('5')
+    await page.getByRole('option', { name: /Overdue/ }).click()
+    await page.keyboard.press('Escape')
+    await expect(page).toHaveURL(/f\.status=overdue/)
+    await expect(table.locator('tbody tr')).toHaveCount(5)
     await page.getByRole('checkbox', { name: 'Select all rows on this page' }).click()
-    await page.getByRole('button', { name: 'Delete 5' }).click()
+    const bar = page.getByRole('toolbar', { name: 'Bulk actions' })
+    await bar.getByRole('button', { name: 'Delete 5' }).click()
     await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
     await expect(page.getByText('5 invoices deleted')).toBeVisible()
+    await expect(page.getByText('No rows match these filters')).toBeVisible()
   })
+
+  test('pages through the server and back with the browser', async ({ page }) => {
+    const table = page.getByRole('table', { name: 'Invoices' })
+    await expect(page.getByText('1–10 of 37')).toBeVisible()
+    await page.getByRole('button', { name: 'Page 2' }).click()
+    await expect(page).toHaveURL(/page=2/)
+    await expect(page.getByText('11–20 of 37')).toBeVisible()
+    await expect(table.locator('tbody tr').first()).toContainText('INV-1050')
+    await page.goBack()
+    await expect(page.getByText('1–10 of 37')).toBeVisible()
+    await expect(table.locator('tbody tr').first()).toContainText('INV-1040')
+  })
+
+  test('opens invoice details from a row', async ({ page }) => {
+    const table = page.getByRole('table', { name: 'Invoices' })
+    await table.getByText('INV-1042').click()
+    const sheet = page.getByRole('dialog', { name: 'INV-1042' })
+    await expect(sheet).toBeVisible()
+    await expect(sheet).toContainText('Initech')
+    await page.keyboard.press('Escape')
+    await expect(sheet).toBeHidden()
+  })
+
+  test('exports every matching invoice as CSV', async ({ page }) => {
+    await page.getByRole('button', { name: 'Export' }).click()
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('menuitem', { name: 'All rows' }).click(),
+    ])
+    expect(download.suggestedFilename()).toBe('invoices.csv')
+    let csv = ''
+    for await (const chunk of await download.createReadStream()) csv += chunk
+    const lines = csv.replace(/^\uFEFF/, '').split('\r\n')
+    expect(lines[0]).toBe('Invoice,Customer,Status,Due,Total')
+    expect(lines).toHaveLength(38)
+  })
+})
+
+test('command menu opens an invoice in the table', async ({ page }) => {
+  await page.goto('/app')
+  await page.keyboard.press('ControlOrMeta+k')
+  await page.getByPlaceholder('Search pages and invoices…').fill('INV-1043')
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(/\/app\/invoices\?q=INV-1043$/)
+  await expect(page.getByRole('searchbox', { name: 'Search rows' })).toHaveValue('INV-1043')
+  const rows = page.getByRole('table', { name: 'Invoices' }).locator('tbody tr')
+  await expect(rows).toHaveCount(1)
+  await expect(rows.first()).toContainText('Umbrella')
 })
 
 test('command menu navigates and closes', async ({ page }) => {

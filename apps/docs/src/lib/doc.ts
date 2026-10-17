@@ -31,6 +31,7 @@ export type Entry =
   | '@glyphui/ui'
   | '@glyphui/ui/form'
   | '@glyphui/ui/data-table'
+  | '@glyphui/ui/data-table/virtual'
   | '@glyphui/ui/chart'
   | '@glyphui/ui/react-router'
   | '@glyphui/ui/vite'

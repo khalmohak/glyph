@@ -10,5 +10,5 @@
   "fixed": [["@glyphui/tokens", "@glyphui/ui", "@glyphui/blocks"]],
   "access": "public",
   "baseBranch": "main",
-  "ignore": ["showcase", "docs"]
+  "ignore": ["showcase", "docs", "demo-saas"]
 }

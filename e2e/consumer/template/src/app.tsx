@@ -21,7 +21,14 @@ import {
   useConfirm,
 } from '@glyphui/ui'
 import { AreaChart, Sparkline } from '@glyphui/ui/chart'
-import { createColumnHelper, DataTable } from '@glyphui/ui/data-table'
+import {
+  createColumnHelper,
+  DataTable,
+  type DataTableState,
+  editableCell,
+  useTableUrlState,
+} from '@glyphui/ui/data-table'
+import { virtualRows } from '@glyphui/ui/data-table/virtual'
 import { Form, FormError, FormField, FormSubmit, useForm } from '@glyphui/ui/form'
 import { useState } from 'react'
 import { z } from 'zod'
@@ -48,8 +55,46 @@ const columns = [
       <Badge tone={info.getValue() === 'paid' ? 'success' : 'info'}>{info.getValue()}</Badge>
     ),
   }),
-  col.accessor('total', { header: 'Total', meta: { align: 'right' } }),
+  col.accessor('total', {
+    header: 'Total',
+    cell: editableCell<Invoice, number>({ type: 'number', validate: (v) => (v < 0 ? 'No' : null) }),
+    meta: { align: 'right', filter: { type: 'range', format: (n) => `$${n}` } },
+  }),
 ]
+
+const virtual = virtualRows({ height: 320 })
+
+/** DataTable v2 in server mode with URL state, as a consumer would write it. */
+function ServerInvoices() {
+  const url = useTableUrlState({ prefix: 'inv' })
+  const [state, setState] = useState<Partial<DataTableState>>({})
+  return (
+    <DataTable
+      aria-label="Server invoices"
+      mode="server"
+      data={invoices}
+      rowCount={120}
+      columns={columns}
+      getRowId={(row) => row.id}
+      state={{ ...url.state, ...state }}
+      onStateChange={(next, changed) => {
+        url.onStateChange(next, changed)
+        if (changed === 'rowSelection') setState({ rowSelection: next.rowSelection })
+      }}
+      selectable
+      bulkActions={(selection) => (
+        <Button onClick={selection.clear}>Clear {selection.count}</Button>
+      )}
+      columnControls
+      densityToggle
+      exportCsv={{ fileName: 'invoices.csv' }}
+      onCellEdit={async ({ value }) => {
+        if (Number(value) > 1e6) throw new Error('Too large')
+      }}
+      mobile="cards"
+    />
+  )
+}
 
 const schema = z.object({
   email: z.email('Enter a valid email'),
@@ -125,6 +170,14 @@ export function App() {
         series={[{ key: 'v', label: 'Revenue' }]}
       />
       <DataTable aria-label="Invoices" data={invoices} columns={columns} search selectable />
+      <ServerInvoices />
+      <DataTable
+        aria-label="All invoices"
+        data={invoices}
+        columns={columns}
+        pageSize={false}
+        virtualize={virtual}
+      />
       <Card>
         <CardHeader>
           <CardTitle>Sign up</CardTitle>

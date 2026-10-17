@@ -23,7 +23,7 @@ export default defineConfig({
       ],
       reporter: ['text-summary', 'html', 'json-summary'],
       // A floor just under current numbers: coverage can only go up. Raise it as tests land.
-      thresholds: { lines: 85, statements: 85, branches: 82, functions: 79 },
+      thresholds: { lines: 89, statements: 89, branches: 82, functions: 83 },
     },
   },
 })

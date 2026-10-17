@@ -5,6 +5,7 @@ export default defineConfig({
     index: 'src/index.ts',
     form: 'src/patterns/form/index.ts',
     'data-table': 'src/patterns/data-table/index.ts',
+    'data-table-virtual': 'src/patterns/data-table/virtual.ts',
     chart: 'src/patterns/chart/index.ts',
     'react-router': 'src/integrations/react-router.tsx',
     vite: 'src/integrations/vite.ts',

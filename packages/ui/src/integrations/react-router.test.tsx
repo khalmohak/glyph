@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, renderHook, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes } from 'react-router'
+import { MemoryRouter, Route, Routes, useLocation, useSearchParams } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import {
   NavigationMenu,
@@ -8,8 +8,10 @@ import {
   NavigationMenuLink,
 } from '../components/navigation-menu'
 import { AppShell, Navbar, Sidebar, SidebarContent, SidebarItem } from '../patterns/app-shell'
+import { defaultTableState } from '../patterns/data-table/use-table-state'
+import { useTableUrlState } from '../patterns/data-table/use-url-state'
 import { GlyphProvider, type GlyphRouter } from '../provider'
-import { matchPath, reactRouter } from './react-router'
+import { matchPath, reactRouter, useRouterUrlAdapter } from './react-router'
 
 function App({ path, children }: { path: string; children: React.ReactNode }) {
   return (
@@ -165,5 +167,41 @@ describe('GlyphProvider router prop', () => {
     const link = screen.getAllByRole('link', { name: 'Home' })[0]
     expect(link).toHaveAttribute('data-custom')
     expect(link).toHaveAttribute('aria-current', 'page')
+  })
+})
+
+describe('useRouterUrlAdapter', () => {
+  it('keeps table URL state and the router location in sync', async () => {
+    const { result } = renderHook(
+      () => {
+        const url = useTableUrlState({ adapter: useRouterUrlAdapter() })
+        const [params, setParams] = useSearchParams()
+        return { url, params, setParams, location: useLocation() }
+      },
+      {
+        wrapper: ({ children }) => (
+          <MemoryRouter initialEntries={['/invoices?q=INV-7&tab=all']}>{children}</MemoryRouter>
+        ),
+      },
+    )
+    expect(result.current.url.state.search).toBe('INV-7')
+
+    await act(async () =>
+      result.current.url.onStateChange(
+        { ...defaultTableState, pagination: { pageIndex: 2, pageSize: 10 } },
+        'pagination',
+      ),
+    )
+    expect(result.current.location.search).toBe('?q=INV-7&tab=all&page=3')
+
+    // A router navigation that keeps other params leaves the table's params alone.
+    act(() =>
+      result.current.setParams((params) => {
+        params.set('new', '1')
+        return params
+      }),
+    )
+    expect(result.current.params.get('page')).toBe('3')
+    expect(result.current.url.state.pagination?.pageIndex).toBe(2)
   })
 })

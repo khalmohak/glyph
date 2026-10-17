@@ -144,6 +144,7 @@
     var(--glyph-ease-standard);
   --animate-collapse-down: glyph-collapse-down var(--glyph-duration-base) var(--glyph-ease-standard);
   --animate-collapse-up: glyph-collapse-up var(--glyph-duration-base) var(--glyph-ease-standard);
+  --animate-indeterminate: glyph-indeterminate 1.1s var(--glyph-ease-standard) infinite;
 }
 
 /*
@@ -282,6 +283,14 @@
   }
   to {
     height: var(--radix-accordion-content-height, var(--radix-collapsible-content-height));
+  }
+}
+@keyframes glyph-indeterminate {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
   }
 }
 @keyframes glyph-collapse-up {

@@ -8,7 +8,7 @@ export default defineDoc({
   description:
     'Connect Glyph to your router once: links navigate client-side and navigation items mark the current page automatically.',
   entry: '@glyphui/ui/react-router',
-  exports: ['reactRouter', 'RouterLink', 'useRouterIsActive', 'matchPath'],
+  exports: ['reactRouter', 'RouterLink', 'useRouterIsActive', 'matchPath', 'useRouterUrlAdapter'],
   examples: [
     {
       file: 'active-items',
@@ -24,5 +24,6 @@ export default defineDoc({
     'Hash links, external URLs and mailto: render as plain anchors and are never marked active.',
     'Other routers: pass { Link, useIsActive } yourself. The getting-started guide has TanStack Router and Next.js versions.',
     'Requires react-router 7 or later as a peer dependency.',
+    'useRouterUrlAdapter() connects DataTable’s useTableUrlState to React Router: useTableUrlState({ adapter: useRouterUrlAdapter() }), so the router’s location and useSearchParams always match the table.',
   ],
 })
