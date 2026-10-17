@@ -28,9 +28,10 @@ interface Invoice {
 }
 
 // Filter editors load on first use; load them up front so tests don't wait on the import.
+// A cold import (calendar, date-fns) can take well over 10 s on a busy CI runner.
 beforeAll(async () => {
   await import('./filters/filter-editors')
-})
+}, 60_000)
 
 const statuses = ['paid', 'open', 'overdue'] as const
 const invoices: Invoice[] = Array.from({ length: 25 }, (_, i) => ({
