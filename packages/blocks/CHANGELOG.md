@@ -1,5 +1,12 @@
 # @glyphui/blocks
 
+## 0.6.0
+
+### Patch Changes
+
+- Updated dependencies [[`ce9fb2a`](https://github.com/khalmohak/glyph/commit/ce9fb2a5c41f92b6bdd26bd3c5cf6308310d3596)]:
+  - @glyphui/ui@0.6.0
+
 ## 0.5.0
 
 ### Minor Changes
