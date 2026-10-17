@@ -25,20 +25,40 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo run build --filter=docs --filter=demo-saas --filter=auth-example
+      # Where the site lives. By default GitHub Pages under /glyph/. To move to a custom domain,
+      # set the repository variable CUSTOM_DOMAIN (e.g. glyphui.dev): everything is then served
+      # from / and a CNAME file is written. See CONTRIBUTING.md, "Custom domain".
+      - name: Site location
         env:
-          DOCS_BASE: /glyph/
-          DEMO_BASE: /glyph/demo/
-          AUTH_EXAMPLE_BASE: /glyph/auth/
-      # Docs at /glyph/, demo app at /glyph/demo/, auth example at /glyph/auth/. The old
+          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
+        run: |
+          if [ -n "$CUSTOM_DOMAIN" ]; then
+            base=/
+            site_url="https://$CUSTOM_DOMAIN"
+          else
+            base=/glyph/
+            site_url="https://khalmohak.github.io/glyph"
+          fi
+          {
+            echo "BASE=$base"
+            echo "DOCS_BASE=$base"
+            echo "DEMO_BASE=${base}demo/"
+            echo "AUTH_EXAMPLE_BASE=${base}auth/"
+            echo "SITE_URL=$site_url"
+          } >> "$GITHUB_ENV"
+      - run: pnpm turbo run build --filter=docs --filter=demo-saas --filter=auth-example
+      # Docs at the base, demo app at <base>demo/, auth example at <base>auth/. The old
       # showcase URL redirects to the docs home, which now has its content.
       # 404.html lets docs deep links load; the demo gets an index.html per route instead.
-      - run: |
+      - env:
+          CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
+        run: |
           mkdir -p site
           cp -R apps/docs/dist/. site/
           cp site/index.html site/404.html
           mkdir -p site/showcase
-          printf '<!doctype html><meta charset="utf-8"><title>Glyph</title><meta http-equiv="refresh" content="0; url=/glyph/"><link rel="canonical" href="/glyph/"><a href="/glyph/">Glyph docs</a>\n' > site/showcase/index.html
+          printf '<!doctype html><meta charset="utf-8"><title>Glyph</title><meta http-equiv="refresh" content="0; url=%s"><link rel="canonical" href="%s"><a href="%s">Glyph docs</a>\n' "$BASE" "$BASE" "$BASE" > site/showcase/index.html
+          if [ -n "$CUSTOM_DOMAIN" ]; then echo "$CUSTOM_DOMAIN" > site/CNAME; fi
           mkdir -p site/demo
           cp -R apps/demo-saas/dist/. site/demo/
           for route in sign-in app app/invoices app/customers app/settings; do

@@ -86,7 +86,7 @@ export function BlockFrame({ slug, file, title, width, onWidthChange }: BlockFra
     target.addEventListener('pointerup', up)
   }
 
-  const src = `${import.meta.env.BASE_URL}blocks/frame/${slug}/${file}`
+  const src = `${import.meta.env.BASE_URL}blocks/frame/?slug=${encodeURIComponent(slug)}&file=${encodeURIComponent(file)}`
 
   return (
     <div className="grid gap-2">

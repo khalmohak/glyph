@@ -28,7 +28,8 @@ const router = createBrowserRouter(
   [
     {
       // A block on its own, without the site chrome, for the blocks gallery's iframes.
-      path: 'blocks/frame/:slug/:file',
+      // One route for every block (?slug=&file=), so the build prerenders a single page for it.
+      path: 'blocks/frame',
       hydrateFallbackElement: <LoadingState label="Loading" className="min-h-dvh" />,
       lazy: page(() => import('./pages/block-frame'), 'BlockFramePage'),
     },

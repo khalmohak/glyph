@@ -4,7 +4,7 @@ import { gzipSync } from 'node:zlib'
 import { withCustomConfig } from 'react-docgen-typescript'
 import { codeToHtml, createCssVariablesTheme } from 'shiki'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
-import { staticRoutes } from '../src/lib/site'
+import { LIVE_URL, staticRoutes } from '../src/lib/site'
 
 /**
  * Build-time data for the docs:
@@ -293,17 +293,62 @@ export function docsData(): Plugin {
       if (config?.command !== 'build') return
       const outDir = resolve(config.root, config.build.outDir)
       const shell = readFileSync(join(outDir, 'index.html'), 'utf8')
-      for (const route of routeMetas(contentRoot)) {
+      const urlOf = (path: string) => `${LIVE_URL}/${path ? `${path}/` : ''}`
+      const page = (
+        route: { path: string; title: string; description?: string },
+        noindex = false,
+      ) => {
+        const title = escapeAttr(route.title)
         const description = escapeAttr(route.description ?? SITE_DESCRIPTION)
-        const html = shell
-          .replace(/<title>.*?<\/title>/, `<title>${escapeAttr(route.title)}</title>`)
+        const url = escapeAttr(urlOf(route.path))
+        // Canonical and Open Graph URLs come from SITE_URL, so moving domains is one setting.
+        const head = [
+          `<link rel="canonical" href="${url}" />`,
+          `<meta property="og:type" content="website" />`,
+          `<meta property="og:site_name" content="${SITE}" />`,
+          `<meta property="og:title" content="${title}" />`,
+          `<meta property="og:description" content="${description}" />`,
+          `<meta property="og:url" content="${url}" />`,
+          `<meta name="twitter:card" content="summary" />`,
+          ...(noindex ? ['<meta name="robots" content="noindex" />'] : []),
+        ].join('\n    ')
+        return shell
+          .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
           .replace(
             /<meta name="description" content="[^"]*"/,
             `<meta name="description" content="${description}"`,
           )
-        mkdirSync(join(outDir, route.path), { recursive: true })
-        writeFileSync(join(outDir, route.path, 'index.html'), html)
+          .replace('</head>', `    ${head}\n  </head>`)
       }
+      const routes = routeMetas(contentRoot)
+      for (const route of routes) {
+        mkdirSync(join(outDir, route.path), { recursive: true })
+        writeFileSync(join(outDir, route.path, 'index.html'), page(route))
+      }
+      // The blocks gallery's iframes load this one page with ?slug=&file=; keep it out of search.
+      mkdirSync(join(outDir, 'blocks/frame'), { recursive: true })
+      writeFileSync(
+        join(outDir, 'blocks/frame/index.html'),
+        page({ path: 'blocks/frame', title: `Block preview · ${SITE}` }, true),
+      )
+      // The home page keeps the shell's title; it gets the canonical and Open Graph tags too.
+      const homeTitle = /<title>(.*?)<\/title>/.exec(shell)?.[1] ?? SITE
+      writeFileSync(join(outDir, 'index.html'), page({ path: '', title: homeTitle }))
+      writeFileSync(
+        join(outDir, 'sitemap.xml'),
+        [
+          '<?xml version="1.0" encoding="UTF-8"?>',
+          '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+          `  <url><loc>${escapeAttr(urlOf(''))}</loc></url>`,
+          ...routes.map((route) => `  <url><loc>${escapeAttr(urlOf(route.path))}</loc></url>`),
+          '</urlset>',
+          '',
+        ].join('\n'),
+      )
+      writeFileSync(
+        join(outDir, 'robots.txt'),
+        `User-agent: *\nDisallow: ${new URL(urlOf('blocks/frame')).pathname}\n\nSitemap: ${urlOf('')}sitemap.xml\n`,
+      )
     },
     configureServer(s) {
       server = s
