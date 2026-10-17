@@ -129,7 +129,7 @@ function SignInPage() {
 
 ## Components
 
-| Category | Components (120) |
+| Category | Components (121) |
 |---|---|
 | Actions | Button · CopyButton · Toggle |
 | Forms | Calendar · Checkbox · Combobox · DatePicker · Field · FileUpload · Input · InputOTP · Label · NumberInput · PasswordInput · RadioGroup · SegmentedControl · Select · Slider · Switch · TagInput · Textarea |
@@ -139,7 +139,7 @@ function SignInPage() {
 | Data display | Accordion · Avatar · Badge · Carousel · Chart · ChartCard · Collapsible · DescriptionList · FunnelChart · Gauge · Heatmap · Kbd · PieChart · RadarChart · SankeyChart · ScatterChart · Sparkline · StatCard · Table · Timeline · Treemap · TreeView |
 | Typography | Blockquote · Code · Eyebrow · Heading · Prose · Text |
 | Layout | AspectRatio · Card · Container · Grid · Resizable · ScrollArea · Section · Separator · Stack · VisuallyHidden |
-| Patterns | AppShell · Async · DataTable · Form · Motion · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Vite plugin |
+| Patterns | AppShell · Async · DataTable · Form · Motion · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Virtual rows · Vite plugin |
 | Auth | Auth provider · AuthLayout · Clerk bridge · Code forms · Firebase adapter · Memory adapter · Password reset · Protected routes · REST adapter · Session dialogs · SignInForm · SignUpForm · SocialButtons · UserMenu |
 | Blocks (`@glyphui/blocks`) | AuthCard · Cta · Faq · FeatureGrid · FeatureSplit · Hero · LogoCloud · Newsletter · Pricing · SectionHeader · SiteFooter · Stats · Testimonials |
 

@@ -519,6 +519,8 @@ test.describe('DataTable v2', () => {
       )
       .toContain('INV-11039')
     expect(await bodyRows(preview).count()).toBeLessThan(60)
+  })
+})
 
 test.describe('Auth', () => {
   test('signs in, showing the server error first', async ({ page }) => {
