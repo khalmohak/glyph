@@ -1,5 +1,14 @@
 # @glyphui/ui
 
+## 0.8.1
+
+### Patch Changes
+
+- [#31](https://github.com/khalmohak/glyph/pull/31) [`fc323a7`](https://github.com/khalmohak/glyph/commit/fc323a7daeaefe1b107bc1f04936acdf2192535b) Thanks [@khalmohak](https://github.com/khalmohak)! - Charts and data tables measure again once web fonts finish loading. A chart's y-axis width and a table's pinned-column offsets were measured with the fallback font when the real one arrived late, so they could stay slightly off (and render differently from one page load to the next).
+
+- Updated dependencies []:
+  - @glyphui/tokens@0.8.1
+
 ## 0.8.0
 
 ### Patch Changes
