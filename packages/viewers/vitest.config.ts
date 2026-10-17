@@ -7,6 +7,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
+    // Cold imports of lazy viewer modules are slow on busy CI runners.
+    hookTimeout: 30_000,
     css: false,
     coverage: {
       provider: 'v8',

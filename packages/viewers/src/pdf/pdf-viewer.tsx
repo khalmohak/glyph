@@ -58,10 +58,15 @@ import {
 export const pdfViewerStyles = /* @__PURE__ */ tv({
   extend: viewerFrameStyles,
   slots: {
+    // One row from `sm` up: the search field gives up width before anything wraps.
+    toolbar: 'sm:flex-nowrap',
+    // Phones: dividers go, and search takes its own full-width row.
+    divider: 'max-sm:hidden',
+    searchGroup: 'flex min-w-0 shrink items-center gap-1 max-sm:order-last max-sm:w-full',
     pageInput: 'w-12 text-center tabular-nums',
-    pageCount: 'px-1 text-small text-muted-foreground tabular-nums',
-    zoomSelect: 'w-28',
-    search: 'w-40 sm:w-48',
+    pageCount: 'px-1 text-small whitespace-nowrap text-muted-foreground tabular-nums',
+    zoomSelect: 'w-28 max-sm:hidden',
+    search: 'w-48 min-w-28 shrink max-sm:flex-1',
     counter: 'min-w-14 text-caption text-muted-foreground tabular-nums',
     layout: 'flex h-full min-h-0',
     sidebar:
@@ -481,6 +486,7 @@ export function PdfViewer(inProps: PdfViewerProps) {
         <span className={s.group({ class: slots.group })}>
           <ToolButton
             label="Zoom out"
+            className="max-sm:hidden"
             shortcut="−"
             icon={<ZoomOutIcon />}
             disabled={!ready}
@@ -509,6 +515,7 @@ export function PdfViewer(inProps: PdfViewerProps) {
           </Select>
           <ToolButton
             label="Zoom in"
+            className="max-sm:hidden"
             shortcut="+"
             icon={<ZoomInIcon />}
             disabled={!ready}
@@ -516,6 +523,7 @@ export function PdfViewer(inProps: PdfViewerProps) {
           />
           <ToolButton
             label="Rotate"
+            className="max-sm:hidden"
             shortcut="R"
             icon={<RotateIcon />}
             disabled={!ready}
@@ -523,7 +531,7 @@ export function PdfViewer(inProps: PdfViewerProps) {
           />
         </span>
         <span className={s.spacer({ class: slots.spacer })} />
-        <span className={s.group({ class: slots.group })}>
+        <span className={s.searchGroup({ class: slots.searchGroup })}>
           <Input
             ref={searchInput}
             size="sm"
