@@ -38,6 +38,22 @@ describe('auditContrast', () => {
       expect.objectContaining({ mode: 'light', foreground: 'muted-foreground', kind: 'text' }),
     )
   })
+
+  it('reports chart colors that are too similar to tell apart', () => {
+    const same = defineTheme({
+      name: 'same',
+      extends: glyph,
+      colors: { dark: { 'chart-1': 'oklch(64% 0.19 255)', 'chart-2': 'oklch(64% 0.19 258)' } },
+    })
+    expect(auditContrast(same)).toContainEqual(
+      expect.objectContaining({
+        mode: 'dark',
+        kind: 'chart-distance',
+        foreground: 'chart-1',
+        background: 'chart-2',
+      }),
+    )
+  })
 })
 
 describe('status text colors', () => {
@@ -85,6 +101,16 @@ describe('status text colors', () => {
       colors: { light: { primary: 'red' } },
     })
     expect(theme.colors.light['primary-text']).toBe('red')
+  })
+
+  it('falls back to the foreground when no mix of the tone is readable', () => {
+    // A foreground that is itself unreadable on the background: no mix can pass.
+    const theme = defineTheme({
+      name: 'fog',
+      extends: glyph,
+      colors: { light: { foreground: 'oklch(90% 0 0)', primary: 'oklch(92% 0.05 255)' } },
+    })
+    expect(theme.colors.light['primary-text']).toBe('oklch(90% 0 0)')
   })
 })
 
