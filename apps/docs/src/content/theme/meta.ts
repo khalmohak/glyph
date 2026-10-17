@@ -42,5 +42,6 @@ export default defineDoc({
     'Render GlyphProvider once at the root. Prevent the dark-mode flash with the Vite plugin (@glyphui/ui/vite), <ColorModeScript /> with SSR, or getColorModeScript() in <head>.',
     'Pass router to connect your router: links navigate client-side and navigation items mark the current page. useIsActive(href) exposes the same matching to your own components.',
     'theme.components is typed per component: a Button size that does not exist is a compile error.',
+    'theme.motion sets durations, easings, the motion level (none, subtle or expressive) and the spring ({ stiffness, damping, mass? }) behind overlays, indicators and reveals. See Motion.',
   ],
 })

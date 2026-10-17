@@ -1,4 +1,4 @@
-import { cn, Eyebrow, Heading, Text } from '@glyphui/ui'
+import { cn, Eyebrow, Heading, Stagger, Text } from '@glyphui/ui'
 import type { ReactNode } from 'react'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 
@@ -14,6 +14,8 @@ export interface SectionHeaderProps {
   /** Id for the title, so the section can reference it with aria-labelledby. */
   titleId?: string
   className?: string
+  /** Cascade the eyebrow, title and description in. Default true. */
+  animate?: boolean
 }
 
 /** Eyebrow, title and description at the top of a section. Used by most blocks. */
@@ -25,11 +27,13 @@ export function SectionHeader({
   headingLevel = 2,
   titleId,
   className,
+  animate = true,
 }: SectionHeaderProps) {
   useBlocksStylesCheck()
   return (
-    <div
+    <Stagger
       data-slot="section-header"
+      enabled={animate}
       className={cn(
         'grid max-w-2xl gap-3',
         align === 'center' && 'mx-auto justify-items-center text-center',
@@ -45,6 +49,6 @@ export function SectionHeader({
           {description}
         </Text>
       )}
-    </div>
+    </Stagger>
   )
 }

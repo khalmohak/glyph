@@ -4,7 +4,7 @@ import { defineTheme } from '../define-theme'
  * The default preset. Precise and restrained, dark-first: cool neutrals do the work,
  * one electric-blue accent, layered soft shadows, Geist type.
  */
-export const glyph = defineTheme({
+export const glyph = /* @__PURE__ */ defineTheme({
   name: 'glyph',
   colors: {
     dark: {
@@ -126,6 +126,8 @@ export const glyph = defineTheme({
       standard: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
       emphasized: 'cubic-bezier(0.3, 1.3, 0.5, 1)',
     },
+    level: 'subtle',
+    spring: { stiffness: 420, damping: 34 },
   },
   control: { sm: '30px', md: '36px', lg: '42px' },
 })

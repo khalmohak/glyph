@@ -90,7 +90,7 @@ function colsToClasses(cols: GridCols): string {
     .join(' ')
 }
 
-export const gridStyles = tv({
+export const gridStyles = /* @__PURE__ */ tv({
   slots: { base: 'grid' },
   variants: {
     gap: {

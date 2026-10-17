@@ -196,3 +196,134 @@ test.describe('Toast', () => {
     await expect(toast).toContainText('Acme Inc. will get it by email.')
   })
 })
+
+test.describe('Motion', () => {
+  test.describe('with motion allowed', () => {
+    test.use({ reducedMotion: 'no-preference' })
+
+    test('a menu springs in, animates out, then unmounts', async ({ page }) => {
+      const preview = await example(page, 'dropdown-menu/actions')
+      expect(await page.evaluate(() => document.documentElement.dataset.motion)).toBe('subtle')
+      await preview.getByRole('button', { name: 'Project actions' }).click()
+      const menu = page.getByRole('menu')
+      await expect(menu).toBeVisible()
+      expect(await menu.evaluate((el) => getComputedStyle(el).animationName)).toBe('glyph-pop-in')
+      await page.keyboard.press('Escape')
+      await expect(menu).toHaveCount(0)
+    })
+
+    test('the Tabs indicator slides to the clicked tab', async ({ page }) => {
+      const preview = await example(page, 'motion/levels')
+      const indicator = preview.locator('[role="tab"] [data-slot="indicator"]')
+      const start = await indicator.boundingBox()
+      await preview.getByRole('tab', { name: 'Settings' }).click()
+      const settings = await preview.getByRole('tab', { name: 'Settings' }).boundingBox()
+      // One indicator, now inside the clicked tab, having travelled there.
+      await expect(indicator).toHaveCount(1)
+      await expect
+        .poll(async () => Math.round((await indicator.boundingBox())?.x ?? 0))
+        .toBe(Math.round(settings?.x ?? -1))
+      expect(start?.x).toBeLessThan(settings?.x ?? 0)
+    })
+
+    test('stagger cards reveal when they scroll into view', async ({ page }) => {
+      const preview = await example(page, 'motion/reveal')
+      const group = preview.locator('[data-slot="stagger"]')
+      await expect(group).toHaveAttribute('data-stagger', 'shown')
+      await expect(group.locator('[data-stagger-item]').last()).toHaveCSS('opacity', '1')
+    })
+
+    test('a motion: none theme renders statically', async ({ page }) => {
+      const preview = await example(page, 'motion/levels')
+      await preview.getByRole('radio', { name: 'None' }).click()
+      const scope = preview.locator('[data-glyph-theme][data-motion]')
+      await expect(scope).toHaveAttribute('data-motion', 'none')
+      // Reveal and Stagger never hide content at level none.
+      await expect(scope.locator('[data-slot="stagger"]')).not.toHaveAttribute('data-stagger')
+      await scope.getByRole('tab', { name: 'Activity' }).click()
+      const indicator = scope.locator('[role="tab"] [data-slot="indicator"]')
+      // Static indicator: no motion transform applied mid-flight.
+      expect(await indicator.evaluate((el) => (el as HTMLElement).style.transform)).toBe('')
+    })
+  })
+
+  test('reduced motion turns animation off everywhere', async ({ page }) => {
+    // The suite's default: reducedMotion 'reduce'.
+    const preview = await example(page, 'dropdown-menu/actions')
+    expect(await page.evaluate(() => document.documentElement.dataset.motion)).toBe('none')
+    await preview.getByRole('button', { name: 'Project actions' }).click()
+    const menu = page.getByRole('menu')
+    await expect(menu).toBeVisible()
+    const duration = await menu.evaluate((el) =>
+      Number.parseFloat(getComputedStyle(el).animationDuration),
+    )
+    expect(duration).toBeLessThan(0.01)
+    await page.keyboard.press('Escape')
+    await expect(menu).toHaveCount(0)
+  })
+})
+
+test.describe('Charts', () => {
+  test('legend hides and shows a series', async ({ page }) => {
+    const preview = await example(page, 'chart/line')
+    const curves = preview.locator('.recharts-line-curve')
+    await expect(curves).toHaveCount(2)
+    const costs = preview.getByRole('button', { name: 'Costs' })
+    await costs.click()
+    await expect(costs).toHaveAttribute('aria-pressed', 'false')
+    await expect(curves).toHaveCount(1)
+    await costs.press('Enter')
+    await expect(costs).toHaveAttribute('aria-pressed', 'true')
+    await expect(curves).toHaveCount(2)
+  })
+
+  test('shows a tooltip on hover', async ({ page }) => {
+    const preview = await example(page, 'chart/bar')
+    const plot = preview.locator('.recharts-surface').first()
+    const box = (await plot.boundingBox())!
+    await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5)
+    const tooltip = preview.locator('[data-slot=chart-tooltip]')
+    await expect(tooltip).toBeVisible()
+    await expect(tooltip).toContainText('Opened')
+  })
+
+  test('ChartCard switches to a table and back', async ({ page }) => {
+    const preview = await example(page, 'chart-card/dashboard')
+    const toggle = preview.getByRole('button', { name: 'View as table' })
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    await expect(preview.getByRole('table')).toBeVisible()
+    await expect(preview.getByRole('columnheader', { name: 'Active' })).toBeVisible()
+    await preview.getByRole('radio', { name: '7d' }).click()
+    await expect(preview.locator('tbody tr')).toHaveCount(7)
+    await toggle.click()
+    await expect(preview.locator('.recharts-line-curve')).toHaveCount(2)
+  })
+
+  test('exports a chart as SVG with theme colors', async ({ page }) => {
+    const preview = await example(page, 'chart-card/dashboard')
+    await preview.getByRole('button', { name: 'Download chart' }).click()
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('menuitem', { name: 'Download SVG' }).click(),
+    ])
+    expect(download.suggestedFilename()).toBe('active-users.svg')
+    const stream = await download.createReadStream()
+    let svg = ''
+    for await (const chunk of stream) svg += chunk
+    expect(svg).toContain('<svg')
+    expect(svg).not.toContain('var(--')
+  })
+
+  test('heatmap cells are reachable with the keyboard', async ({ page }) => {
+    const preview = await example(page, 'heatmap/quarter')
+    const grid = preview.getByRole('grid', { name: 'Support tickets, Q3' })
+    await grid.getByRole('gridcell').first().focus()
+    await page.keyboard.press('End')
+    await expect(page.locator(':focus')).toHaveAttribute('aria-label', /Sep 30, 2026/)
+    await page.keyboard.press('ArrowLeft')
+    await expect(page.locator(':focus')).toHaveAttribute('aria-label', /Sep 23, 2026/)
+    await page.keyboard.press('Enter')
+    await expect(preview).toContainText('Opened Sep 23, 2026')
+  })
+})

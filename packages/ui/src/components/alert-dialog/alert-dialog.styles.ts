@@ -1,13 +1,14 @@
 import type { StylesEntry } from '../../utils/registry'
-import { themedBorder } from '../../utils/styles'
+import { dialogMotion, overlayMotion, themedBorder } from '../../utils/styles'
 import { tv } from '../../utils/tv'
 
-export const alertDialogStyles = tv({
+export const alertDialogStyles = /* @__PURE__ */ tv({
   slots: {
-    overlay: 'fixed inset-0 z-50 animate-fade-in bg-overlay',
+    overlay: ['fixed inset-0 z-50 bg-overlay', overlayMotion],
     content: [
       'fixed top-1/2 left-1/2 z-50 grid w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 gap-5',
-      'rounded-xl border-border bg-surface p-6 text-foreground shadow-lg outline-none animate-pop-in',
+      'rounded-xl border-border bg-surface p-6 text-foreground shadow-lg outline-none',
+      dialogMotion,
       themedBorder,
     ],
     header: 'flex flex-col gap-1.5',

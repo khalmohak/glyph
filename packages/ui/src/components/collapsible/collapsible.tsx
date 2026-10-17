@@ -4,7 +4,7 @@ import { useComponentConfig } from '../../hooks/use-component-config'
 import type { StylesEntry } from '../../utils/registry'
 import { tv } from '../../utils/tv'
 
-export const collapsibleStyles = tv({
+export const collapsibleStyles = /* @__PURE__ */ tv({
   slots: {
     root: '',
     trigger: '',

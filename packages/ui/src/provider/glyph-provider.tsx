@@ -1,12 +1,18 @@
-import type { Theme } from '@glyphui/tokens'
+import type { MotionLevel, Theme } from '@glyphui/tokens'
 import { Tooltip } from 'radix-ui'
-import { type ReactNode, useMemo } from 'react'
+import { lazy, type ReactNode, Suspense, useMemo } from 'react'
 import { ConfirmProvider } from '../components/alert-dialog/confirm'
-import { Toaster, type ToasterProps } from '../components/toast/toast'
+import type { ToasterProps } from '../components/toast/toast'
+import { MotionRootAttribute, MotionScope } from '../motion/motion-root'
 import { glyph } from '../themes'
 import { type ColorModePreference, ColorModeProvider } from './color-mode'
 import { GlyphContext, type GlyphRouter, type LinkComponent, neverActive } from './glyph-context'
 import { ThemeStyle } from './theme-style'
+
+// Only apps that turn on `toaster` load the toast UI.
+const Toaster = lazy(() =>
+  import('../components/toast/toast').then((m) => ({ default: m.Toaster })),
+)
 
 export interface GlyphProviderProps {
   children: ReactNode
@@ -29,6 +35,11 @@ export interface GlyphProviderProps {
    * Toaster props (e.g. `{ position: 'top-center' }`). Off by default.
    */
   toaster?: boolean | ToasterProps
+  /**
+   * Overrides the theme's motion level everywhere, e.g. `"none"` in tests or for a user
+   * setting. Visitors who ask for reduced motion never get animation either way.
+   */
+  motion?: MotionLevel
 }
 
 /** Provides the theme, color mode, tooltips, `useConfirm()` and (optionally) toasts. Render once at the root. */
@@ -40,12 +51,13 @@ export function GlyphProvider({
   router,
   linkComponent,
   toaster = false,
+  motion,
 }: GlyphProviderProps) {
   const Link = router?.Link ?? linkComponent ?? 'a'
   const useIsActive = router?.useIsActive ?? neverActive
   const value = useMemo(
-    () => ({ theme, linkComponent: Link, useIsActive }),
-    [theme, Link, useIsActive],
+    () => ({ theme, linkComponent: Link, useIsActive, motion }),
+    [theme, Link, useIsActive, motion],
   )
   return (
     <ColorModeProvider
@@ -54,13 +66,20 @@ export function GlyphProvider({
     >
       <GlyphContext.Provider value={value}>
         <ThemeStyle theme={theme} />
-        <Tooltip.Provider delayDuration={300}>
-          {/* useConfirm() works anywhere without setup; the dialog only mounts while open. */}
-          <ConfirmProvider>
-            {children}
-            {toaster && <Toaster {...(toaster === true ? {} : toaster)} />}
-          </ConfirmProvider>
-        </Tooltip.Provider>
+        <MotionRootAttribute />
+        <MotionScope>
+          <Tooltip.Provider delayDuration={300}>
+            {/* useConfirm() works anywhere without setup; the dialog only mounts while open. */}
+            <ConfirmProvider>
+              {children}
+              {toaster && (
+                <Suspense fallback={null}>
+                  <Toaster {...(toaster === true ? {} : toaster)} />
+                </Suspense>
+              )}
+            </ConfirmProvider>
+          </Tooltip.Provider>
+        </MotionScope>
       </GlyphContext.Provider>
     </ColorModeProvider>
   )

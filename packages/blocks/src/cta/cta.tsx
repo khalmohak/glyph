@@ -1,9 +1,10 @@
-import { Container, Heading, Section, Text, tv } from '@glyphui/ui'
+import { Container, Heading, Reveal, Section, Text, tv } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import type { BlockMotionProps } from '../internal/motion'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 import type { HeadingLevel } from '../section-header'
 
-export const ctaStyles = tv({
+export const ctaStyles = /* @__PURE__ */ tv({
   slots: {
     panel: 'relative isolate grid justify-items-center gap-5 overflow-hidden text-center',
     glow: 'pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_80%_at_50%_0%,color-mix(in_oklab,var(--color-primary)_16%,transparent),transparent)]',
@@ -21,7 +22,7 @@ export const ctaStyles = tv({
   defaultVariants: { variant: 'card' },
 })
 
-export interface CtaProps extends Omit<ComponentProps<'section'>, 'title'> {
+export interface CtaProps extends Omit<ComponentProps<'section'>, 'title'>, BlockMotionProps {
   title: ReactNode
   description?: ReactNode
   actions?: ReactNode
@@ -37,6 +38,7 @@ export function Cta({
   actions,
   variant = 'card',
   headingLevel = 2,
+  animate = true,
   className,
   ...props
 }: CtaProps) {
@@ -46,7 +48,7 @@ export function Cta({
   return (
     <Section data-slot="cta" aria-labelledby={titleId} className={className} {...props}>
       <Container size="lg">
-        <div className={s.panel()}>
+        <Reveal className={s.panel()} enabled={animate} scale>
           <div aria-hidden="true" className={s.glow()} />
           <Heading level={headingLevel} size="h2" id={titleId} className="max-w-2xl">
             {title}
@@ -57,7 +59,7 @@ export function Cta({
             </Text>
           )}
           {actions && <div className={s.actions()}>{actions}</div>}
-        </div>
+        </Reveal>
       </Container>
     </Section>
   )

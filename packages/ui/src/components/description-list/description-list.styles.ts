@@ -1,7 +1,7 @@
 import type { StylesEntry } from '../../utils/registry'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const descriptionListStyles = tv({
+export const descriptionListStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'grid w-full',
     item: 'grid min-w-0 gap-1',

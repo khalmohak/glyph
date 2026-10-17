@@ -2,13 +2,13 @@ import type { StylesEntry } from '../../utils/registry'
 import { themedBorder } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const codeStyles = tv({
+export const codeStyles = /* @__PURE__ */ tv({
   slots: {
     base: 'rounded-xs bg-muted px-[0.3em] py-[0.15em] font-mono text-[0.875em] text-foreground',
   },
 })
 
-export const codeBlockStyles = tv({
+export const codeBlockStyles = /* @__PURE__ */ tv({
   slots: {
     root: ['relative min-w-0 overflow-hidden rounded-lg border-border bg-subtle', themedBorder],
     header:

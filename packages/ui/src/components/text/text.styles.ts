@@ -1,6 +1,6 @@
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const textStyles = tv({
+export const textStyles = /* @__PURE__ */ tv({
   slots: { base: '' },
   variants: {
     size: {

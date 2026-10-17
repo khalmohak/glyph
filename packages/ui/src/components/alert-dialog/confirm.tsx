@@ -1,22 +1,14 @@
 import {
   createContext,
+  lazy,
   type ReactNode,
+  Suspense,
   useCallback,
   useContext,
   useMemo,
   useRef,
   useState,
 } from 'react'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from './alert-dialog'
 
 export interface ConfirmOptions {
   title: ReactNode
@@ -30,6 +22,11 @@ export interface ConfirmOptions {
 export type ConfirmFn = (options: ConfirmOptions) => Promise<boolean>
 
 const ConfirmContext = createContext<ConfirmFn | null>(null)
+
+// The dialog loads the first time confirm() is called, so apps that never confirm don't ship it.
+const ConfirmDialog = lazy(() =>
+  import('./confirm-dialog').then((m) => ({ default: m.ConfirmDialog })),
+)
 
 interface Pending {
   options: ConfirmOptions
@@ -64,31 +61,15 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => confirm, [confirm])
   const options = pending?.options
-  const danger = options?.tone === 'danger'
 
   return (
     <ConfirmContext.Provider value={value}>
       {children}
-      <AlertDialog open={open} onOpenChange={(next) => !next && settle(false)}>
-        {options && (
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{options.title}</AlertDialogTitle>
-              {options.description && (
-                <AlertDialogDescription>{options.description}</AlertDialogDescription>
-              )}
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => settle(false)}>
-                {options.cancelLabel ?? 'Cancel'}
-              </AlertDialogCancel>
-              <AlertDialogAction tone={options.tone} onClick={() => settle(true)}>
-                {options.confirmLabel ?? (danger ? 'Delete' : 'Confirm')}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        )}
-      </AlertDialog>
+      {options && (
+        <Suspense fallback={null}>
+          <ConfirmDialog open={open} options={options} onSettle={settle} />
+        </Suspense>
+      )}
     </ConfirmContext.Provider>
   )
 }

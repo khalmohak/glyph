@@ -8,11 +8,11 @@ const item = [
   '[&_svg]:size-4 [&_svg]:shrink-0',
 ]
 
-export const dropdownMenuStyles = tv({
+export const dropdownMenuStyles = /* @__PURE__ */ tv({
   slots: {
     content: [
       popover,
-      'min-w-48 max-h-(--radix-dropdown-menu-content-available-height) overflow-y-auto p-1',
+      'origin-(--radix-dropdown-menu-content-transform-origin) min-w-48 max-h-(--radix-dropdown-menu-content-available-height) overflow-y-auto p-1',
     ],
     item,
     icon: 'flex size-4 shrink-0 items-center justify-center text-muted-foreground',
@@ -21,7 +21,7 @@ export const dropdownMenuStyles = tv({
     separator: '-mx-1 my-1 h-px bg-border',
     shortcut: 'ml-auto pl-4 font-mono text-caption tracking-wider text-faint-foreground',
     subTrigger: [...item, 'data-[state=open]:bg-muted'],
-    subContent: [popover, 'min-w-40 p-1'],
+    subContent: [popover, 'origin-(--radix-dropdown-menu-content-transform-origin) min-w-40 p-1'],
   },
   variants: {
     tone: {

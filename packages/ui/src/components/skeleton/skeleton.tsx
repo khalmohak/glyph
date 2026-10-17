@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { tv } from '../../utils/tv'
 
-export const skeletonStyles = tv({
+export const skeletonStyles = /* @__PURE__ */ tv({
   slots: { base: 'animate-pulse rounded-sm bg-muted' },
 })
 

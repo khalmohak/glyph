@@ -5,7 +5,7 @@ import { useComponentConfig } from '../../hooks/use-component-config'
 import { AlertIcon, InboxIcon } from '../../internal/icons'
 import { tv } from '../../utils/tv'
 
-export const stateStyles = tv({
+export const stateStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'flex flex-col items-center justify-center gap-3 px-6 py-12 text-center',
     icon: 'flex size-10 items-center justify-center rounded-md border border-border bg-surface text-muted-foreground shadow-xs [&>svg]:size-5',

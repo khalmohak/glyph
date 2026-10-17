@@ -1,7 +1,7 @@
 import type { StylesEntry } from '../../utils/registry'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const progressStyles = tv({
+export const progressStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'grid w-full gap-1.5',
     header: 'flex items-baseline justify-between gap-3 text-small',
@@ -32,7 +32,7 @@ export const progressStyles = tv({
 
 export type ProgressVariants = VariantProps<typeof progressStyles>
 
-export const progressCircleStyles = tv({
+export const progressCircleStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'relative inline-flex shrink-0 items-center justify-center',
     svg: 'size-full -rotate-90',

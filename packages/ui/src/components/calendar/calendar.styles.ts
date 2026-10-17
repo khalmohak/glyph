@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing, transition } from '../../utils/styles'
 import { tv } from '../../utils/tv'
 
-export const calendarStyles = tv({
+export const calendarStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'relative w-fit p-3 text-small text-foreground',
     months: 'relative flex flex-col gap-6 sm:flex-row',

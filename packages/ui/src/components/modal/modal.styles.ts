@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { tv } from '../../utils/tv'
 
 /** Modal is built from Dialog parts; these slots add Modal-specific classes on top. */
-export const modalStyles = tv({
+export const modalStyles = /* @__PURE__ */ tv({
   slots: {
     content: '',
     header: '',

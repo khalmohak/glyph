@@ -1,6 +1,6 @@
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const headingStyles = tv({
+export const headingStyles = /* @__PURE__ */ tv({
   slots: { base: 'font-display text-balance text-foreground' },
   variants: {
     size: {

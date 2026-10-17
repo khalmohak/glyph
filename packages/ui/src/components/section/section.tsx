@@ -2,7 +2,7 @@ import { Slot } from 'radix-ui'
 import type { ComponentProps } from 'react'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const sectionStyles = tv({
+export const sectionStyles = /* @__PURE__ */ tv({
   base: 'w-full',
   variants: {
     spacing: {

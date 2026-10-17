@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing, themedBorder, transition } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const stepperStyles = tv({
+export const stepperStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'flex w-full list-none p-0',
     step: 'relative flex min-w-0',

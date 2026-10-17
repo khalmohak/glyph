@@ -4,7 +4,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { tv } from '../../utils/tv'
 import { Button, type ButtonProps } from '../button'
 
-export const copyButtonStyles = tv({
+export const copyButtonStyles = /* @__PURE__ */ tv({
   slots: {
     base: '',
     icon: 'size-4',

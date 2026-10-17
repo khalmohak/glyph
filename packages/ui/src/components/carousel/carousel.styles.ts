@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing, transition } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const carouselStyles = tv({
+export const carouselStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'relative',
     viewport: 'overflow-hidden rounded-lg',

@@ -46,7 +46,7 @@ declare module '@tanstack/react-table' {
   }
 }
 
-export const dataTableStyles = tv({
+export const dataTableStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'flex min-w-0 flex-col',
     toolbar: 'flex flex-wrap items-center gap-2',

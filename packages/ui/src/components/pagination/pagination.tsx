@@ -1,6 +1,7 @@
-import type { ComponentProps, ReactNode } from 'react'
+import { type ComponentProps, type ReactNode, useId } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { ChevronLeftIcon, ChevronRightIcon } from '../../internal/icons'
+import { ActiveIndicator } from '../../motion/active-indicator'
 import { useLinkComponent } from '../../provider/glyph-context'
 import { type PaginationVariants, paginationStyles } from './pagination.styles'
 import { paginationRange } from './pagination-range'
@@ -65,6 +66,7 @@ export function Pagination(inProps: PaginationProps) {
   const s = paginationStyles({ size })
   const itemClass = s.item({ class: slots.item })
   const current = Math.min(Math.max(1, page), Math.max(1, pageCount))
+  const indicatorId = `${useId()}-pagination-indicator`
 
   const control = (
     target: number,
@@ -73,6 +75,17 @@ export function Pagination(inProps: PaginationProps) {
     options: { current?: boolean } = {},
   ) => {
     const disabled = target < 1 || target > pageCount || (target === current && !options.current)
+    if (options.current) {
+      content = (
+        <>
+          <ActiveIndicator
+            layoutId={indicatorId}
+            className={s.indicator({ class: slots.indicator })}
+          />
+          {content}
+        </>
+      )
+    }
     const shared = {
       'aria-label': label,
       'aria-current': options.current ? ('page' as const) : undefined,

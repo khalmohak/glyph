@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const linkStyles = tv({
+export const linkStyles = /* @__PURE__ */ tv({
   slots: {
     base: [
       'inline-flex items-baseline gap-1 rounded-xs font-medium',

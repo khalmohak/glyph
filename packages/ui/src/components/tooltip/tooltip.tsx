@@ -1,12 +1,15 @@
 import { Tooltip as TooltipPrimitive } from 'radix-ui'
 import type { ComponentProps, ReactNode } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
+import { popoverMotion } from '../../utils/styles'
 import { tv } from '../../utils/tv'
 
-export const tooltipStyles = tv({
+export const tooltipStyles = /* @__PURE__ */ tv({
   slots: {
-    content:
-      'z-50 max-w-xs animate-pop-in rounded-sm bg-secondary px-2 py-1 text-caption text-secondary-foreground shadow-md',
+    content: [
+      'z-50 max-w-xs origin-(--radix-tooltip-content-transform-origin) rounded-sm bg-secondary px-2 py-1 text-caption text-secondary-foreground shadow-md',
+      popoverMotion,
+    ],
   },
 })
 

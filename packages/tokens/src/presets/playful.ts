@@ -2,7 +2,7 @@ import { defineTheme } from '../define-theme'
 import { glyph } from './glyph'
 
 /** Pill shapes, lavender and mint, chunky rounded type, springy motion. */
-export const playful = defineTheme({
+export const playful = /* @__PURE__ */ defineTheme({
   name: 'playful',
   extends: glyph,
   colors: {
@@ -104,6 +104,8 @@ export const playful = defineTheme({
       standard: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
       emphasized: 'cubic-bezier(0.34, 1.8, 0.64, 1)',
     },
+    level: 'expressive',
+    spring: { stiffness: 380, damping: 18 },
   },
   control: { sm: '34px', md: '42px', lg: '50px' },
 })

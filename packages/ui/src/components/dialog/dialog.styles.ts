@@ -1,13 +1,20 @@
 import type { StylesEntry } from '../../utils/registry'
-import { focusRing, themedBorder, transition } from '../../utils/styles'
+import {
+  dialogMotion,
+  focusRing,
+  overlayMotion,
+  themedBorder,
+  transition,
+} from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const dialogStyles = tv({
+export const dialogStyles = /* @__PURE__ */ tv({
   slots: {
-    overlay: 'fixed inset-0 z-50 animate-fade-in bg-overlay',
+    overlay: ['fixed inset-0 z-50 bg-overlay', overlayMotion],
     content: [
       'fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 gap-5 overflow-y-auto',
-      'rounded-xl border-border bg-surface p-6 text-foreground shadow-lg outline-none animate-pop-in',
+      'rounded-xl border-border bg-surface p-6 text-foreground shadow-lg outline-none',
+      dialogMotion,
       themedBorder,
     ],
     close: [

@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing, themedBorder, transition } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const accordionStyles = tv({
+export const accordionStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'w-full',
     item: '',

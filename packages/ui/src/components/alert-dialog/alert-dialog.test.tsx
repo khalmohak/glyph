@@ -64,7 +64,8 @@ describe('useConfirm', () => {
   it('resolves true when confirmed', async () => {
     renderConfirm({ title: 'Delete project?', tone: 'danger' })
     await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
-    const dialog = screen.getByRole('alertdialog', { name: 'Delete project?' })
+    // The dialog loads on first use.
+    const dialog = await screen.findByRole('alertdialog', { name: 'Delete project?' })
     // Danger tone defaults the confirm label to "Delete".
     await userEvent.click(within(dialog).getByRole('button', { name: 'Delete' }))
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('true'))
@@ -73,11 +74,11 @@ describe('useConfirm', () => {
   it('resolves false when cancelled or dismissed with Escape', async () => {
     renderConfirm({ title: 'Archive?', confirmLabel: 'Archive', cancelLabel: 'Not now' })
     await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
-    await userEvent.click(screen.getByRole('button', { name: 'Not now' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Not now' }))
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('false'))
 
     await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
-    expect(screen.getByRole('alertdialog', { name: 'Archive?' })).toBeInTheDocument()
+    expect(await screen.findByRole('alertdialog', { name: 'Archive?' })).toBeInTheDocument()
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
     expect(screen.getByRole('status')).toHaveTextContent('false')

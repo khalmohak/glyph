@@ -2,7 +2,7 @@ import { Slot } from 'radix-ui'
 import type { ComponentProps } from 'react'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const containerStyles = tv({
+export const containerStyles = /* @__PURE__ */ tv({
   base: 'mx-auto w-full px-4 sm:px-6',
   variants: {
     size: {

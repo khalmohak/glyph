@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { transition } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const treeViewStyles = tv({
+export const treeViewStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'grid gap-px text-small',
     // Focus and selection are drawn on the item's own row only, never on nested rows.

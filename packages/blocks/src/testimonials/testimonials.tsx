@@ -1,5 +1,6 @@
-import { Avatar, Card, Container, cn, Section } from '@glyphui/ui'
+import { Avatar, Card, Container, cn, Reveal, Section, Stagger } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import type { BlockMotionProps } from '../internal/motion'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 import { type HeadingLevel, SectionHeader } from '../section-header'
 
@@ -13,7 +14,9 @@ export interface Testimonial {
   }
 }
 
-export interface TestimonialsProps extends Omit<ComponentProps<'section'>, 'title'> {
+export interface TestimonialsProps
+  extends Omit<ComponentProps<'section'>, 'title'>,
+    BlockMotionProps {
   eyebrow?: ReactNode
   title?: ReactNode
   description?: ReactNode
@@ -50,6 +53,7 @@ export function Testimonials({
   items,
   variant = 'grid',
   headingLevel = 2,
+  animate = true,
   className,
   ...props
 }: TestimonialsProps) {
@@ -73,15 +77,23 @@ export function Testimonials({
             align="center"
             headingLevel={headingLevel}
             titleId={titleId}
+            animate={animate}
           />
         )}
         {variant === 'featured' && first ? (
           <div className="grid gap-6">
-            <Card padding="lg" className="mx-auto w-full max-w-3xl">
-              <Quote item={first} large />
-            </Card>
+            <Reveal asChild enabled={animate} scale>
+              <Card padding="lg" className="mx-auto w-full max-w-3xl">
+                <Quote item={first} large />
+              </Card>
+            </Reveal>
             {rest.length > 0 && (
-              <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <Stagger
+                as="ul"
+                enabled={animate}
+                delay={120}
+                className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+              >
                 {rest.map((item, i) => (
                   <li key={i}>
                     <Card variant="outline" className="h-full">
@@ -89,11 +101,11 @@ export function Testimonials({
                     </Card>
                   </li>
                 ))}
-              </ul>
+              </Stagger>
             )}
           </div>
         ) : (
-          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Stagger as="ul" enabled={animate} className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {items.map((item, i) => (
               <li key={i}>
                 <Card variant="outline" className="h-full">
@@ -101,7 +113,7 @@ export function Testimonials({
                 </Card>
               </li>
             ))}
-          </ul>
+          </Stagger>
         )}
       </Container>
     </Section>

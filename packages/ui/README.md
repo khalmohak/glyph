@@ -87,17 +87,17 @@ The same tokens work in your own markup: `bg-primary`, `text-muted-foreground`, 
 
 ## Components
 
-| Category | Components (95) |
+| Category | Components (106) |
 |---|---|
 | Actions | Button · CopyButton · Toggle |
 | Forms | Calendar · Checkbox · Combobox · DatePicker · Field · FileUpload · Input · InputOTP · Label · NumberInput · PasswordInput · RadioGroup · SegmentedControl · Select · Slider · Switch · TagInput · Textarea |
 | Overlays | Alert Dialog · ContextMenu · Dialog · Dropdown Menu · HoverCard · Modal · Popover · Sheet · Tooltip |
 | Navigation | Breadcrumb · CommandMenu · Link · NavigationMenu · Pagination · Stepper · Tabs |
 | Feedback | Alert · Banner · Progress · Skeleton · Spinner · Toast |
-| Data display | Accordion · Avatar · Badge · Carousel · Chart · Collapsible · DescriptionList · Kbd · StatCard · Table · Timeline · TreeView |
+| Data display | Accordion · Avatar · Badge · Carousel · Chart · ChartCard · Collapsible · DescriptionList · FunnelChart · Gauge · Heatmap · Kbd · PieChart · RadarChart · SankeyChart · ScatterChart · Sparkline · StatCard · Table · Timeline · Treemap · TreeView |
 | Typography | Blockquote · Code · Eyebrow · Heading · Prose · Text |
 | Layout | AspectRatio · Card · Container · Grid · Resizable · ScrollArea · Section · Separator · Stack · VisuallyHidden |
-| Patterns | AppShell · Async · DataTable · Form · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Vite plugin |
+| Patterns | AppShell · Async · DataTable · Form · Motion · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Vite plugin |
 | Blocks (`@glyphui/blocks`) | AuthCard · Cta · Faq · FeatureGrid · FeatureSplit · Hero · LogoCloud · Newsletter · Pricing · SectionHeader · SiteFooter · Stats · Testimonials |
 
 Every component has a page with live examples and props in the [docs](https://khalmohak.github.io/glyph/components). Accessible behavior comes from [Radix UI](https://www.radix-ui.com/). Every component accepts `className`, and most accept `asChild`.
@@ -172,11 +172,14 @@ Includes sorting, search, row selection and pages, plus loading, empty, no-resul
 ### Charts: `@glyphui/ui/chart`
 
 ```tsx
-<AreaChart title="Revenue" data={revenue} index="month"
-  series={[{ key: 'recurring', label: 'Recurring' }, { key: 'oneOff', label: 'One-off' }]} />
+<ChartCard title="Revenue" period={{ options: periods, value, onValueChange }}>
+  <AreaChart title="Revenue" data={revenue} index="month" stacked
+    series={[{ key: 'recurring', label: 'Recurring' }, { key: 'oneOff', label: 'One-off' }]}
+    referenceLines={[{ y: 40000, label: 'Target' }]} />
+</ChartCard>
 ```
 
-Series use the theme's `chart-1` to `chart-5` colors. Every chart includes a visually hidden data table for screen readers. Needs `recharts`.
+Line, area, bar, composed, pie and donut, radar, radial bar, scatter and bubble, funnel, treemap, Sankey, calendar heatmap, gauge and sparkline charts. Series use the theme's `chart-1` to `chart-5` colors and animate at the theme's motion level. Legends toggle series, `brush` zooms, and every chart takes `loading`, `error` and an empty state. `ChartCard` adds a period selector, a "view as table" toggle and PNG/SVG download; `exportChart()` exports any chart with its theme colors baked in. Every chart includes a data table for screen readers. Needs `recharts`.
 
 ### Async states
 

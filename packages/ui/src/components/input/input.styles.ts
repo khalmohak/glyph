@@ -10,7 +10,7 @@ export const fieldControl = [
   'data-invalid:border-danger aria-invalid:border-danger',
 ]
 
-export const inputStyles = tv({
+export const inputStyles = /* @__PURE__ */ tv({
   slots: {
     root: [
       ...fieldControl,

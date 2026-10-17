@@ -10,7 +10,7 @@ const topLevel = [
   'data-active:text-foreground',
 ]
 
-export const navigationMenuStyles = tv({
+export const navigationMenuStyles = /* @__PURE__ */ tv({
   slots: {
     root: 'relative z-10 flex max-w-max flex-1 items-center justify-center',
     list: 'group flex flex-1 list-none items-center justify-center gap-1',
@@ -21,7 +21,7 @@ export const navigationMenuStyles = tv({
     content: 'top-0 left-0 w-full p-2 animate-fade-in md:absolute md:w-auto',
     viewportWrapper: 'absolute top-full left-0 flex justify-center',
     viewport: [
-      'relative mt-1.5 h-(--radix-navigation-menu-viewport-height) w-[calc(100vw-2rem)] origin-top overflow-hidden rounded-lg border-border bg-raised text-foreground shadow-lg animate-pop-in',
+      'relative mt-1.5 h-(--radix-navigation-menu-viewport-height) w-[calc(100vw-2rem)] origin-top overflow-hidden rounded-lg border-border bg-raised text-foreground shadow-lg animate-pop-in data-[state=closed]:animate-pop-out',
       'md:w-(--radix-navigation-menu-viewport-width)',
       'transition-[width,height] duration-(--glyph-duration-base) ease-standard',
       themedBorder,

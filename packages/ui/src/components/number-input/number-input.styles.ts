@@ -3,7 +3,7 @@ import { focusRing } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 import { fieldControl } from '../input/input.styles'
 
-export const numberInputStyles = tv({
+export const numberInputStyles = /* @__PURE__ */ tv({
   slots: {
     root: [
       ...fieldControl,

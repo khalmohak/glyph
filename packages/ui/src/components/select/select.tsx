@@ -7,7 +7,7 @@ import { tv, type VariantProps } from '../../utils/tv'
 import { useFieldControl } from '../field/field-context'
 import { fieldControl } from '../input/input.styles'
 
-export const selectStyles = tv({
+export const selectStyles = /* @__PURE__ */ tv({
   slots: {
     trigger: [
       ...fieldControl,
@@ -19,7 +19,7 @@ export const selectStyles = tv({
     icon: 'size-4 shrink-0 text-faint-foreground',
     content: [
       popover,
-      'max-h-(--radix-select-content-available-height) min-w-(--radix-select-trigger-width)',
+      'origin-(--radix-select-content-transform-origin) max-h-(--radix-select-content-available-height) min-w-(--radix-select-trigger-width)',
     ],
     viewport: 'p-1',
     item: [

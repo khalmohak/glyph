@@ -1,5 +1,6 @@
-import { Container, cn, Section } from '@glyphui/ui'
+import { Container, cn, Section, Stagger } from '@glyphui/ui'
 import { type ComponentProps, isValidElement, type ReactNode, useId } from 'react'
+import type { BlockMotionProps } from '../internal/motion'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 
 export interface LogoItem {
@@ -8,7 +9,7 @@ export interface LogoItem {
   logo: ReactNode
 }
 
-export interface LogoCloudProps extends Omit<ComponentProps<'section'>, 'title'> {
+export interface LogoCloudProps extends Omit<ComponentProps<'section'>, 'title'>, BlockMotionProps {
   /** Short line above the logos, e.g. "Trusted by teams at". */
   title?: ReactNode
   logos: readonly (LogoItem | ReactNode)[]
@@ -19,7 +20,7 @@ function isLogoItem(value: LogoItem | ReactNode): value is LogoItem {
 }
 
 /** A row of customer or partner logos, muted so they support rather than compete. */
-export function LogoCloud({ title, logos, className, ...props }: LogoCloudProps) {
+export function LogoCloud({ title, logos, animate = true, className, ...props }: LogoCloudProps) {
   useBlocksStylesCheck()
   const titleId = useId()
   return (
@@ -37,7 +38,12 @@ export function LogoCloud({ title, logos, className, ...props }: LogoCloudProps)
             {title}
           </p>
         )}
-        <ul className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
+        <Stagger
+          as="ul"
+          enabled={animate}
+          step={40}
+          className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6"
+        >
           {logos.map((item, i) => (
             <li
               key={isLogoItem(item) ? item.name : i}
@@ -55,7 +61,7 @@ export function LogoCloud({ title, logos, className, ...props }: LogoCloudProps)
               )}
             </li>
           ))}
-        </ul>
+        </Stagger>
       </Container>
     </Section>
   )

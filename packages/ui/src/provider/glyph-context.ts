@@ -1,4 +1,4 @@
-import type { Theme } from '@glyphui/tokens'
+import type { MotionLevel, Theme } from '@glyphui/tokens'
 import {
   createContext,
   type ElementType,
@@ -45,6 +45,8 @@ export interface GlyphContextValue {
   theme: Theme
   linkComponent: LinkComponent
   useIsActive: UseIsActive
+  /** Overrides the theme's motion level for the whole app. */
+  motion?: MotionLevel | undefined
 }
 
 export const GlyphContext = createContext<GlyphContextValue | null>(null)

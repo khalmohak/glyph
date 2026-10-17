@@ -2,7 +2,7 @@ import { Slot } from 'radix-ui'
 import type { ComponentProps } from 'react'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const stackStyles = tv({
+export const stackStyles = /* @__PURE__ */ tv({
   base: 'flex',
   variants: {
     direction: { column: 'flex-col', row: 'flex-row' },

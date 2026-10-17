@@ -2,7 +2,7 @@ import type { StylesEntry } from '../../utils/registry'
 import { focusRing, themedBorder, transition } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-export const toggleStyles = tv({
+export const toggleStyles = /* @__PURE__ */ tv({
   slots: {
     base: [
       'inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium text-muted-foreground',
