@@ -22,9 +22,29 @@ export interface LinkComponentProps {
  */
 export type LinkComponent = ElementType<LinkComponentProps>
 
+export interface IsActiveOptions {
+  /** Match only this exact path, not its children. Default false. */
+  end?: boolean
+}
+
+/**
+ * A hook that reports whether `href` is the current location. Glyph calls it once per
+ * navigation item on every render, so it must follow the rules of hooks.
+ */
+export type UseIsActive = (href: string, options?: IsActiveOptions) => boolean
+
+/** Connects Glyph's navigation components to your router. */
+export interface GlyphRouter {
+  /** Renders links client-side. */
+  Link: LinkComponent
+  /** Marks Sidebar, Navbar and NavigationMenu items active automatically. */
+  useIsActive?: UseIsActive
+}
+
 export interface GlyphContextValue {
   theme: Theme
   linkComponent: LinkComponent
+  useIsActive: UseIsActive
 }
 
 export const GlyphContext = createContext<GlyphContextValue | null>(null)
@@ -39,4 +59,22 @@ export function useGlyph(): GlyphContextValue {
 /** The router-aware link component configured on `GlyphProvider`. */
 export function useLinkComponent(): LinkComponent {
   return useContext(GlyphContext)?.linkComponent ?? 'a'
+}
+
+export const neverActive: UseIsActive = () => false
+
+/**
+ * Whether `href` is the current page, using the router passed to `GlyphProvider`.
+ * Returns `explicit` when it is set, so an `active` prop always wins.
+ */
+export function useIsActive(
+  href: string | undefined,
+  options?: IsActiveOptions & { explicit?: boolean | undefined },
+): boolean {
+  const isActive = useContext(GlyphContext)?.useIsActive ?? neverActive
+  const { explicit, ...matchOptions } = options ?? {}
+  // Always call the router hook so the hook order never changes between renders.
+  const matched = isActive(href ?? '', matchOptions)
+  if (explicit !== undefined) return explicit
+  return href ? matched : false
 }

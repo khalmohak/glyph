@@ -5,7 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"],
-      "env": ["DOCS_BASE"]
+      "env": ["DOCS_BASE", "DEMO_BASE"]
     },
     "dev": {
       "cache": false,
@@ -16,6 +16,9 @@
     },
     "test": {
       "outputs": []
+    },
+    "test:coverage": {
+      "outputs": ["coverage/**"]
     },
     "check:exports": {
       "dependsOn": ["build"],

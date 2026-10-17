@@ -15,16 +15,16 @@ export const bannerStyles = tv({
       neutral: { root: 'border-border bg-subtle text-foreground', icon: 'text-muted-foreground' },
       primary: { root: 'border-primary bg-primary text-primary-foreground' },
       info: {
-        root: 'border-info/25 bg-info/10 text-[color-mix(in_oklab,var(--color-info)_55%,var(--color-foreground))]',
+        root: 'border-info/25 bg-info/10 text-info-text',
       },
       success: {
-        root: 'border-success/25 bg-success/10 text-[color-mix(in_oklab,var(--color-success)_55%,var(--color-foreground))]',
+        root: 'border-success/25 bg-success/10 text-success-text',
       },
       warning: {
-        root: 'border-warning/30 bg-warning/14 text-[color-mix(in_oklab,var(--color-warning)_50%,var(--color-foreground))]',
+        root: 'border-warning/30 bg-warning/14 text-warning-text',
       },
       danger: {
-        root: 'border-danger/25 bg-danger/10 text-[color-mix(in_oklab,var(--color-danger)_55%,var(--color-foreground))]',
+        root: 'border-danger/25 bg-danger/10 text-danger-text',
       },
     },
   },

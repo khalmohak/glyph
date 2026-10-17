@@ -1,6 +1,6 @@
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
 import type { StandardSchemaV1 } from '@standard-schema/spec'
-import type { ComponentProps, ReactNode } from 'react'
+import { type ComponentProps, type MouseEvent, type ReactNode, useCallback } from 'react'
 import {
   type Control,
   Controller,
@@ -11,6 +11,7 @@ import {
   type Resolver,
   type UseFormProps,
   type UseFormReturn,
+  useFormContext,
   useFormState,
   useForm as useHookForm,
 } from 'react-hook-form'
@@ -62,12 +63,29 @@ export interface FormProps<TInput extends FieldValues, TOutput>
   onSubmit: (values: TOutput) => SubmitResult<TInput> | Promise<SubmitResult<TInput>>
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: keyed by any form's control object
+type AnyControl = Control<any, any, any>
+
+/** The rendered `<form>` of each form, so a FormSubmit outside it can submit it. */
+const formElements = new WeakMap<AnyControl, HTMLFormElement>()
+
 export function Form<TInput extends FieldValues, TOutput>({
   form,
   onSubmit,
   children,
+  ref,
   ...props
 }: FormProps<TInput, TOutput>) {
+  const control = form.control as AnyControl
+  const registerElement = useCallback(
+    (element: HTMLFormElement | null) => {
+      if (element) formElements.set(control, element)
+      else formElements.delete(control)
+      if (typeof ref === 'function') ref(element)
+      else if (ref) ref.current = element
+    },
+    [control, ref],
+  )
   const submit = form.handleSubmit(async (values) => {
     try {
       const result = await onSubmit(values)
@@ -85,7 +103,7 @@ export function Form<TInput extends FieldValues, TOutput>({
 
   return (
     <FormProvider {...form}>
-      <form noValidate onSubmit={submit} {...props}>
+      <form noValidate onSubmit={submit} ref={registerElement} {...props}>
         {children}
       </form>
     </FormProvider>
@@ -122,15 +140,39 @@ export function FormField<TInput extends FieldValues, TName extends FieldPath<TI
   )
 }
 
+export interface FormSubmitProps extends Omit<ButtonProps, 'type' | 'form'> {
+  /**
+   * The form to submit, for a button outside `<Form>` such as a Modal footer:
+   * `<FormSubmit form={form}>`. Not needed inside `<Form>`.
+   */
+  // biome-ignore lint/suspicious/noExplicitAny: accepts any form regardless of its value types
+  form?: UseFormReturn<any, any, any>
+}
+
 /** Submit button that shows progress while the form submits. */
-export function FormSubmit(props: Omit<ButtonProps, 'type'>) {
-  const { isSubmitting } = useFormState()
-  return <Button type="submit" loading={isSubmitting} {...props} />
+export function FormSubmit({ form, onClick, ...props }: FormSubmitProps) {
+  const context = useFormContext()
+  const control = (form ?? context)?.control
+  if (!control) {
+    throw new Error(
+      'FormSubmit must be inside <Form> or receive form={form}, e.g. <FormSubmit form={form}> in a Modal footer.',
+    )
+  }
+  const { isSubmitting } = useFormState({ control })
+
+  if (!form) return <Button type="submit" loading={isSubmitting} onClick={onClick} {...props} />
+
+  // Outside <Form>, submit its element explicitly so validation and onSubmit run as usual.
+  const submitOutside = (event: MouseEvent<HTMLButtonElement>) => {
+    onClick?.(event)
+    if (!event.defaultPrevented) formElements.get(control)?.requestSubmit()
+  }
+  return <Button type="button" loading={isSubmitting} onClick={submitOutside} {...props} />
 }
 
 export const formErrorStyles = tv({
   slots: {
-    base: 'flex items-start gap-2 rounded-md border border-danger/30 bg-danger/8 px-3 py-2.5 text-small text-danger',
+    base: 'flex items-start gap-2 rounded-md border border-danger/30 bg-danger/8 px-3 py-2.5 text-small text-danger-text',
     icon: 'mt-0.5 size-4 shrink-0',
   },
 })

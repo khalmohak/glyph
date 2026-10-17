@@ -32,6 +32,8 @@ export type Entry =
   | '@glyphui/ui/form'
   | '@glyphui/ui/data-table'
   | '@glyphui/ui/chart'
+  | '@glyphui/ui/react-router'
+  | '@glyphui/ui/vite'
   | '@glyphui/blocks'
 
 export interface ExampleMeta {

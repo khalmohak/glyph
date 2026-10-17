@@ -1,5 +1,5 @@
 import { ScrollArea as ScrollAreaPrimitive } from 'radix-ui'
-import type { ComponentProps } from 'react'
+import { type ComponentProps, useEffect, useRef, useState } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import type { StylesEntry } from '../../utils/registry'
 import { focusRing } from '../../utils/styles'
@@ -31,6 +31,24 @@ export interface ScrollAreaProps extends ComponentProps<typeof ScrollAreaPrimiti
   viewportClassName?: string
 }
 
+/** True while the element's content overflows it, so keyboard users need to reach it. */
+function useOverflowing<E extends HTMLElement>() {
+  const ref = useRef<E>(null)
+  const [overflowing, setOverflowing] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const measure = () =>
+      setOverflowing(el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth)
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    if (el.firstElementChild) observer.observe(el.firstElementChild)
+    return () => observer.disconnect()
+  }, [])
+  return [ref, overflowing] as const
+}
+
 /**
  * A scrollable region with slim, theme-colored scrollbars. Give it a height (or width)
  * with `className`, e.g. `h-72`.
@@ -39,6 +57,7 @@ export function ScrollArea(inProps: ScrollAreaProps) {
   const [props, slots] = useComponentConfig('ScrollArea', inProps)
   const { orientation = 'vertical', viewportClassName, className, children, ...rest } = props
   const s = scrollAreaStyles()
+  const [viewportRef, overflowing] = useOverflowing<HTMLDivElement>()
   const bar = (o: 'vertical' | 'horizontal') => (
     <ScrollAreaPrimitive.Scrollbar
       data-slot="scroll-area-scrollbar"
@@ -55,7 +74,10 @@ export function ScrollArea(inProps: ScrollAreaProps) {
       {...rest}
     >
       <ScrollAreaPrimitive.Viewport
+        ref={viewportRef}
         data-slot="scroll-area-viewport"
+        // Scrollable regions must be reachable by keyboard to scroll with arrow keys.
+        tabIndex={overflowing ? 0 : undefined}
         className={s.viewport({ class: [slots.viewport, viewportClassName] })}
       >
         {children}

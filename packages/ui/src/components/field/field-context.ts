@@ -2,6 +2,8 @@ import { createContext, useContext } from 'react'
 
 export interface FieldContextValue {
   id: string
+  /** Id of the visible label, for controls labelled by reference (aria-labelledby). */
+  labelId: string | undefined
   descriptionId: string | undefined
   errorId: string | undefined
   invalid: boolean

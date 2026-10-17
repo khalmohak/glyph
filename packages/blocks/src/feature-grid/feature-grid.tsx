@@ -1,5 +1,6 @@
 import { Card, Container, Section, Text, tv, useLinkComponent } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import { useBlocksStylesCheck } from '../internal/styles-check'
 import { type HeadingLevel, SectionHeader } from '../section-header'
 
 export const featureGridStyles = tv({
@@ -51,6 +52,7 @@ export function FeatureGrid({
   className,
   ...props
 }: FeatureGridProps) {
+  useBlocksStylesCheck()
   const titleId = useId()
   const Link = useLinkComponent()
   const s = featureGridStyles({ columns })

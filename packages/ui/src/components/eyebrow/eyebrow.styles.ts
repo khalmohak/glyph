@@ -5,7 +5,7 @@ export const eyebrowStyles = tv({
   variants: {
     tone: {
       muted: { base: 'text-muted-foreground' },
-      primary: { base: 'text-primary' },
+      primary: { base: 'text-primary-text' },
     },
   },
   defaultVariants: { tone: 'muted' },

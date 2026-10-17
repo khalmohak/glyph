@@ -1,0 +1,10 @@
+/*
+ * Geist and Geist Mono, the fonts the default `glyph` theme uses. Import once, before the
+ * Glyph stylesheet:
+ *
+ *   @import "@glyphui/ui/fonts.css";
+ *   @import "tailwindcss";
+ *   @import "@glyphui/ui/styles.css";
+ */
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";

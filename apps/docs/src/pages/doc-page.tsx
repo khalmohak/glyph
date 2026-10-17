@@ -52,6 +52,17 @@ export function DocPage() {
             )}
           </div>
         )}
+        {doc.entry === '@glyphui/blocks' && doc.status !== 'planned' && (
+          <div className="grid gap-2">
+            <Text size="small" tone="muted">
+              Blocks need their stylesheet, after the Glyph one in your main CSS file:
+            </Text>
+            <Snippet
+              code={'@import "@glyphui/blocks/styles.css";'}
+              className="max-w-full sm:w-fit"
+            />
+          </div>
+        )}
       </header>
 
       {doc.status === 'planned' ? (

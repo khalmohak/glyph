@@ -18,14 +18,24 @@ React components on Tailwind CSS v4 that take their whole look from one typed th
 
 ```sh
 pnpm add @glyphui/ui
-# optional, for the form and data-table patterns
-pnpm add react-hook-form @hookform/resolvers zod @tanstack/react-table
+pnpm add @glyphui/blocks                                                   # optional: page sections
+pnpm add react-hook-form @hookform/resolvers zod @tanstack/react-table@8   # optional: forms and data tables
+pnpm add recharts                                                          # optional: charts
 ```
 
 ```css
 /* index.css */
+@import "@glyphui/ui/fonts.css";      /* Geist, used by the default theme */
 @import "tailwindcss";
 @import "@glyphui/ui/styles.css";
+@import "@glyphui/blocks/styles.css"; /* only with @glyphui/blocks */
+```
+
+```ts
+// vite.config.ts: sets dark mode before first paint, so there is no light flash
+import { glyphColorMode } from '@glyphui/ui/vite'
+
+export default defineConfig({ plugins: [react(), tailwindcss(), glyphColorMode()] })
 ```
 
 ## One theme file
@@ -48,16 +58,20 @@ export default defineTheme({
 ```tsx
 // main.tsx
 import { GlyphProvider } from '@glyphui/ui'
+import { reactRouter } from '@glyphui/ui/react-router'
 import theme from './glyph.theme'
 
 createRoot(root).render(
-  <GlyphProvider theme={theme}>
-    <App />
-  </GlyphProvider>,
+  <BrowserRouter>
+    {/* router: client-side links and automatic active nav items. toaster: toast() works anywhere. */}
+    <GlyphProvider theme={theme} router={reactRouter} toaster>
+      <App />
+    </GlyphProvider>
+  </BrowserRouter>,
 )
 ```
 
-A theme sets color (per light and dark mode), typography (a nine-step scale with size, line height, tracking and weight), radius, shadows, border width, motion and control density, plus per-component defaults and classes. Every option is type-checked.
+A theme sets color (per light and dark mode, including a five-color chart palette), typography (a nine-step scale with size, line height, tracking and weight), radius, shadows, border width, motion and control density, plus per-component defaults and classes. Every option is type-checked.
 
 ## Solved patterns
 
@@ -77,14 +91,36 @@ const form = useForm({ schema, defaultValues })   // zod, valibot, arktype: any 
 </Form>
 ```
 
+`<FormSubmit form={form}>` also works outside the form, for example in a `Modal` footer. Confirmations are one line: `if (await confirm({ title: 'Delete project?', tone: 'danger' })) ...` with `useConfirm()`.
+
 | Import | What you get |
 |---|---|
-| `@glyphui/ui` | 80+ components on Radix (Modal, DatePicker, Combobox, FileUpload, CommandMenu, Toast...), `AppShell` / `Sidebar` / `Navbar` / `PageHeader`, `Async` + `EmptyState` / `ErrorState`, `GlyphProvider`, `useColorMode`, presets |
+| `@glyphui/ui` | Components on Radix (Modal, DatePicker, Combobox, FileUpload, CommandMenu, Toast...), `AppShell` / `Sidebar` / `Navbar` / `PageHeader`, `Async` + `EmptyState` / `ErrorState`, `useConfirm`, `GlyphProvider`, `useColorMode`, presets |
 | `@glyphui/ui/form` | `useForm`, `Form`, `FormField`, `FormSubmit`, `FormError` |
-| `@glyphui/ui/data-table` | `DataTable` with sorting, search, selection, paging and loading / empty / error states |
-| `@glyphui/ui/chart` | `LineChart`, `AreaChart`, `BarChart`, `DonutChart`, `Sparkline`, colored by the theme (needs `recharts`) |
+| `@glyphui/ui/data-table` | `DataTable` with sorting, search, selection, paging and loading / empty / error states (needs `@tanstack/react-table@8`) |
+| `@glyphui/ui/chart` | `LineChart`, `AreaChart`, `BarChart`, `DonutChart`, `Sparkline`, colored by the theme's chart palette (needs `recharts`) |
+| `@glyphui/ui/react-router` | `reactRouter` for `GlyphProvider`: client-side links and automatic active items |
+| `@glyphui/ui/vite` | `glyphColorMode()` Vite plugin that prevents the dark-mode flash |
+| `@glyphui/ui/fonts.css` | Geist and Geist Mono for the default theme |
 | `@glyphui/blocks` | Page sections: Hero, Pricing, FAQ, Testimonials, Newsletter, AuthCard, SiteFooter and more |
 | `@glyphui/tokens` | The framework-free theme engine, if you only need the CSS variables |
+
+## Components
+
+| Category | Components (95) |
+|---|---|
+| Actions | Button · CopyButton · Toggle |
+| Forms | Calendar · Checkbox · Combobox · DatePicker · Field · FileUpload · Input · InputOTP · Label · NumberInput · PasswordInput · RadioGroup · SegmentedControl · Select · Slider · Switch · TagInput · Textarea |
+| Overlays | Alert Dialog · ContextMenu · Dialog · Dropdown Menu · HoverCard · Modal · Popover · Sheet · Tooltip |
+| Navigation | Breadcrumb · CommandMenu · Link · NavigationMenu · Pagination · Stepper · Tabs |
+| Feedback | Alert · Banner · Progress · Skeleton · Spinner · Toast |
+| Data display | Accordion · Avatar · Badge · Carousel · Chart · Collapsible · DescriptionList · Kbd · StatCard · Table · Timeline · TreeView |
+| Typography | Blockquote · Code · Eyebrow · Heading · Prose · Text |
+| Layout | AspectRatio · Card · Container · Grid · Resizable · ScrollArea · Section · Separator · Stack · VisuallyHidden |
+| Patterns | AppShell · Async · DataTable · Form · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Vite plugin |
+| Blocks (`@glyphui/blocks`) | AuthCard · Cta · Faq · FeatureGrid · FeatureSplit · Hero · LogoCloud · Newsletter · Pricing · SectionHeader · SiteFooter · Stats · Testimonials |
+
+Every component has a page with live examples, props and theming slots in the [docs](https://khalmohak.github.io/glyph/components). Regenerate this table with `pnpm -C apps/docs readme:components`.
 
 ## Develop
 

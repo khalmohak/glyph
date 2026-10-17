@@ -1,8 +1,8 @@
 import { GlyphProvider, presets } from '@glyphui/ui'
+import { reactRouter } from '@glyphui/ui/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router'
-import { RouterLink } from './components/router-link'
 import './fonts'
 import './index.css'
 import { Layout } from './layout'
@@ -33,7 +33,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeChoiceProvider>
       {(theme) => (
-        <GlyphProvider theme={presets[theme]} defaultMode="dark" linkComponent={RouterLink} toaster>
+        <GlyphProvider theme={presets[theme]} defaultMode="dark" router={reactRouter} toaster>
           <RouterProvider router={router} />
         </GlyphProvider>
       )}

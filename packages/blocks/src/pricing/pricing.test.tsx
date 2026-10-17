@@ -44,4 +44,13 @@ describe('Pricing', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Start trial' }))
     expect(tiers[1]!.cta.onClick).toHaveBeenCalled()
   })
+
+  it('shows no billing period on a free tier', () => {
+    render(<Pricing title="Plans" tiers={tiers} />)
+    const card = (name: string) =>
+      screen.getByRole('heading', { name }).closest('[data-slot=card]') as HTMLElement
+    expect(card('Free')).toHaveTextContent('$0')
+    expect(card('Free')).not.toHaveTextContent('per month')
+    expect(card('Pro')).toHaveTextContent('per month')
+  })
 })

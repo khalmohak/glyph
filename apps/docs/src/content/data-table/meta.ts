@@ -18,6 +18,6 @@ export default defineDoc({
   notes: [
     'Columns are typed from your row type via createColumnHelper<T>().',
     'Set meta: { align: "right" } on numeric columns.',
-    'Requires @tanstack/react-table as a peer dependency.',
+    'Requires @tanstack/react-table version 8 as a peer dependency (install @tanstack/react-table@8; version 9 is not supported yet).',
   ],
 })

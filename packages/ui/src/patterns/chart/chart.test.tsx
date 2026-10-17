@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { AreaChart, BarChart, DonutChart, LineChart, Sparkline } from './chart'
+import { resolveColor } from './chart-parts'
 
 const data = [
   { month: 'Jan', revenue: 1200, costs: 800 },
@@ -71,5 +72,23 @@ describe('charts', () => {
   it('labels sparklines as images', () => {
     render(<Sparkline title="Signups, rising" values={[1, 3, 2, 5]} />)
     expect(screen.getByRole('img', { name: 'Signups, rising' })).toBeInTheDocument()
+  })
+})
+
+describe('chart colors', () => {
+  it('defaults series to the theme chart palette, in order', () => {
+    expect([0, 1, 4, 5].map((i) => resolveColor(undefined, i))).toEqual([
+      'var(--color-chart-1)',
+      'var(--color-chart-2)',
+      'var(--color-chart-5)',
+      'var(--color-chart-1)',
+    ])
+  })
+
+  it('accepts theme color names and raw CSS colors', () => {
+    expect(resolveColor('success', 0)).toBe('var(--color-success)')
+    expect(resolveColor('chart-3', 0)).toBe('var(--color-chart-3)')
+    expect(resolveColor('#ff0066', 0)).toBe('#ff0066')
+    expect(resolveColor('oklch(70% 0.1 200)', 0)).toBe('oklch(70% 0.1 200)')
   })
 })

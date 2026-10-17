@@ -2,7 +2,7 @@ import { type ColorMode, scopeSelector, type Theme } from '@glyphui/tokens'
 import { Slot } from 'radix-ui'
 import { type ComponentProps, useContext, useMemo } from 'react'
 import { cn } from '../utils/cn'
-import { GlyphContext } from './glyph-context'
+import { GlyphContext, neverActive } from './glyph-context'
 import { ThemeStyle } from './theme-style'
 
 export interface ThemeScopeProps extends ComponentProps<'div'> {
@@ -16,8 +16,12 @@ export interface ThemeScopeProps extends ComponentProps<'div'> {
 export function ThemeScope({ theme, mode, asChild, children, ...props }: ThemeScopeProps) {
   const parent = useContext(GlyphContext)
   const value = useMemo(
-    () => ({ theme, linkComponent: parent?.linkComponent ?? 'a' }),
-    [theme, parent?.linkComponent],
+    () => ({
+      theme,
+      linkComponent: parent?.linkComponent ?? 'a',
+      useIsActive: parent?.useIsActive ?? neverActive,
+    }),
+    [theme, parent?.linkComponent, parent?.useIsActive],
   )
   const Comp = asChild ? Slot.Root : 'div'
   return (

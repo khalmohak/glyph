@@ -16,7 +16,10 @@ export function PropsTable({
   const inherits = radix ? (
     <>
       It also accepts every prop of the{' '}
-      <a href={radix} className="text-primary underline-offset-4 hover:underline">
+      <a
+        href={radix}
+        className="text-primary-text underline decoration-primary-text/40 underline-offset-4 hover:decoration-primary-text"
+      >
         Radix primitive
       </a>{' '}
       it wraps, plus <code className="font-mono">className</code>.

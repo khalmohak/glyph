@@ -1,7 +1,7 @@
 import { themedBorder } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
 
-// Tinted text is mixed toward the foreground so it stays readable on light and dark surfaces.
+// Tinted text uses the theme's status text colors, which stay readable on tinted backgrounds.
 const tones = {
   neutral: {
     soft: 'bg-muted text-muted-foreground',
@@ -9,34 +9,29 @@ const tones = {
     outline: 'border-border-strong text-foreground',
   },
   primary: {
-    soft: 'bg-primary/14 text-[color-mix(in_oklab,var(--color-primary)_62%,var(--color-foreground))]',
+    soft: 'bg-primary/14 text-primary-text',
     solid: 'bg-primary text-primary-foreground',
-    outline:
-      'border-primary/50 text-[color-mix(in_oklab,var(--color-primary)_62%,var(--color-foreground))]',
+    outline: 'border-primary/50 text-primary-text',
   },
   success: {
-    soft: 'bg-success/14 text-[color-mix(in_oklab,var(--color-success)_62%,var(--color-foreground))]',
+    soft: 'bg-success/14 text-success-text',
     solid: 'bg-success text-success-foreground',
-    outline:
-      'border-success/50 text-[color-mix(in_oklab,var(--color-success)_62%,var(--color-foreground))]',
+    outline: 'border-success/50 text-success-text',
   },
   warning: {
-    soft: 'bg-warning/16 text-[color-mix(in_oklab,var(--color-warning)_62%,var(--color-foreground))]',
+    soft: 'bg-warning/14 text-warning-text',
     solid: 'bg-warning text-warning-foreground',
-    outline:
-      'border-warning/50 text-[color-mix(in_oklab,var(--color-warning)_62%,var(--color-foreground))]',
+    outline: 'border-warning/50 text-warning-text',
   },
   danger: {
-    soft: 'bg-danger/14 text-[color-mix(in_oklab,var(--color-danger)_62%,var(--color-foreground))]',
+    soft: 'bg-danger/14 text-danger-text',
     solid: 'bg-danger text-danger-foreground',
-    outline:
-      'border-danger/50 text-[color-mix(in_oklab,var(--color-danger)_62%,var(--color-foreground))]',
+    outline: 'border-danger/50 text-danger-text',
   },
   info: {
-    soft: 'bg-info/14 text-[color-mix(in_oklab,var(--color-info)_62%,var(--color-foreground))]',
+    soft: 'bg-info/14 text-info-text',
     solid: 'bg-info text-info-foreground',
-    outline:
-      'border-info/50 text-[color-mix(in_oklab,var(--color-info)_62%,var(--color-foreground))]',
+    outline: 'border-info/50 text-info-text',
   },
 } as const
 

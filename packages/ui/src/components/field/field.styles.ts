@@ -4,10 +4,12 @@ export const fieldStyles = tv({
   slots: {
     root: 'grid gap-1.5',
     label: '',
-    required: 'text-danger',
+    labelRow: 'flex items-center justify-between gap-2',
+    labelAction: 'text-small',
+    required: 'text-danger-text',
     text: 'grid gap-0.5',
     description: 'text-small text-faint-foreground',
-    error: 'text-small font-medium text-danger',
+    error: 'text-small font-medium text-danger-text',
   },
   variants: {
     orientation: {

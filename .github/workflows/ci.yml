@@ -25,6 +25,66 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test
+      - name: Test with coverage
+        run: pnpm test:coverage
+      - name: Coverage summary
+        if: always()
+        run: |
+          {
+            echo '### Coverage'
+            echo '| Package | Lines | Branches | Functions |'
+            echo '| --- | --- | --- | --- |'
+            for f in packages/*/coverage/coverage-summary.json; do
+              [ -f "$f" ] || continue
+              node -e "const t=require('./$f').total;console.log('| $(basename "$(dirname "$(dirname "$f")")") | '+t.lines.pct+'% | '+t.branches.pct+'% | '+t.functions.pct+'% |')"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
       - run: pnpm build
       - run: pnpm check:exports
+      - name: Bundle size budget
+        run: pnpm size
+
+  e2e:
+    runs-on: ubuntu-latest
+    # Keep the tag in sync with @playwright/test in apps/docs/package.json.
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -C apps/docs build
+      - name: Accessibility, interaction and visual tests
+        run: pnpm -C apps/docs e2e
+      - name: Demo app journeys
+        run: |
+          pnpm turbo run build --filter=demo-saas
+          pnpm -C apps/demo-saas e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            apps/docs/e2e/.report
+            apps/docs/e2e/.results
+            apps/demo-saas/e2e/.report
+            apps/demo-saas/e2e/.results
+          retention-days: 14
+
+  consumer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install packed packages into a fresh app, type-check and build
+        run: pnpm test:consumer

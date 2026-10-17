@@ -8,6 +8,8 @@ export const modalStyles = tv({
     header: '',
     body: 'grid gap-4',
     footer: '',
+    /** Wraps body and footer when `onSubmit` is set; `contents` keeps the dialog layout. */
+    form: 'contents',
   },
 })
 

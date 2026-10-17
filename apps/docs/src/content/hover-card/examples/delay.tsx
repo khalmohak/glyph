@@ -8,7 +8,7 @@ export default function Example() {
       <HoverCard openDelay={150} closeDelay={100}>
         <HoverCardTrigger
           href="#pr-482"
-          className="font-mono text-primary underline-offset-4 hover:underline"
+          className="font-mono text-primary-text underline decoration-primary-text/40 underline-offset-4 hover:decoration-primary-text"
         >
           #482
         </HoverCardTrigger>

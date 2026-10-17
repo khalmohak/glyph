@@ -1,4 +1,17 @@
 export {
+  auditContrast,
+  type ContrastIssue,
+  contrastMinimums,
+  minChartDistance,
+} from './audit'
+export {
+  colorDistance,
+  composite,
+  contrastRatio,
+  parseColor,
+  relativeLuminance,
+} from './contrast'
+export {
   type BaseThemeInput,
   defineTheme,
   type ExtendedThemeInput,
@@ -15,6 +28,7 @@ export type {
   GlyphComponentRegistry,
 } from './register'
 export * from './schema'
+export { deriveTextColor } from './text-colors'
 export {
   modeVars,
   scopeSelector,

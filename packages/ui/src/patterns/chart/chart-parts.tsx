@@ -4,6 +4,11 @@ import { chartStyles } from './chart.styles'
 
 /** Theme colors a series can use by name. Any CSS color also works. */
 export type ChartColor =
+  | 'chart-1'
+  | 'chart-2'
+  | 'chart-3'
+  | 'chart-4'
+  | 'chart-5'
   | 'primary'
   | 'info'
   | 'success'
@@ -12,11 +17,12 @@ export type ChartColor =
   | 'foreground'
   | 'muted-foreground'
 
-const palette: ChartColor[] = ['primary', 'info', 'success', 'warning', 'danger']
+/** Series without a color use the theme's chart palette, in order. */
+const palette: ChartColor[] = ['chart-1', 'chart-2', 'chart-3', 'chart-4', 'chart-5']
 
 export function resolveColor(color: string | undefined, index: number): string {
   const value = color ?? palette[index % palette.length]!
-  return /^[a-z-]+$/.test(value) ? `var(--color-${value})` : value
+  return /^[a-z][a-z\d-]*$/.test(value) ? `var(--color-${value})` : value
 }
 
 export const defaultFormatter = (value: number) =>
@@ -135,6 +141,8 @@ export function ChartFrame({
           <span className={s.description({ class: slots.description })}>{description}</span>
         )}
       </figcaption>
+      {/* Screen readers get the data table below. Charts pass `accessibilityLayer={false}`
+          so recharts adds no focusable nodes inside this hidden plot. */}
       <div className={s.plot({ class: slots.plot })} aria-hidden="true">
         {children}
       </div>

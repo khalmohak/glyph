@@ -1,5 +1,6 @@
 import { Container, cn, Section } from '@glyphui/ui'
 import { type ComponentProps, isValidElement, type ReactNode, useId } from 'react'
+import { useBlocksStylesCheck } from '../internal/styles-check'
 
 export interface LogoItem {
   /** Company name, used as the accessible label. */
@@ -19,6 +20,7 @@ function isLogoItem(value: LogoItem | ReactNode): value is LogoItem {
 
 /** A row of customer or partner logos, muted so they support rather than compete. */
 export function LogoCloud({ title, logos, className, ...props }: LogoCloudProps) {
+  useBlocksStylesCheck()
   const titleId = useId()
   return (
     <Section
@@ -40,7 +42,7 @@ export function LogoCloud({ title, logos, className, ...props }: LogoCloudProps)
             <li
               key={isLogoItem(item) ? item.name : i}
               className={cn(
-                'flex h-8 items-center text-faint-foreground opacity-80 grayscale transition-opacity duration-(--glyph-duration-base) hover:opacity-100',
+                'flex h-8 items-center text-faint-foreground grayscale transition-colors duration-(--glyph-duration-base) hover:text-muted-foreground',
                 '[&_img]:h-full [&_img]:w-auto [&_svg]:h-full [&_svg]:w-auto',
               )}
             >

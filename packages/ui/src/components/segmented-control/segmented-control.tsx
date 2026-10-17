@@ -1,8 +1,10 @@
 import { ToggleGroup } from 'radix-ui'
-import type { ReactNode } from 'react'
+import { type ReactNode, useContext } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
+import { warnOnce } from '../../internal/dev'
 import { focusRing, themedBorder, transition } from '../../utils/styles'
 import { tv, type VariantProps } from '../../utils/tv'
+import { FieldContext } from '../field/field-context'
 
 export const segmentedControlStyles = tv({
   slots: {
@@ -40,7 +42,9 @@ export interface SegmentedControlProps<T extends string>
   value?: T
   defaultValue?: T
   onValueChange?: (value: T) => void
-  'aria-label': string
+  /** Required unless the control sits in a `<Field label>`, which labels it. */
+  'aria-label'?: string
+  'aria-labelledby'?: string
   className?: string
   id?: string
 }
@@ -52,7 +56,16 @@ export interface SegmentedControlProps<T extends string>
 export function SegmentedControl<T extends string>(inProps: SegmentedControlProps<T>) {
   const [props, slots] = useComponentConfig('SegmentedControl', inProps)
   const { options, value, defaultValue, onValueChange, size, fullWidth, className, ...rest } = props
+  const field = useContext(FieldContext)
   const s = segmentedControlStyles({ size, fullWidth })
+  const labelledBy = rest['aria-labelledby'] ?? (rest['aria-label'] ? undefined : field?.labelId)
+  if (!rest['aria-label'] && !labelledBy) {
+    warnOnce(
+      'segmented-control-label',
+      'SegmentedControl needs a label: pass aria-label, or place it in a <Field label="…">.',
+    )
+  }
+  const describedBy = [field?.descriptionId, field?.errorId].filter(Boolean).join(' ')
   return (
     <ToggleGroup.Root
       type="single"
@@ -62,6 +75,8 @@ export function SegmentedControl<T extends string>(inProps: SegmentedControlProp
       // Radix emits '' when the active item is clicked again; a segmented control never deselects.
       onValueChange={(next: string) => next && onValueChange?.(next as T)}
       className={s.root({ class: [slots.root, className] })}
+      aria-labelledby={labelledBy}
+      aria-describedby={describedBy || undefined}
       {...rest}
     >
       {options.map((option) => (

@@ -1,5 +1,6 @@
 import { Container, cn, Section } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import { useBlocksStylesCheck } from '../internal/styles-check'
 import { type HeadingLevel, SectionHeader } from '../section-header'
 
 export interface StatItem {
@@ -31,6 +32,7 @@ export function Stats({
   className,
   ...props
 }: StatsProps) {
+  useBlocksStylesCheck()
   const titleId = useId()
   return (
     <Section

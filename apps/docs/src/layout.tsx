@@ -21,6 +21,7 @@ import { BookOpen, Github, LayoutGrid, Monitor, Moon, Rocket, Sun } from 'lucide
 import { useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
 import { docsByCategory } from './lib/catalog'
+import { version } from './lib/version'
 import { SearchCommand } from './search'
 import { useThemeChoice } from './theme-choice'
 
@@ -62,7 +63,7 @@ function DocsSidebar({ pathname }: { pathname: string }) {
       <SidebarHeader className="justify-between">
         <Brand />
         <Badge variant="outline" className="group-data-[collapsed=true]/sidebar:hidden">
-          v0.1
+          v{version}
         </Badge>
       </SidebarHeader>
       <SidebarContent>

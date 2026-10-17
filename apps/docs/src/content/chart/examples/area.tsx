@@ -19,8 +19,8 @@ export default function Example() {
       stacked
       series={[
         { key: 'organic', label: 'Organic' },
-        { key: 'paid', label: 'Paid', color: 'info' },
-        { key: 'referral', label: 'Referral', color: 'success' },
+        { key: 'paid', label: 'Paid' },
+        { key: 'referral', label: 'Referral' },
       ]}
     />
   )

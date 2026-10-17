@@ -22,7 +22,9 @@ export const buttonStyles = tv({
       },
       ghost: { base: 'text-muted-foreground hover:bg-muted hover:text-foreground' },
       danger: { base: 'bg-danger text-danger-foreground shadow-sm hover:bg-danger/88' },
-      link: { base: 'h-auto px-0 text-primary underline-offset-4 shadow-none hover:underline' },
+      link: {
+        base: 'h-auto px-0 text-primary-text underline-offset-4 shadow-none hover:underline',
+      },
     },
     size: {
       sm: { base: 'h-(--glyph-control-sm) px-3 text-small', icon: 'size-3.5' },

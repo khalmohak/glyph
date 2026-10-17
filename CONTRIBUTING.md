@@ -32,6 +32,25 @@ Status: `stable` (API settled), `beta` (usable, may change), `planned` (roadmap)
 
 `*.test-d.ts(x)` files are checked by `pnpm typecheck` and never run. Use `// @ts-expect-error` to lock in what must *not* compile.
 
+## Testing
+
+| Command | What it checks |
+| --- | --- |
+| `pnpm test` | Unit and interaction tests (Vitest + Testing Library, jsdom) |
+| `pnpm test:coverage` | The same, with a coverage floor per package (`vitest.config.ts` → `thresholds`). Raise the floor when you add tests; never lower it. |
+| `pnpm e2e` | Playwright against the built docs (`pnpm -C apps/docs build` first): axe on every page in light and dark, interaction tests for the hard components, and, on Linux only, visual regression |
+| `pnpm -C apps/docs e2e:docker` | The full e2e suite, visual included, in the Playwright Linux image (needs Docker) |
+| `pnpm -C apps/docs e2e:update` | Regenerate the visual baselines in Docker. Without Docker, run the **Update visual baselines** workflow on your branch from the Actions tab. |
+| `pnpm test:consumer` | Packs the packages, installs the tarballs into a fresh Vite app with the newest supported dependency versions, then type-checks (`skipLibCheck: false`) and builds |
+| `pnpm size` | Gzipped size of every public entry against `scripts/size-budget.json` (5% tolerance). After an intended change, `pnpm size --update` and commit the budget. |
+
+Notes:
+
+- **Every docs example is an e2e fixture.** Adding an example adds an axe check and three screenshots (glyph light, glyph dark, brutalist light). Examples must render the same every time: no `Math.random`, no remote images, and dates relative to `new Date()` (the visual tests freeze time).
+- **Visual baselines are Linux-only** (`apps/docs/e2e/__screenshots__/**/*-linux.png`); fonts render differently on macOS, so local runs skip the visual project. Commit only the Linux files.
+- **Accessibility debt is explicit.** `apps/docs/e2e/a11y-known-issues.ts` lists the violations we know about, each with a reason. Remove an entry when you fix it; anything not listed fails the suite.
+- **Known bugs can be pinned with `test.fail`** and a reason, so the test flips red once the bug is fixed and the marker must be removed.
+
 ## Dependencies
 
 `pnpm-workspace.yaml` sets `minimumReleaseAge` to 14 days: new versions are not installed until they have been public for two weeks.
@@ -46,6 +65,6 @@ Status: `stable` (API settled), `beta` (usable, may change), `planned` (roadmap)
 2. `pnpm dev` and work against the showcase. Check your change in all four themes, light and dark.
 3. `pnpm check` before pushing.
 4. If a published package changed, run `pnpm changeset` and commit the generated file.
-5. Open a pull request. CI runs lint, typecheck, tests and build.
+5. Open a pull request. CI runs lint, typecheck, tests with coverage, build, export checks and the size budget, plus the e2e suite and the consumer smoke test.
 
 Maintainers merge the "Release packages" pull request that Changesets keeps open; merging it publishes to npm with provenance.

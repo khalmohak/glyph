@@ -10,6 +10,7 @@ import {
   useLinkComponent,
 } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId, useState } from 'react'
+import { useBlocksStylesCheck } from '../internal/styles-check'
 import { type HeadingLevel, SectionHeader } from '../section-header'
 
 export type Billing = 'monthly' | 'yearly'
@@ -36,7 +37,7 @@ export interface PricingProps extends Omit<ComponentProps<'section'>, 'title'> {
   defaultBilling?: Billing
   /** Labels for the billing switch. */
   billingLabels?: Record<Billing, ReactNode>
-  /** Shown after each numeric price, per billing period. */
+  /** Shown after each numeric price above zero, per billing period. */
   periodLabels?: Record<Billing, ReactNode>
   /** Turns numeric prices into text. Default: `$` + the number. */
   formatPrice?: (amount: number) => string
@@ -80,6 +81,7 @@ export function Pricing({
   className,
   ...props
 }: PricingProps) {
+  useBlocksStylesCheck()
   const titleId = useId()
   const [billing, setBilling] = useState<Billing>(defaultBilling)
   const Link = useLinkComponent()
@@ -130,15 +132,15 @@ export function Pricing({
             const numeric = typeof amount === 'number'
             const tierId = `${titleId}-${tier.name.replace(/\s+/g, '-').toLowerCase()}`
             return (
-              <li key={tier.name} className="min-w-0">
+              <li key={tier.name} className="@container min-w-0">
                 <Card
                   aria-labelledby={tierId}
                   data-highlighted={tier.highlighted || undefined}
                   className={cn('h-full', tier.highlighted && 'ring-2 ring-primary')}
                 >
                   <div className="grid gap-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <TierHeading id={tierId} className="font-display text-h4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <TierHeading id={tierId} className="min-w-0 font-display text-h4">
                         {tier.name}
                       </TierHeading>
                       {tier.badge && <Badge tone="primary">{tier.badge}</Badge>}
@@ -150,10 +152,12 @@ export function Pricing({
                     )}
                   </div>
                   <p className="flex flex-wrap items-baseline gap-x-1.5">
-                    <span className="font-display text-h1 tabular-nums">
+                    {/* Shrinks with the card so wide display fonts and text prices never overflow. */}
+                    <span className="min-w-0 font-display text-h1 tabular-nums [font-size:min(var(--text-h1),18cqi)] [overflow-wrap:anywhere]">
                       {numeric ? formatPrice(amount) : amount}
                     </span>
-                    {numeric && (
+                    {/* A free tier has no billing period. */}
+                    {numeric && amount > 0 && (
                       <span className="text-small text-muted-foreground">
                         {periodLabels[billing]}
                       </span>

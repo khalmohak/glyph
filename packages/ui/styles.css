@@ -39,7 +39,17 @@
   --color-danger-foreground: var(--glyph-danger-foreground);
   --color-info: var(--glyph-info);
   --color-info-foreground: var(--glyph-info-foreground);
+  --color-primary-text: var(--glyph-primary-text);
+  --color-success-text: var(--glyph-success-text);
+  --color-warning-text: var(--glyph-warning-text);
+  --color-danger-text: var(--glyph-danger-text);
+  --color-info-text: var(--glyph-info-text);
   --color-overlay: var(--glyph-overlay);
+  --color-chart-1: var(--glyph-chart-1);
+  --color-chart-2: var(--glyph-chart-2);
+  --color-chart-3: var(--glyph-chart-3);
+  --color-chart-4: var(--glyph-chart-4);
+  --color-chart-5: var(--glyph-chart-5);
 
   --radius-xs: var(--glyph-radius-xs);
   --radius-sm: var(--glyph-radius-sm);
@@ -140,6 +150,68 @@
   from {
     opacity: 0;
     transform: translateY(-8px);
+  }
+}
+@keyframes glyph-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes glyph-sheet-in-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes glyph-sheet-out-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes glyph-sheet-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+}
+@keyframes glyph-sheet-out-left {
+  to {
+    transform: translateX(-100%);
+  }
+}
+@keyframes glyph-sheet-in-top {
+  from {
+    transform: translateY(-100%);
+  }
+}
+@keyframes glyph-sheet-out-top {
+  to {
+    transform: translateY(-100%);
+  }
+}
+@keyframes glyph-sheet-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes glyph-sheet-out-bottom {
+  to {
+    transform: translateY(100%);
+  }
+}
+/* Radix sets the content height variable on Accordion and Collapsible content. */
+@keyframes glyph-collapse-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height, var(--radix-collapsible-content-height));
+  }
+}
+@keyframes glyph-collapse-up {
+  from {
+    height: var(--radix-accordion-content-height, var(--radix-collapsible-content-height));
+  }
+  to {
+    height: 0;
   }
 }
 

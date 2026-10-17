@@ -1,8 +1,18 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import { Field } from '../field'
 import { Slider } from './slider'
 
 describe('Slider', () => {
+  it('takes its accessible name from a surrounding Field label', () => {
+    render(
+      <Field label="Volume">
+        <Slider defaultValue={60} />
+      </Field>,
+    )
+    expect(screen.getByRole('slider', { name: 'Volume' })).toBeInTheDocument()
+  })
+
   it('exposes a labelled slider and reports a number', () => {
     const onValueChange = vi.fn<(value: number) => void>()
     render(<Slider aria-label="Volume" defaultValue={40} onValueChange={onValueChange} />)

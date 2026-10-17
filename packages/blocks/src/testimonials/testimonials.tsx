@@ -1,5 +1,6 @@
 import { Avatar, Card, Container, cn, Section } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import { useBlocksStylesCheck } from '../internal/styles-check'
 import { type HeadingLevel, SectionHeader } from '../section-header'
 
 export interface Testimonial {
@@ -52,6 +53,7 @@ export function Testimonials({
   className,
   ...props
 }: TestimonialsProps) {
+  useBlocksStylesCheck()
   const titleId = useId()
   const [first, ...rest] = items
   return (

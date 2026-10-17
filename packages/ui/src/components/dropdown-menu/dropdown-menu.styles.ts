@@ -27,8 +27,8 @@ export const dropdownMenuStyles = tv({
     tone: {
       default: {},
       danger: {
-        item: 'text-danger data-highlighted:bg-danger/10',
-        icon: 'text-danger',
+        item: 'text-danger-text data-highlighted:bg-danger/10',
+        icon: 'text-danger-text',
       },
     },
     inset: { true: { item: 'pl-8', label: 'pl-8' } },

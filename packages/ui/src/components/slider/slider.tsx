@@ -1,7 +1,7 @@
 import { Slider as SliderPrimitive } from 'radix-ui'
-import type { ReactNode } from 'react'
+import { type ReactNode, useContext } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
-import { useFieldControl } from '../field/field-context'
+import { FieldContext, useFieldControl } from '../field/field-context'
 import { sliderStyles } from './slider.styles'
 
 export type SliderValue = number | readonly [number, number]
@@ -31,7 +31,9 @@ export interface SliderProps<V extends SliderValue> {
   name?: string
   id?: string
   className?: string
+  /** Accessible name. Inside a `Field`, the field's label is used when this is not set. */
   'aria-label'?: string
+  'aria-labelledby'?: string
   'aria-describedby'?: string
   'aria-invalid'?: boolean
   /** Accessible names for range thumbs. Default: "Minimum", "Maximum". */
@@ -61,9 +63,13 @@ export function Slider<V extends SliderValue = number>(inProps: SliderProps<V>) 
     className,
     thumbLabels = ['Minimum', 'Maximum'],
     'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
     'aria-describedby': ariaDescribedBy,
     'aria-invalid': ariaInvalid,
   } = props
+  const field = useContext(FieldContext)
+  // Thumbs are not labelable elements, so a Field's <label for> can't name them.
+  const labelledBy = ariaLabelledBy ?? (ariaLabel ? undefined : field?.labelId)
   const isRange = Array.isArray(value ?? defaultValue)
   const fromArray = (next: number[]) => (isRange ? [next[0], next[1]] : next[0]) as V
   const current = toArray(value) ?? toArray(defaultValue) ?? [min]
@@ -97,6 +103,7 @@ export function Slider<V extends SliderValue = number>(inProps: SliderProps<V>) 
             key={index}
             id={index === 0 ? id : undefined}
             aria-label={isRange ? thumbLabels[index] : ariaLabel}
+            aria-labelledby={isRange ? undefined : labelledBy}
             aria-describedby={ariaDescribedBy}
             aria-invalid={ariaInvalid}
             className={s.thumb({ class: slots.thumb })}

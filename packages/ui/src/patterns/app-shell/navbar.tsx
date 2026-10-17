@@ -5,13 +5,42 @@ import { Container, type ContainerProps } from '../../components/container'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { useScrolled } from '../../hooks/use-scrolled'
 import { MenuIcon, XIcon } from '../../internal/icons'
-import { useLinkComponent } from '../../provider/glyph-context'
+import { useIsActive, useLinkComponent } from '../../provider/glyph-context'
 import { navbarStyles } from './app-shell.styles'
 
 export interface NavLink {
   label: ReactNode
   href: string
+  /** Marks the current page. Computed from the provider's `router` when not set. */
   active?: boolean
+  /** With automatic matching, only the exact path is active (not its children). */
+  end?: boolean
+}
+
+function NavbarLink({
+  link,
+  className,
+  onClick,
+}: {
+  link: NavLink
+  className: string
+  onClick?: () => void
+}) {
+  const Link = useLinkComponent()
+  const active = useIsActive(link.href, {
+    explicit: link.active,
+    ...(link.end !== undefined && { end: link.end }),
+  })
+  return (
+    <Link
+      href={link.href}
+      aria-current={active ? 'page' : undefined}
+      className={className}
+      {...(onClick && { onClick })}
+    >
+      {link.label}
+    </Link>
+  )
 }
 
 export interface NavbarProps extends Omit<ComponentProps<'header'>, 'children'> {
@@ -44,7 +73,6 @@ export function Navbar(inProps: NavbarProps) {
   } = props
   const [open, setOpen] = useState(false)
   const scrolled = useScrolled(8, blurOnScroll)
-  const Link = useLinkComponent()
   const s = navbarStyles({ sticky, blur: blurOnScroll })
 
   return (
@@ -59,14 +87,7 @@ export function Navbar(inProps: NavbarProps) {
         {links.length > 0 && (
           <nav aria-label="Main" className={s.links({ class: slots.links })}>
             {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={link.active ? 'page' : undefined}
-                className={s.link({ class: slots.link })}
-              >
-                {link.label}
-              </Link>
+              <NavbarLink key={link.href} link={link} className={s.link({ class: slots.link })} />
             ))}
           </nav>
         )}
@@ -96,15 +117,12 @@ export function Navbar(inProps: NavbarProps) {
               </div>
               <nav aria-label="Main" className={s.panelLinks({ class: slots.panelLinks })}>
                 {links.map((link) => (
-                  <Link
+                  <NavbarLink
                     key={link.href}
-                    href={link.href}
-                    aria-current={link.active ? 'page' : undefined}
+                    link={link}
                     className={s.panelLink({ class: slots.panelLink })}
                     onClick={() => setOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
+                  />
                 ))}
               </nav>
               {actions && (

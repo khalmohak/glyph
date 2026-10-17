@@ -5,7 +5,7 @@ import { ConfirmProvider } from '../components/alert-dialog/confirm'
 import { Toaster, type ToasterProps } from '../components/toast/toast'
 import { glyph } from '../themes'
 import { type ColorModePreference, ColorModeProvider } from './color-mode'
-import { GlyphContext, type LinkComponent } from './glyph-context'
+import { GlyphContext, type GlyphRouter, type LinkComponent, neverActive } from './glyph-context'
 import { ThemeStyle } from './theme-style'
 
 export interface GlyphProviderProps {
@@ -16,7 +16,13 @@ export interface GlyphProviderProps {
   defaultMode?: ColorModePreference
   /** localStorage key for the user's color mode. `null` disables persistence. */
   storageKey?: string | null
-  /** Your router's link, used by Navbar, Sidebar and other navigation components. */
+  /**
+   * Your router: its link component, plus an optional `useIsActive` hook that marks the
+   * current page in Sidebar, Navbar and NavigationMenu. React Router:
+   * `import { reactRouter } from '@glyphui/ui/react-router'`.
+   */
+  router?: GlyphRouter
+  /** Your router's link only. Prefer `router`, which also handles active items. */
   linkComponent?: LinkComponent
   /**
    * Mounts a themed `<Toaster />` so `toast()` works anywhere. `true` for defaults, or pass
@@ -31,10 +37,16 @@ export function GlyphProvider({
   theme = glyph,
   defaultMode,
   storageKey,
-  linkComponent = 'a',
+  router,
+  linkComponent,
   toaster = false,
 }: GlyphProviderProps) {
-  const value = useMemo(() => ({ theme, linkComponent }), [theme, linkComponent])
+  const Link = router?.Link ?? linkComponent ?? 'a'
+  const useIsActive = router?.useIsActive ?? neverActive
+  const value = useMemo(
+    () => ({ theme, linkComponent: Link, useIsActive }),
+    [theme, Link, useIsActive],
+  )
   return (
     <ColorModeProvider
       {...(defaultMode !== undefined && { defaultMode })}

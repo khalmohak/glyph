@@ -6,6 +6,11 @@ import { FieldContext } from './field-context'
 
 export interface FieldProps extends Omit<ComponentProps<'div'>, 'children'>, FieldVariants {
   label?: ReactNode
+  /**
+   * Shown at the end of the label row, outside the label, so it is not part of the
+   * control's accessible name. For example a "Forgot password?" link.
+   */
+  labelAction?: ReactNode
   description?: ReactNode
   /** Error message. Marks the control invalid and is announced to screen readers. */
   error?: ReactNode
@@ -27,6 +32,7 @@ export function Field(inProps: FieldProps) {
   const [props, slots] = useComponentConfig('Field', inProps)
   const {
     label,
+    labelAction,
     description,
     error,
     required = false,
@@ -40,17 +46,18 @@ export function Field(inProps: FieldProps) {
   const generated = useId()
   const id = controlId ?? generated
   const invalid = Boolean(error)
+  const labelId = label ? `${id}-label` : undefined
   const descriptionId = description ? `${id}-description` : undefined
   const errorId = invalid ? `${id}-error` : undefined
   const s = fieldStyles({ orientation })
 
   const context = useMemo(
-    () => ({ id, descriptionId, errorId, invalid, required, disabled }),
-    [id, descriptionId, errorId, invalid, required, disabled],
+    () => ({ id, labelId, descriptionId, errorId, invalid, required, disabled }),
+    [id, labelId, descriptionId, errorId, invalid, required, disabled],
   )
 
-  const labelNode = label ? (
-    <Label htmlFor={id} className={s.label({ class: slots.label })}>
+  const labelElement = label ? (
+    <Label id={labelId} htmlFor={id} className={s.label({ class: slots.label })}>
       {label}
       {required && (
         <span className={s.required({ class: slots.required })} aria-hidden="true">
@@ -59,6 +66,20 @@ export function Field(inProps: FieldProps) {
       )}
     </Label>
   ) : null
+  const labelNode =
+    labelElement && labelAction ? (
+      <div data-slot="field-label-row" className={s.labelRow({ class: slots.labelRow })}>
+        {labelElement}
+        <span
+          data-slot="field-label-action"
+          className={s.labelAction({ class: slots.labelAction })}
+        >
+          {labelAction}
+        </span>
+      </div>
+    ) : (
+      labelElement
+    )
 
   const messages = (
     <>

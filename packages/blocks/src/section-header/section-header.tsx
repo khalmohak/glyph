@@ -1,5 +1,6 @@
 import { cn, Eyebrow, Heading, Text } from '@glyphui/ui'
 import type { ReactNode } from 'react'
+import { useBlocksStylesCheck } from '../internal/styles-check'
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -25,6 +26,7 @@ export function SectionHeader({
   titleId,
   className,
 }: SectionHeaderProps) {
+  useBlocksStylesCheck()
   return (
     <div
       data-slot="section-header"
