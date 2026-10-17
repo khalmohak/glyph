@@ -1,5 +1,84 @@
 # @glyphui/ui
 
+## 0.8.0
+
+### Patch Changes
+
+- [#27](https://github.com/khalmohak/glyph/pull/27) [`bc2af02`](https://github.com/khalmohak/glyph/commit/bc2af02637abcb99897f31764e417f6ce7596fa3) Thanks [@khalmohak](https://github.com/khalmohak)! - Fixes from building a real app with Glyph (Ledgerline):
+
+  - **NumberInput no longer corrupts amounts.** Tabbing into a formatted value like "$90,000.00" and typing used to append (giving $900,001,250); keyboard focus now selects the whole number so typing replaces it. NumberInput also reports the value while you type, so form errors clear before you click Submit instead of moving the button out from under the click. Clamping and rounding still happen on blur.
+  - **Shared table links with one filter value work.** `useTableUrlState` (and `parseTableSearch`) take your `columns` and decode each filter by its type, so `?f.status=overdue` gives a `multi` filter `['overdue']`, not a string. DataTable always reports `multi` filters as arrays, and the new `getFilterList(filters, id)` reads a filter as an array for server-side fetches.
+  - **Menus no longer hide the page from screen readers.** `DropdownMenu` and `ContextMenu` are now non-modal by default: focus still moves into the menu and Escape or an outside click closes it, but the rest of the page isn't marked `aria-hidden` while staying focusable. Pass `modal` for the old behavior.
+  - **Contrast warnings in development.** `GlyphProvider` logs once per theme when its colors fail WCAG contrast, naming each pair. `auditContrast` and `contrastRatio` are now exported from `@glyphui/ui`.
+  - **Tab panels show focus.** A tab panel that takes keyboard focus now gets the focus ring.
+  - **InputOTP fits phones.** Slots and gaps are one step smaller below `sm`, so eight slots fit a 390px screen.
+  - **Headings wrap long words** instead of overflowing narrow screens.
+
+- [#27](https://github.com/khalmohak/glyph/pull/27) [`bc2af02`](https://github.com/khalmohak/glyph/commit/bc2af02637abcb99897f31764e417f6ce7596fa3) Thanks [@khalmohak](https://github.com/khalmohak)! - Fixes from building a helpdesk app on a real bearer-token API.
+
+  **Auth**
+
+  - **Two-step sign-in works with bearer tokens on multi-user servers.** A server can return a `challenge` with `needs-second-factor` (and `needs-verification`); the client sends it back with the code, so the server knows which sign-in the code completes. The memory adapter and the example app now track each sign-in separately instead of one global "pending" user.
+  - **Sign-in links can be completed.** New `completeMagicLink(token)` on the client and adapters (REST: `POST /auth/magic-link/verify`), and a `MagicLinkCallback` screen for the page the link opens.
+  - **The session-expired dialog handles two-step accounts:** after the password it asks for the code right there instead of sending people to the sign-in page.
+  - **SignUpForm `extraFields`** for invite codes, workspace names and similar. Values are validated with the form and passed to `signUp` as `extra`; the REST adapter sends them with the request.
+  - **The code step says how the code arrived** (authenticator app, email or text) from the server's `method`. Override it with `SignInForm twoFactor`.
+  - **OrganizationSwitcher `label` and `createLabel`**, so it can say Workspaces or Teams.
+  - **`AuthRevalidator` / `useAuthRevalidation()`** for React Router data routers: pages guarded only by `protectedLoader` now redirect after an idle, cross-tab or server sign-out. `IdleWarningDialog onSignOut` also fires for the automatic idle sign-out, and the auth state records `lastSignOut`.
+  - Docs cover the bearer-mode server contract (refresh rotation, two-step challenges, magic links, organizations) and the CORS headers a separate API origin needs.
+
+  **UI**
+
+  - Charts that start in a loading or empty state measure their width once data arrives (Funnel, Sankey and Heatmap used to keep a 480px fallback and overflow narrow cards).
+  - Gauge inside ChartCard no longer shows its title twice.
+  - DataTable phone cards, Alert, form errors, chart tooltips and tables, mega-menu link cards, FileUpload rows and Stepper steps use the container radius, so themes with pill-shaped controls (playful) don't turn them into ovals.
+  - The DataTable phone-card list is named after the table.
+  - `tableSearch(state)` builds a table URL for deep links; comma-joined values in hand-written links (`f.status=open,pending`) are read as separate filter values. The URL format is documented.
+  - `SidebarHeader` grows with its content, so a switcher under the brand isn't clipped.
+  - `StaggerItem` no longer needs `index`: it follows document order.
+
+- [#27](https://github.com/khalmohak/glyph/pull/27) [`bc2af02`](https://github.com/khalmohak/glyph/commit/bc2af02637abcb99897f31764e417f6ce7596fa3) Thanks [@khalmohak](https://github.com/khalmohak)! - Bug fixes across components:
+
+  - **NumberInput** reads the locale's decimal comma ("1.234,5" is 1234.5 with `locale="de-DE"`), keeps showing the raw number while focused after arrow keys or the − / + buttons (instead of switching to the formatted "$2.00"), and no longer calls `onValueChange` when you leave the field without changing it.
+  - **TagInput** no longer adds a tag when Enter confirms an IME candidate (Japanese, Chinese, Korean input). When `maxTags` is reached the field stays focused and read-only, so Backspace can still remove the last tag; before, it was disabled and focus was lost.
+  - **Slider** with `showValue` and no `value` now updates the shown number as you drag or use arrow keys.
+  - **Carousel** arrow keys no longer hijack text fields, selects and sliders inside a slide, and your own `onKeyDownCapture` on the carousel, or `onClick` on CarouselPrevious / CarouselNext, now runs alongside Glyph's instead of replacing it.
+  - **TreeView** keeps its keyboard navigation when you pass your own `onKeyDown`.
+  - **Button** with `asChild` and `disabled` or `loading` now really disables the link it renders: `aria-disabled`, out of the tab order, click prevented.
+  - **useCommandMenuShortcut** no longer throws on keydown events without a key (Chrome autofill), and holding ⌘K no longer toggles the menu repeatedly.
+  - **Color mode** follows a change made in another tab.
+  - **Avatar** initials keep emoji and other multi-byte characters whole.
+  - **FileUpload** lists two rejected files with the same name without a React key warning.
+  - `useControllableState` (used by most inputs) applies several functional updates in one event correctly and returns a stable setter.
+  - DatePicker and DateRangePicker: the clear control is now a real button beside the trigger instead of a fake button nested inside it, so screen readers announce both correctly, and focus returns to the picker after clearing.
+
+- [#27](https://github.com/khalmohak/glyph/pull/27) [`bc2af02`](https://github.com/khalmohak/glyph/commit/bc2af02637abcb99897f31764e417f6ce7596fa3) Thanks [@khalmohak](https://github.com/khalmohak)! - Bug fixes for tables, charts, layout, motion and router integration.
+
+  - **DataTable:**
+    - In server mode, "Select all 312" now survives moving to another page.
+    - When the server total shrinks below the current page (say, after deleting every row on the last page), the table moves back to the last page instead of showing an empty one.
+    - Sorting or filters for a column that no longer exists (an old shared URL, say) are ignored instead of logging errors on every render.
+    - CSV export now escapes a formula at the start of a list cell, like a tags column.
+  - **Table URL state:** a search still being typed no longer overwrites the page the user navigated to with the back or forward button.
+  - **Charts:**
+    - Gaps in data (`null` or missing values) show as "—" in the accessible data table instead of `0` or `NaN`.
+    - Legends ignore hidden keys for series, slices or groups that have gone away, and never leave a chart with everything hidden.
+    - Heatmap skips invalid dates instead of drawing an empty grid.
+  - **AppShell and Navbar:**
+    - The mobile drawer and menu panel close when the window grows to desktop width.
+    - Using an action in the Navbar's mobile panel closes it.
+    - Links that share an `href` no longer trigger React key warnings.
+  - **`useAsync`:** a function that throws before returning a promise now produces an error state instead of crashing.
+  - **Motion:**
+    - `PageTransition` no longer replays its entrance when the first page re-renders.
+    - `AnimatedNumber` shows `NaN` or `Infinity` values directly instead of animating them.
+  - **React Router:**
+    - Relative `href`s (like `"invoices"` under `/app`) are marked active.
+    - Table URL writes through `useRouterUrlAdapter()` keep the location hash.
+
+- Updated dependencies [[`bc2af02`](https://github.com/khalmohak/glyph/commit/bc2af02637abcb99897f31764e417f6ce7596fa3), [`bc2af02`](https://github.com/khalmohak/glyph/commit/bc2af02637abcb99897f31764e417f6ce7596fa3)]:
+  - @glyphui/tokens@0.8.0
+
 ## 0.7.0
 
 ### Patch Changes
