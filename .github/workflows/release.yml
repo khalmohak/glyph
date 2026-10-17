@@ -28,7 +28,9 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck && pnpm test
+      # Two packages at a time: running every jsdom suite at once on the runner crashed Vitest
+      # ("Timeout calling onTaskUpdate") and blocked several releases. CI runs the full set too.
+      - run: pnpm typecheck && pnpm turbo run test --concurrency=2
       - uses: changesets/action@v1
         with:
           version: pnpm changeset version
