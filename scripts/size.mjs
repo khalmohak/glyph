@@ -35,10 +35,14 @@ function distFile(pkg, subpath) {
 
 const external = (pkg) => {
   const json = pkgJson(pkg)
+  const shared = pkg === 'ui' ? [] : Object.keys(pkgJson('ui').dependencies ?? {})
   return [
     ...Object.keys(json.peerDependencies ?? {}),
-    // Sibling Glyph packages are measured on their own.
-    ...Object.keys(json.dependencies ?? {}).filter((d) => d.startsWith('@glyphui/')),
+    // Sibling Glyph packages are measured on their own, and dependencies @glyphui/ui already
+    // brings (tailwind-variants, …) are shared in a real app, not added again.
+    ...Object.keys(json.dependencies ?? {}).filter(
+      (d) => d.startsWith('@glyphui/') || shared.includes(d),
+    ),
     'react/jsx-runtime',
   ]
 }
@@ -86,6 +90,21 @@ const entries = [
     pkg: 'auth',
     code: `export { SignInForm } from '${distFile('auth', './ui')}'`,
   },
+  ...[
+    '.',
+    './pdf',
+    './csv',
+    './spreadsheet',
+    './json',
+    './code',
+    './markdown',
+    './diff',
+    './media',
+  ].map((subpath) => ({
+    name: `@glyphui/viewers${subpath === '.' ? '' : subpath.slice(1)}`,
+    pkg: 'viewers',
+    code: `export * from '${distFile('viewers', subpath)}'`,
+  })),
 ]
 
 const scratch = mkdtempSync(join(tmpdir(), 'glyph-size-'))

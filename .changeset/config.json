@@ -7,7 +7,7 @@
     }
   ],
   "commit": false,
-  "fixed": [["@glyphui/tokens", "@glyphui/ui", "@glyphui/blocks", "@glyphui/auth"]],
+  "fixed": [["@glyphui/tokens", "@glyphui/ui", "@glyphui/blocks", "@glyphui/auth", "@glyphui/viewers"]],
   "access": "public",
   "baseBranch": "main",
   "ignore": ["showcase", "docs", "demo-saas", "auth-example"]

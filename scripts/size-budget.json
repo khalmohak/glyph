@@ -12,5 +12,14 @@
   "@glyphui/auth/rest": 1932,
   "@glyphui/auth/react-router": 1666,
   "@glyphui/auth/ui": 8593,
-  "@glyphui/auth/ui (SignInForm only)": 5034
+  "@glyphui/auth/ui (SignInForm only)": 5034,
+  "@glyphui/viewers": 7973,
+  "@glyphui/viewers/pdf": 7765,
+  "@glyphui/viewers/csv": 4786,
+  "@glyphui/viewers/spreadsheet": 4406,
+  "@glyphui/viewers/json": 5739,
+  "@glyphui/viewers/code": 3725,
+  "@glyphui/viewers/markdown": 4365,
+  "@glyphui/viewers/diff": 3057,
+  "@glyphui/viewers/media": 8832
 }

@@ -1,5 +1,7 @@
 import { GlyphProvider, presets } from '@glyphui/ui'
 import { reactRouter } from '@glyphui/ui/react-router'
+import { setPdfWorker } from '@glyphui/viewers/pdf'
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router'
@@ -12,6 +14,9 @@ import { GettingStartedPage } from './pages/getting-started'
 import { HomePage } from './pages/home'
 import { NotFoundPage } from './pages/not-found'
 import { ThemeChoiceProvider } from './theme-choice'
+
+// Serve pdf.js's worker from this site instead of the default CDN.
+setPdfWorker(pdfWorker)
 
 const router = createBrowserRouter(
   [

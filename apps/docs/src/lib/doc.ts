@@ -17,6 +17,7 @@ export const categories = [
   'Patterns',
   'Auth',
   'Blocks',
+  'Viewers',
 ] as const
 
 export type Category = (typeof categories)[number]
@@ -44,6 +45,15 @@ export type Entry =
   | '@glyphui/auth/clerk'
   | '@glyphui/auth/react-router'
   | '@glyphui/auth/ui'
+  | '@glyphui/viewers'
+  | '@glyphui/viewers/pdf'
+  | '@glyphui/viewers/csv'
+  | '@glyphui/viewers/spreadsheet'
+  | '@glyphui/viewers/json'
+  | '@glyphui/viewers/code'
+  | '@glyphui/viewers/markdown'
+  | '@glyphui/viewers/diff'
+  | '@glyphui/viewers/media'
 
 export interface ExampleMeta {
   /** File name in `examples/` without `.tsx`. */
@@ -64,7 +74,7 @@ export interface DocMeta {
   entry?: Entry
   /** Every runtime export this doc covers. Checked against the package's real exports. */
   exports?: readonly string[]
-  /** Source file (relative to `packages/ui/src/`) whose props are documented. */
+  /** Source file (relative to the package's `src/`) whose props are documented. */
   source?: string
   /** Component export whose props are documented, e.g. `Button`. */
   propsOf?: string

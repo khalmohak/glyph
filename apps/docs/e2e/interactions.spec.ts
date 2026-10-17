@@ -557,3 +557,137 @@ test.describe('Auth', () => {
     await expect(preview.getByText('You don’t have access to this page')).toBeVisible()
   })
 })
+
+test.describe('Viewers', () => {
+  test('PdfViewer pages, zooms and highlights search matches', async ({ page }) => {
+    const preview = await example(page, 'pdf-viewer/basic')
+    await expect(preview.getByText('/ 6')).toBeVisible()
+    const pageInput = preview.getByRole('textbox', { name: 'Page number' })
+    await preview.getByRole('button', { name: 'Next page' }).click()
+    await expect(pageInput).toHaveValue('2')
+    await pageInput.fill('5')
+    await pageInput.press('Enter')
+    await expect(pageInput).toHaveValue('5')
+
+    const zoom = preview.getByRole('combobox', { name: 'Zoom' })
+    await preview.getByRole('button', { name: 'Zoom in' }).click()
+    await expect(zoom).toContainText('%')
+
+    await preview.getByRole('searchbox', { name: 'Search in document' }).fill('revenue')
+    await expect(preview.getByText('1 of 4')).toBeVisible()
+    await expect(preview.locator('mark[data-current]')).toHaveCount(1)
+    await preview.getByRole('button', { name: 'Next match' }).click()
+    await expect(preview.getByText('2 of 4')).toBeVisible()
+  })
+
+  test('CsvViewer opens 50,000 rows quickly and filters them', async ({ page }) => {
+    const started = Date.now()
+    const preview = await example(page, 'csv-viewer/large')
+    await expect(preview.getByText(/50,000 rows · 5 columns/)).toBeVisible()
+    expect(Date.now() - started).toBeLessThan(15_000)
+    const table = preview.getByRole('table')
+    await expect(table).toHaveAttribute('aria-rowcount', '50001')
+    expect(await table.locator('tbody tr').count()).toBeLessThan(80)
+
+    await preview.getByRole('searchbox', { name: 'Search rows' }).fill('Latin America')
+    await expect(table).toHaveAttribute('aria-rowcount', '12501')
+
+    await preview.getByRole('button', { name: 'amount', exact: true }).click()
+    await expect(table.locator('th[aria-sort]')).toHaveAttribute('aria-sort', 'ascending')
+  })
+
+  test('SpreadsheetViewer switches sheets', async ({ page }) => {
+    const preview = await example(page, 'spreadsheet-viewer/basic')
+    await expect(preview.getByRole('table', { name: /sheet Q3 sales/ })).toBeVisible()
+    await preview.getByRole('tab', { name: 'Targets' }).click()
+    await expect(preview.getByRole('table', { name: /sheet Targets/ })).toBeVisible()
+    await expect(preview.getByText(/4 rows · 3 columns/)).toBeVisible()
+  })
+
+  test('JsonViewer searches and expands', async ({ page }) => {
+    const preview = await example(page, 'json-viewer/basic')
+    const tree = preview.getByRole('tree')
+    const before = await tree.getByRole('treeitem').count()
+    await preview.getByRole('searchbox', { name: 'Search keys and values' }).fill('INV-104')
+    await expect(preview.getByText(/1 of \d+/)).toBeVisible()
+    await expect(tree.locator('mark').first()).toBeVisible()
+    await preview.getByRole('button', { name: 'Expand all' }).click()
+    expect(await tree.getByRole('treeitem').count()).toBeGreaterThan(before)
+  })
+
+  test('CodeViewer copies its code', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    const preview = await example(page, 'code-viewer/file')
+    await preview.getByRole('button', { name: 'Copy code' }).click()
+    const copied = await page.evaluate(() => navigator.clipboard.readText())
+    expect(copied).toContain('export async function remind')
+    await expect(preview.locator('[data-line="15"]')).toHaveAttribute('data-mark', 'highlight')
+  })
+
+  test('DiffViewer switches between unified and split', async ({ page }) => {
+    const preview = await example(page, 'diff-viewer/code')
+    await expect(preview.getByRole('columnheader', { name: 'Code' })).toBeAttached()
+    await preview.getByRole('radio', { name: 'Split' }).click()
+    await expect(preview.getByRole('columnheader', { name: 'Before' })).toBeAttached()
+    const expand = preview.getByRole('button', { name: /Show \d+ unchanged/ }).first()
+    await expand.click()
+    await expect(
+      preview.getByText('export function isOverdue(invoice: Invoice) {').first(),
+    ).toBeVisible()
+  })
+
+  test('ImageViewer zooms', async ({ page }) => {
+    const preview = await example(page, 'image-viewer/basic')
+    await preview.getByRole('button', { name: 'Actual size' }).click()
+    await expect(preview.getByText('100%')).toBeVisible()
+    await preview.getByRole('button', { name: 'Zoom in' }).click()
+    await expect(preview.getByText('125%')).toBeVisible()
+  })
+
+  test('VideoPlayer plays, pauses and seeks', async ({ page }) => {
+    const preview = await example(page, 'video-player/captions')
+    const video = preview.locator('video')
+    await expect
+      .poll(() => video.evaluate((v: HTMLVideoElement) => v.readyState))
+      .toBeGreaterThan(0)
+    await preview.getByRole('button', { name: 'Play Product tour' }).click()
+    await expect
+      .poll(() => video.evaluate((v: HTMLVideoElement) => v.currentTime))
+      .toBeGreaterThan(0.2)
+    await preview.getByRole('button', { name: 'Pause Product tour' }).click()
+    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true)
+    await preview.getByRole('slider', { name: 'Position' }).press('End')
+    await expect
+      .poll(() => video.evaluate((v: HTMLVideoElement) => v.currentTime))
+      .toBeGreaterThan(3.5)
+  })
+
+  test('AudioPlayer seeks from the waveform', async ({ page }) => {
+    const preview = await example(page, 'audio-player/basic')
+    const waveform = preview.getByRole('slider', { name: 'Position in Standup notes' })
+    await expect(waveform.locator('rect').first()).toBeAttached()
+    const audio = preview.locator('audio')
+    await expect.poll(() => audio.evaluate((a: HTMLAudioElement) => a.duration)).toBeGreaterThan(5)
+    const box = await waveform.boundingBox()
+    if (!box) throw new Error('no waveform')
+    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height / 2)
+    await expect
+      .poll(() => audio.evaluate((a: HTMLAudioElement) => a.currentTime))
+      .toBeGreaterThan(2.5)
+  })
+
+  test('FilePreview picks the right viewer', async ({ page }) => {
+    const preview = await example(page, 'file-preview/switcher')
+    const choose = async (name: string) => {
+      await preview.getByRole('combobox', { name: 'Sample file' }).click()
+      await page.getByRole('option', { name }).click()
+    }
+    await expect(preview.getByText('/ 6')).toBeVisible()
+    await choose('customers.csv')
+    await expect(preview.locator('[data-kind="csv"]').getByRole('table')).toBeVisible()
+    await choose('workspace.json')
+    await expect(preview.getByRole('tree')).toBeVisible()
+    await choose('archive.zip')
+    await expect(preview.getByText('No preview for this file')).toBeVisible()
+  })
+})

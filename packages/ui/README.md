@@ -87,7 +87,7 @@ The same tokens work in your own markup: `bg-primary`, `text-muted-foreground`, 
 
 ## Components
 
-| Category | Components (121) |
+| Category | Components (132) |
 |---|---|
 | Actions | Button · CopyButton · Toggle |
 | Forms | Calendar · Checkbox · Combobox · DatePicker · Field · FileUpload · Input · InputOTP · Label · NumberInput · PasswordInput · RadioGroup · SegmentedControl · Select · Slider · Switch · TagInput · Textarea |
@@ -100,6 +100,7 @@ The same tokens work in your own markup: `bg-primary`, `text-muted-foreground`, 
 | Patterns | AppShell · Async · DataTable · Form · Motion · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Virtual rows · Vite plugin |
 | Auth | Auth provider · AuthLayout · Clerk bridge · Code forms · Firebase adapter · Memory adapter · Password reset · Protected routes · REST adapter · Session dialogs · SignInForm · SignUpForm · SocialButtons · UserMenu |
 | Blocks (`@glyphui/blocks`) | AuthCard · Cta · Faq · FeatureGrid · FeatureSplit · Hero · LogoCloud · Newsletter · Pricing · SectionHeader · SiteFooter · Stats · Testimonials |
+| Viewers (`@glyphui/viewers`) | AudioPlayer · CodeViewer · CsvViewer · DiffViewer · FilePreview · ImageViewer · JsonViewer · MarkdownViewer · PdfViewer · SpreadsheetViewer · VideoPlayer |
 
 Every component has a page with live examples and props in the [docs](https://khalmohak.github.io/glyph/components). Accessible behavior comes from [Radix UI](https://www.radix-ui.com/). Every component accepts `className`, and most accept `asChild`.
 

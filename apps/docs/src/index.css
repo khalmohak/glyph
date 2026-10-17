@@ -2,6 +2,7 @@
 @import "@glyphui/ui/styles.css";
 @import "@glyphui/blocks/styles.css";
 @import "@glyphui/auth/styles.css";
+@import "@glyphui/viewers/styles.css";
 
 html {
   scroll-padding-top: 5rem;

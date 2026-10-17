@@ -23,9 +23,11 @@ export function DocPage() {
   const importLine = `import { ${shown.slice(0, 4).join(', ')} } from '${doc.entry ?? '@glyphui/ui'}'`
   const sourceRoot = doc.entry?.startsWith('@glyphui/auth')
     ? 'packages/auth/src'
-    : doc.entry === '@glyphui/blocks'
-      ? 'packages/blocks/src'
-      : 'packages/ui/src'
+    : doc.entry?.startsWith('@glyphui/viewers')
+      ? 'packages/viewers/src'
+      : doc.entry === '@glyphui/blocks'
+        ? 'packages/blocks/src'
+        : 'packages/ui/src'
 
   return (
     // minmax(0, 1fr) lets wide examples and code scroll instead of widening the page on phones.
@@ -76,6 +78,17 @@ export function DocPage() {
             </Text>
             <Snippet
               code={'@import "@glyphui/blocks/styles.css";'}
+              className="max-w-full sm:w-fit"
+            />
+          </div>
+        )}
+        {doc.entry?.startsWith('@glyphui/viewers') && doc.status !== 'planned' && (
+          <div className="grid gap-2">
+            <Text size="small" tone="muted">
+              Viewers need their stylesheet, after the Glyph one in your main CSS file:
+            </Text>
+            <Snippet
+              code={'@import "@glyphui/viewers/styles.css";'}
               className="max-w-full sm:w-fit"
             />
           </div>
