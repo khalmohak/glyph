@@ -290,6 +290,9 @@ function usePinnedOffsets(tableRef: RefObject<HTMLTableElement | null>, key: str
     if (!key || !table || typeof ResizeObserver === 'undefined') return
     const observer = new ResizeObserver(() => measure())
     observer.observe(table)
+    // Column widths can change without the table's width changing (a web font swapping in,
+    // a cell's content growing), so watch the header cells as well.
+    for (const th of table.querySelectorAll('thead th[data-column-id]')) observer.observe(th)
     return () => observer.disconnect()
   }, [tableRef, key, measure])
 
