@@ -26,7 +26,13 @@ export function findStyles(component: string): StylesFn | undefined {
 /** Shows how to restyle a component from the theme file: its slots and variants, read from its styles. */
 export function ThemingInfo({ component }: { component: string }) {
   const styles = findStyles(component)
-  if (!styles?.slots) return null
+  if (!styles?.slots)
+    return (
+      <Text tone="muted">
+        {component} has no styles of its own: it is built from other Glyph components, so it follows
+        their theme recipes and your theme&apos;s tokens.
+      </Text>
+    )
   const slots = Object.keys(styles.slots)
   const variants = Object.entries(styles.variants ?? {})
     .map(([name, values]) => [name, Object.keys(values)] as const)

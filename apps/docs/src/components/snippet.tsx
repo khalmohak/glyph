@@ -35,7 +35,8 @@ export function Snippet({ code, className }: { code: string; className?: string 
         className,
       )}
     >
-      <pre className="min-w-0 flex-1 overflow-x-auto py-1.5 font-mono text-[0.8125rem] text-foreground">
+      {/* Long lines wrap rather than scroll: a scrolling <pre> would need its own Tab stop. */}
+      <pre className="min-w-0 flex-1 py-1.5 font-mono text-[0.8125rem] whitespace-pre-wrap text-foreground [overflow-wrap:anywhere]">
         <code>{code}</code>
       </pre>
       <CopyButton text={code} />

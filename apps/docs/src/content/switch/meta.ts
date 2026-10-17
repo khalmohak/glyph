@@ -16,4 +16,8 @@ export default defineDoc({
     { file: 'sizes', title: 'Sizes' },
   ],
   notes: ['Use a Switch for instant settings and a Checkbox for choices submitted with a form.'],
+  a11y: {
+    keyboard: [{ keys: 'Space or Enter', action: 'Turns it on or off.' }],
+    notes: ['Uses role="switch" with aria-checked, labelled by its Field label or aria-label.'],
+  },
 })

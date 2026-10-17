@@ -32,4 +32,13 @@ export default defineDoc({
     'It is one real input under the boxes, so paste, autofill and screen readers work as with a normal field.',
     'Restrict characters with pattern, e.g. REGEXP_ONLY_DIGITS.',
   ],
+  a11y: {
+    keyboard: [
+      {
+        keys: 'Typing, Backspace, arrow keys and paste',
+        action: 'Behave like a normal text field: it is one input under the hood.',
+      },
+    ],
+    notes: ['Supports one-time-code autofill (autocomplete="one-time-code") on phones.'],
+  },
 })

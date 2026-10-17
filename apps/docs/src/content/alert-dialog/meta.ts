@@ -42,4 +42,16 @@ export default defineDoc({
     'Clicking the backdrop does not close it; the user has to choose.',
     'Mount ConfirmProvider once near the root to use useConfirm() anywhere below it.',
   ],
+  a11y: {
+    keyboard: [
+      { keys: 'Space or Enter', action: 'On the trigger: opens it and focuses the Cancel button.' },
+      { keys: 'Tab', action: 'Moves between the actions; focus stays trapped while it is open.' },
+      { keys: 'Esc', action: 'Cancels and returns focus to the trigger.' },
+    ],
+    notes: [
+      'Uses role="alertdialog": screen readers announce the title and description when it opens.',
+      "Clicking outside doesn't close it, so a decision is always explicit.",
+      'useConfirm() renders the same dialog and resolves false on Esc.',
+    ],
+  },
 })

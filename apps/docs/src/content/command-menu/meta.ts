@@ -38,4 +38,19 @@ export default defineDoc({
     'Items close the menu after onSelect by default; pass closeOnSelect={false} to keep it open.',
     'Shortcuts on items are display-only hints; bind the keys yourself if they should work globally.',
   ],
+  a11y: {
+    keyboard: [
+      {
+        keys: '\u2318 + K or Ctrl + K',
+        action: 'Opens or closes the menu (with useCommandMenuShortcut).',
+      },
+      { keys: 'Typing', action: 'Filters commands.' },
+      { keys: 'Arrow Down or Arrow Up', action: 'Moves the highlighted command.' },
+      { keys: 'Enter', action: 'Runs the highlighted command.' },
+      { keys: 'Esc', action: 'Closes the menu.' },
+    ],
+    notes: [
+      'It is a dialog containing a combobox and listbox; the highlighted item is announced as you move.',
+    ],
+  },
 })

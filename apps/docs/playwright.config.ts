@@ -33,14 +33,14 @@ export default defineConfig({
   projects: [
     {
       name: 'a11y',
-      testMatch: 'a11y.spec.ts',
+      testMatch: /(^|\/)(a11y|component-page-a11y)\.spec\.ts$/,
       // axe on a full docs page takes a few seconds, more on a busy machine.
       timeout: 120_000,
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'interactions',
-      testMatch: 'interactions.spec.ts',
+      testMatch: /(^|\/)(interactions|component-page)\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'] },
     },
     {

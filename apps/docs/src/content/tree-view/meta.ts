@@ -24,4 +24,20 @@ export default defineDoc({
     'Enter or Space selects. Clicking a parent also expands or collapses it.',
     'Give the tree an aria-label that says what it contains.',
   ],
+  a11y: {
+    keyboard: [
+      { keys: 'Arrow Down or Arrow Up', action: 'Moves to the next or previous visible item.' },
+      { keys: 'Arrow Right', action: 'Expands a closed item, or moves to its first child.' },
+      { keys: 'Arrow Left', action: 'Collapses an open item, or moves to its parent.' },
+      { keys: 'Home or End', action: 'Moves to the first or last visible item.' },
+      { keys: 'Enter or Space', action: 'Selects the focused item.' },
+      {
+        keys: 'Letter keys',
+        action: 'Typeahead: moves to the next item starting with that letter.',
+      },
+    ],
+    notes: [
+      'Uses role="tree" and treeitem with aria-expanded, aria-level and aria-selected; one item is a Tab stop.',
+    ],
+  },
 })

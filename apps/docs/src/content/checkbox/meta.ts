@@ -19,4 +19,11 @@ export default defineDoc({
       description: 'Indeterminate when some, not all, items are checked.',
     },
   ],
+  a11y: {
+    keyboard: [{ keys: 'Space', action: 'Checks or unchecks it.' }],
+    notes: [
+      'Uses role="checkbox" with aria-checked, including "mixed" for the indeterminate state.',
+      'Inside a Field it is labelled by the Field label; otherwise wrap it in a label or pass aria-label.',
+    ],
+  },
 })

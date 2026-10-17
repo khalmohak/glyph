@@ -35,4 +35,19 @@ export default defineDoc({
     'Always render a DialogTitle; it becomes the dialog’s accessible name.',
     'Escape and clicking the backdrop close it. For decisions that must not be dismissed by accident, use AlertDialog.',
   ],
+  a11y: {
+    keyboard: [
+      { keys: 'Space or Enter', action: 'On the trigger: opens it and moves focus inside.' },
+      {
+        keys: 'Tab',
+        action: 'Moves to the next focusable element inside; focus stays trapped while it is open.',
+      },
+      { keys: 'Shift + Tab', action: 'Moves to the previous focusable element inside.' },
+      { keys: 'Esc', action: 'Closes it and returns focus to the trigger.' },
+    ],
+    notes: [
+      'Uses role="dialog" with aria-modal; the title labels it and the description describes it.',
+      "Content outside is hidden from screen readers and can't be scrolled while it is open.",
+    ],
+  },
 })

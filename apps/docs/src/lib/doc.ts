@@ -62,6 +62,21 @@ export interface ExampleMeta {
   description?: string
 }
 
+/** One row of a component's keyboard table. */
+export interface KeyboardInteraction {
+  /** Keys, e.g. `Space`, `Enter`, `Arrow Down`, `Shift + Tab`. */
+  keys: string
+  /** What happens. */
+  action: string
+}
+
+/** Accessibility facts shown on the component page. Keep them true to the implementation. */
+export interface A11yInfo {
+  keyboard?: readonly KeyboardInteraction[]
+  /** ARIA roles, labelling and screen reader notes, one sentence each. */
+  notes?: readonly string[]
+}
+
 export interface DocMeta {
   name: string
   /** URL segment and folder name, kebab-case. */
@@ -88,6 +103,8 @@ export interface DocMeta {
   snippets?: readonly ExampleMeta[]
   /** Usage and accessibility notes, one sentence each. */
   notes?: readonly string[]
+  /** Keyboard interactions and ARIA notes for the Accessibility tab. */
+  a11y?: A11yInfo
 }
 
 export function defineDoc<const T extends DocMeta>(meta: T): T {

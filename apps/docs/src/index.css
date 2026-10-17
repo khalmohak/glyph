@@ -44,3 +44,8 @@ body {
   opacity: 1 !important;
   animation: none !important;
 }
+
+/* In-page anchors (examples, API sections) land below the sticky site header. */
+#main [id] {
+  scroll-margin-top: 5.5rem;
+}

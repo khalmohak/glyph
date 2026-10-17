@@ -60,7 +60,12 @@ const router = createBrowserRouter(
               handle: { wide: true } satisfies DocsRouteHandle,
               lazy: page(() => import('./pages/gallery'), 'GalleryPage'),
             },
-            { path: 'components/:slug', lazy: page(() => import('./pages/doc-page'), 'DocPage') },
+            {
+              path: 'components/:slug',
+              // Wide: the component page has an "On this page" column on large screens.
+              handle: { wide: true } satisfies DocsRouteHandle,
+              lazy: page(() => import('./pages/doc-page'), 'DocPage'),
+            },
             { path: 'docs', lazy: page(() => import('./pages/docs-index'), 'DocsIndexPage') },
             { path: 'docs/:slug', lazy: page(() => import('./pages/guide'), 'GuidePage') },
             {

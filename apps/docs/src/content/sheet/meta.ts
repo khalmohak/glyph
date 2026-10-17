@@ -35,4 +35,18 @@ export default defineDoc({
     'It is a modal dialog: focus is trapped inside and returns to the trigger on close.',
     'SheetBody scrolls on its own, so the header and footer stay in view.',
   ],
+  a11y: {
+    keyboard: [
+      { keys: 'Space or Enter', action: 'On the trigger: opens it and moves focus inside.' },
+      {
+        keys: 'Tab',
+        action: 'Moves to the next focusable element inside; focus stays trapped while it is open.',
+      },
+      { keys: 'Shift + Tab', action: 'Moves to the previous focusable element inside.' },
+      { keys: 'Esc', action: 'Closes it and returns focus to the trigger.' },
+    ],
+    notes: [
+      'A sheet is a dialog that slides in from an edge; it has the same roles and focus trap.',
+    ],
+  },
 })

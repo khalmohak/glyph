@@ -89,4 +89,20 @@ export default defineDoc({
     'CSV exports quote fields as RFC 4180 requires and prefix text starting with =, +, - or @ so spreadsheets don’t run it as a formula.',
     'For 10,000+ rows, pass virtualize from @glyphui/ui/data-table/virtual.',
   ],
+  a11y: {
+    keyboard: [
+      { keys: 'Enter or Space', action: 'On a column header: sorts by that column.' },
+      { keys: 'Shift + click', action: 'Adds a column to a multi-column sort.' },
+      { keys: 'Enter', action: 'On a row with onRowClick or getRowHref: opens it.' },
+      {
+        keys: 'Arrow Left or Arrow Right',
+        action: 'On a column resize handle: narrows or widens the column (Shift for bigger steps).',
+      },
+      { keys: 'Enter or Space', action: 'On a column resize handle: resets the width.' },
+    ],
+    notes: [
+      'Sorted headers set aria-sort; selection checkboxes are labelled ("Select row", "Select all rows on this page").',
+      'Loading sets aria-busy on the table; empty and error states are announced as regular content.',
+    ],
+  },
 })

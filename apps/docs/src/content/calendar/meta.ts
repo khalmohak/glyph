@@ -24,4 +24,14 @@ export default defineDoc({
     'Built on react-day-picker v9; every DayPicker prop works, including locale and weekStartsOn.',
     'Arrow keys move between days, Page Up/Down change month, and Enter selects.',
   ],
+  a11y: {
+    keyboard: [
+      { keys: 'Arrow keys', action: 'Move by day or week.' },
+      { keys: 'Page Up or Page Down', action: 'Previous or next month.' },
+      { keys: 'Shift + Page Up or Shift + Page Down', action: 'Previous or next year.' },
+      { keys: 'Home or End', action: 'Start or end of the week.' },
+      { keys: 'Enter or Space', action: 'Selects the focused day.' },
+    ],
+    notes: ["Built on react-day-picker's accessible grid; only one day is a Tab stop."],
+  },
 })
