@@ -15,7 +15,12 @@ const server = await createServer({
 try {
   const { docsByCategory } = await server.ssrLoadModule('/src/lib/catalog.ts')
   const rows = docsByCategory().map(({ category, items }) => {
-    const label = category === 'Blocks' ? 'Blocks (`@glyphui/blocks`)' : category
+    const label =
+      category === 'Blocks'
+        ? 'Blocks (`@glyphui/blocks`)'
+        : category === 'Viewers'
+          ? 'Viewers (`@glyphui/viewers`)'
+          : category
     return `| ${label} | ${items.map((doc) => doc.name).join(' · ')} |`
   })
   const total = docsByCategory().reduce((sum, group) => sum + group.items.length, 0)

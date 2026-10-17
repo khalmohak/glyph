@@ -71,7 +71,7 @@ export const dataTableStyles = /* @__PURE__ */ tv({
     bulkCount: 'whitespace-nowrap font-medium tabular-nums',
     cards: 'grid gap-2.5',
     card: [
-      'grid gap-2 rounded-md border-border bg-surface p-3.5 text-small data-[state=selected]:border-primary/50 data-[state=selected]:bg-primary/4',
+      'grid gap-2 rounded-lg border-border bg-surface p-3.5 text-small data-[state=selected]:border-primary/50 data-[state=selected]:bg-primary/4',
       themedBorder,
     ],
     cardHeader: 'flex min-w-0 items-start gap-3',

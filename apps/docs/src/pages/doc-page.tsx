@@ -1,6 +1,7 @@
 import examples from 'virtual:glyph-examples'
 import { Button, EmptyState, Eyebrow, Heading, Separator, Text } from '@glyphui/ui'
 import { ArrowLeft, Github, Hammer } from 'lucide-react'
+import { Fragment } from 'react'
 import { Link, useParams } from 'react-router'
 import { ExampleView } from '../components/example-view'
 import { PropsTable } from '../components/props-table'
@@ -11,6 +12,16 @@ import { getDoc } from '../lib/catalog'
 import { NotFoundPage } from './not-found'
 
 const REPO = 'https://github.com/khalmohak/glyph'
+
+/** `SpreadsheetViewer` → `Spreadsheet<wbr>Viewer`, so it wraps between words when it must. */
+function wordBreaks(name: string) {
+  return name.split(/(?=[A-Z][a-z])/).map((part, i) => (
+    <Fragment key={`${i}-${part}`}>
+      {i > 0 && <wbr />}
+      {part}
+    </Fragment>
+  ))
+}
 
 export function DocPage() {
   const { slug = '' } = useParams()
@@ -23,9 +34,11 @@ export function DocPage() {
   const importLine = `import { ${shown.slice(0, 4).join(', ')} } from '${doc.entry ?? '@glyphui/ui'}'`
   const sourceRoot = doc.entry?.startsWith('@glyphui/auth')
     ? 'packages/auth/src'
-    : doc.entry === '@glyphui/blocks'
-      ? 'packages/blocks/src'
-      : 'packages/ui/src'
+    : doc.entry?.startsWith('@glyphui/viewers')
+      ? 'packages/viewers/src'
+      : doc.entry === '@glyphui/blocks'
+        ? 'packages/blocks/src'
+        : 'packages/ui/src'
 
   return (
     // minmax(0, 1fr) lets wide examples and code scroll instead of widening the page on phones.
@@ -42,7 +55,10 @@ export function DocPage() {
           <Eyebrow>{doc.category}</Eyebrow>
           <StatusBadge status={doc.status} />
         </div>
-        <Heading level={1}>{doc.name}</Heading>
+        {/* Long names (SpreadsheetViewer) in wide display fonts must wrap on phones. */}
+        <Heading level={1} className="[overflow-wrap:anywhere]">
+          {wordBreaks(doc.name)}
+        </Heading>
         <Text size="lead" tone="muted" className="max-w-2xl">
           {doc.description}
         </Text>
@@ -76,6 +92,17 @@ export function DocPage() {
             </Text>
             <Snippet
               code={'@import "@glyphui/blocks/styles.css";'}
+              className="max-w-full sm:w-fit"
+            />
+          </div>
+        )}
+        {doc.entry?.startsWith('@glyphui/viewers') && doc.status !== 'planned' && (
+          <div className="grid gap-2">
+            <Text size="small" tone="muted">
+              Viewers need their stylesheet, after the Glyph one in your main CSS file:
+            </Text>
+            <Snippet
+              code={'@import "@glyphui/viewers/styles.css";'}
               className="max-w-full sm:w-fit"
             />
           </div>

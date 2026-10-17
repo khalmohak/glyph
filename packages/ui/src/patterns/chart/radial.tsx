@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useId, useState } from 'react'
+import { type ReactNode, useContext, useEffect, useId, useState } from 'react'
 import * as R from 'recharts'
 import { useControllableState } from '../../hooks/use-controllable-state'
 import { useMotionSettings } from '../../motion/use-motion-settings'
@@ -7,8 +7,11 @@ import {
   type ChartColorValue,
   ChartFrame,
   type ChartStateProps,
+  ChartViewContext,
   categoryColor,
+  currentHidden,
   defaultFormatter,
+  formatCell,
   type Key,
   resolveColor,
   toggleIn,
@@ -118,17 +121,21 @@ export function RadialBarChart<T extends object>(props: RadialBarChartProps<T>) 
   const { data, category, value, valueFormatter = defaultFormatter, size = 220 } = props
   const { s, slots } = useChartParts()
   const animation = useChartAnimation()
-  const [hidden, setHidden] = useControllableState<readonly string[]>({ defaultValue: [] })
+  const [hiddenState, setHidden] = useControllableState<readonly string[]>({ defaultValue: [] })
   const rows = data.map((row, i) => ({
     row: row as Row,
     name: String((row as Row)[category]),
     color: categoryColor(props.colors?.[i], i),
   }))
+  const hidden = currentHidden(
+    hiddenState,
+    rows.map((item) => item.name),
+  )
   const visible = rows.filter((item) => !hidden.includes(item.name))
   const max = props.max ?? Math.max(0, ...rows.map((item) => Number(item.row[value]) || 0))
   const table = {
     columns: [String(category), String(value)],
-    rows: rows.map((item) => [item.name, valueFormatter(Number(item.row[value]))]),
+    rows: rows.map((item) => [item.name, formatCell(item.row[value], valueFormatter)]),
   }
   const legend =
     (props.showLegend ?? true)
@@ -252,6 +259,9 @@ export function Gauge({
   const { s, slots } = useChartParts()
   const { animate } = useMotionSettings()
   const id = useId()
+  // Inside a ChartCard the card shows the title; keep it for screen readers only.
+  const inCard = useContext(ChartViewContext) !== null
+  const captionHidden = hideTitle || inCard
   const span = max - min || 1
   const clamped = Math.min(Math.max(value, min), max)
   const share = (clamped - min) / span
@@ -289,7 +299,7 @@ export function Gauge({
       aria-labelledby={`${id}-title`}
       className={s.root({ class: [slots.root, className] })}
     >
-      <figcaption className={hideTitle ? s.srOnly() : s.caption({ class: slots.caption })}>
+      <figcaption className={captionHidden ? s.srOnly() : s.caption({ class: slots.caption })}>
         <span id={`${id}-title`} className={s.title({ class: slots.title })}>
           {title}
         </span>

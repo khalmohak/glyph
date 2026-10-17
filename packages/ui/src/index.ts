@@ -2,9 +2,12 @@ import './register'
 
 // Theme engine (re-exported so apps only import from @glyphui/ui).
 export {
+  auditContrast,
   type ColorMode,
   type ColorToken,
   type ComponentOverrides,
+  type ContrastIssue,
+  contrastRatio,
   defineTheme,
   type MotionLevel,
   type RadiusToken,

@@ -205,3 +205,63 @@ describe('useRouterUrlAdapter', () => {
     expect(result.current.url.state.pagination?.pageIndex).toBe(2)
   })
 })
+
+describe('react-router regressions', () => {
+  it('marks a relative href active once it resolves against the current route', () => {
+    render(
+      <MemoryRouter initialEntries={['/app/invoices']}>
+        <GlyphProvider router={reactRouter} storageKey={null}>
+          <Routes>
+            <Route
+              path="/app"
+              element={
+                <AppShell
+                  layout="embedded"
+                  sidebar={
+                    <Sidebar>
+                      <SidebarContent>
+                        <SidebarItem href="invoices">Invoices</SidebarItem>
+                        <SidebarItem href="settings">Settings</SidebarItem>
+                      </SidebarContent>
+                    </Sidebar>
+                  }
+                >
+                  <p>Page</p>
+                </AppShell>
+              }
+            >
+              <Route path="invoices" element={null} />
+              <Route path="settings" element={null} />
+            </Route>
+          </Routes>
+        </GlyphProvider>
+      </MemoryRouter>,
+    )
+    const links = screen.getAllByRole('link', { name: 'Invoices' })
+    expect(links[0]).toHaveAttribute('href', '/app/invoices')
+    expect(links[0]).toHaveAttribute('aria-current', 'page')
+    expect(screen.getAllByRole('link', { name: 'Settings' })[0]).not.toHaveAttribute('aria-current')
+  })
+
+  it('keeps the location hash when table state is written to the URL', async () => {
+    const { result } = renderHook(
+      () => ({
+        url: useTableUrlState({ adapter: useRouterUrlAdapter() }),
+        location: useLocation(),
+      }),
+      {
+        wrapper: ({ children }) => (
+          <MemoryRouter initialEntries={['/invoices#activity']}>{children}</MemoryRouter>
+        ),
+      },
+    )
+    await act(async () =>
+      result.current.url.onStateChange(
+        { ...defaultTableState, pagination: { pageIndex: 1, pageSize: 10 } },
+        'pagination',
+      ),
+    )
+    expect(result.current.location.search).toBe('?page=2')
+    expect(result.current.location.hash).toBe('#activity')
+  })
+})

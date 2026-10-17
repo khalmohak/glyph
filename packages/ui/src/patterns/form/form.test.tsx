@@ -80,6 +80,25 @@ describe('Form', () => {
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ email: 'a@b.co' }))
   })
 
+  it('ignores a second submit while the first is still running', async () => {
+    let finish: () => void = () => {}
+    const onSubmit = vi.fn(() => new Promise<void>((resolve) => (finish = resolve)))
+    render(<SignupForm onSubmit={onSubmit} />)
+    const email = screen.getByLabelText('Email')
+    await userEvent.type(email, 'a@b.co')
+    // Enter twice in the field, as an impatient user would.
+    await userEvent.type(email, '{Enter}')
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
+    await userEvent.type(email, '{Enter}')
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+    finish()
+    // Once it settles, the form can be submitted again.
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Sign up' })).toBeEnabled())
+    await userEvent.type(email, '{Enter}')
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(2))
+  })
+
   it('explains how to fix a FormSubmit with no form', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     expect(() => render(<FormSubmit>Save</FormSubmit>)).toThrow(

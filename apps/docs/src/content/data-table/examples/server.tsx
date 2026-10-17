@@ -1,5 +1,10 @@
 import { Badge, Button, toast } from '@glyphui/ui'
-import { createColumnHelper, DataTable, type DataTableState } from '@glyphui/ui/data-table'
+import {
+  createColumnHelper,
+  DataTable,
+  type DataTableState,
+  getFilterList,
+} from '@glyphui/ui/data-table'
 import { Archive } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { fetchInvoices, formatDay, type Invoice, statusOptions, statusTone, usd } from '../data'
@@ -21,15 +26,14 @@ export default function Example() {
   useEffect(() => {
     let current = true
     setLoading(true)
-    const statuses = query.columnFilters.find((f) => f.id === 'status')?.value as
-      | string[]
-      | undefined
+    // Always an array, even when a shared link held a single status.
+    const statuses = getFilterList(query.columnFilters, 'status')
     fetchInvoices({
       page: query.pagination.pageIndex,
       pageSize: query.pagination.pageSize,
       sort: query.sorting[0],
       search: query.search,
-      ...(statuses && { statuses }),
+      ...(statuses.length > 0 && { statuses }),
     }).then((next) => {
       if (!current) return
       setResult(next)

@@ -62,6 +62,13 @@ export function categoryColor(color: string | undefined, index: number): string 
 export const defaultFormatter = (value: number) =>
   typeof value === 'number' && Number.isFinite(value) ? value.toLocaleString() : String(value)
 
+/** A data-table cell: missing or non-numeric values (gaps in a series) read as a dash. */
+export function formatCell(value: unknown, formatter: (value: number) => string): string {
+  if (value === null || value === undefined || value === '') return '—'
+  const n = Number(value)
+  return Number.isFinite(n) ? formatter(n) : '—'
+}
+
 export function useChartParts() {
   const [, slots] = useComponentConfig('Chart', {})
   return { s: chartStyles(), slots }
@@ -433,6 +440,16 @@ export function ChartFrame({
       )}
     </figure>
   )
+}
+
+/**
+ * The hidden keys that still name a series, and never all of them. Series, slices and
+ * groups can change under a legend (new data, another period); stale keys would otherwise
+ * block toggles or leave the chart empty.
+ */
+export function currentHidden<K extends string>(hidden: readonly K[], keys: readonly K[]): K[] {
+  const current = hidden.filter((key) => keys.includes(key))
+  return current.length >= keys.length ? [] : current
 }
 
 /** Hidden-series state for interactive legends, controlled or not. */

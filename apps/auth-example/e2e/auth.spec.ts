@@ -27,9 +27,11 @@ async function signIn(page: Page, email: string, password: string) {
 
 test('sign up, verify the email code, use the app and sign out', async ({ page }) => {
   await page.goto('/sign-up')
-  await page.getByRole('textbox', { name: 'Name' }).fill('Alan Turing')
+  await page.getByRole('textbox', { name: 'Name', exact: true }).fill('Alan Turing')
   await page.getByRole('textbox', { name: 'Email' }).fill('alan@example.com')
   await page.getByRole('textbox', { name: 'Password', exact: true }).fill('enigma machine')
+  // An extra sign-up field (SignUpForm extraFields) the server uses for the first workspace.
+  await page.getByRole('textbox', { name: 'Workspace name' }).fill('Bletchley Park')
   await page.getByRole('button', { name: 'Create account' }).click()
 
   await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible()
@@ -38,6 +40,7 @@ test('sign up, verify the email code, use the app and sign out', async ({ page }
   await expect(page).toHaveURL(/\/app$/)
   await expect(page.getByRole('heading', { name: 'Welcome back, Alan Turing' })).toBeVisible()
   await expect(page.getByRole('table', { name: 'Invoices' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Bletchley Park/ })).toBeVisible()
 
   await page.getByRole('button', { name: /alan@example\.com/ }).click()
   await page.getByRole('menuitem', { name: 'Sign out' }).click()
@@ -76,6 +79,17 @@ test('two-step sign-in with an emailed code', async ({ page }) => {
   await expect(page).toHaveURL(/\/app$/)
 })
 
+test('a sign-in link signs in and continues to the app', async ({ page }) => {
+  await page.goto('/sign-in')
+  await page.getByRole('button', { name: 'Email me a sign-in link instead' }).click()
+  await page.getByRole('textbox', { name: 'Email' }).fill('ada@example.com')
+  await page.getByRole('button', { name: 'Email me a sign-in link', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible()
+  await inbox(page).getByRole('link', { name: 'Open link' }).first().click()
+  await expect(page.getByRole('heading', { name: /Welcome back/ })).toBeVisible()
+  await expect(page).toHaveURL(/\/app$/)
+})
+
 test('role and permission checks show a fallback', async ({ page }) => {
   await page.goto('/sign-in?next=%2Fapp%2Fadmin')
   await signIn(page, 'grace@example.com', 'cobol rules')
@@ -88,6 +102,9 @@ test('role and permission checks show a fallback', async ({ page }) => {
 test('forgot and reset password through the emailed link', async ({ page }) => {
   await page.goto('/sign-in')
   await page.getByRole('link', { name: 'Forgot password?' }).click()
+  // The sign-in page has an Email field too, and React Router commits the new page in a
+  // transition just after the URL changes: wait for the page itself.
+  await expect(page.getByRole('heading', { name: 'Reset your password' })).toBeVisible()
   await page.getByRole('textbox', { name: 'Email' }).fill('ada@example.com')
   await page.getByRole('button', { name: 'Send reset link' }).click()
   await expect(page.getByText(/If an account exists for ada@example.com/)).toBeVisible()

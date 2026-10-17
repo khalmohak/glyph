@@ -5,6 +5,7 @@ import {
   type CSSProperties,
   isValidElement,
   type ReactNode,
+  useLayoutEffect,
   useRef,
 } from 'react'
 import { composeRefs } from '../utils/compose-refs'
@@ -63,8 +64,11 @@ export function Stagger({
 }
 
 export interface StaggerItemProps {
-  /** Position in the cascade, starting at 0. */
-  index: number
+  /**
+   * Position in the cascade, starting at 0. Leave it out to follow document order among the
+   * items of the surrounding `Stagger`.
+   */
+  index?: number
   children: ReactNode
 }
 
@@ -73,8 +77,30 @@ export interface StaggerItemProps {
  * mapped list with wrappers). Merges onto its child; renders no element of its own.
  */
 export function StaggerItem({ index, children }: StaggerItemProps) {
+  const ref = useRef<HTMLElement>(null)
+  useLayoutEffect(() => {
+    const element = ref.current
+    if (index !== undefined || !element) return
+    const root = element.closest('[data-slot="stagger"]')
+    if (!root) return
+    // Count items at this nesting level only: a wrapping item (a direct child the Stagger
+    // already ordered) starts its own sequence.
+    const level = (item: Element) => item.parentElement?.closest('[data-stagger-item]') ?? null
+    const own = level(element)
+    const peers = Array.from(root.querySelectorAll('[data-stagger-item]')).filter(
+      (item) => level(item) === own,
+    )
+    const position = peers.indexOf(element)
+    if (position >= 0) element.style.setProperty('--glyph-stagger-index', String(position))
+  })
   return (
-    <Slot.Root data-stagger-item="" style={{ '--glyph-stagger-index': index } as CSSProperties}>
+    <Slot.Root
+      ref={ref}
+      data-stagger-item=""
+      {...(index !== undefined && {
+        style: { '--glyph-stagger-index': index } as CSSProperties,
+      })}
+    >
       {children}
     </Slot.Root>
   )

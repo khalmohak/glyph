@@ -5,7 +5,7 @@ import { tv, type VariantProps } from '../../utils/tv'
 // Soft fills per tone. Icon color is mixed toward the foreground so it stays readable in both modes.
 export const alertStyles = /* @__PURE__ */ tv({
   slots: {
-    root: ['relative flex w-full items-start gap-3 rounded-md px-4 py-3 text-small', themedBorder],
+    root: ['relative flex w-full items-start gap-3 rounded-lg px-4 py-3 text-small', themedBorder],
     icon: 'mt-0.5 flex size-4 shrink-0 items-center justify-center [&>svg]:size-4',
     content: 'grid min-w-0 flex-1 gap-0.5',
     title: 'font-medium text-foreground',

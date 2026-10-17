@@ -116,6 +116,8 @@ export function TagInput(inProps: TagInputProps) {
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    // Enter also confirms an IME candidate (Japanese, Chinese, Korean); that isn't a tag yet.
+    if (event.nativeEvent.isComposing) return
     if (event.key === 'Enter' || separators.includes(event.key)) {
       if (event.key === 'Enter' && !draft.trim()) return
       event.preventDefault()
@@ -178,7 +180,9 @@ export function TagInput(inProps: TagInputProps) {
           ref={inputRef}
           id={id}
           value={draft}
-          disabled={disabled || full}
+          disabled={disabled}
+          // When full, stay focusable (read-only) so Backspace can still remove the last tag.
+          readOnly={full}
           placeholder={full ? undefined : tags.length === 0 ? placeholder : undefined}
           aria-label={ariaLabel}
           aria-describedby={describedBy}

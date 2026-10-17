@@ -7,7 +7,9 @@ import {
   ChartFrame,
   type ChartStateProps,
   categoryColor,
+  currentHidden,
   defaultFormatter,
+  formatCell,
   type Key,
   toggleIn,
   useChartAnimation,
@@ -59,7 +61,7 @@ export function PieChart<T extends object>(props: PieChartProps<T>) {
   } = props
   const { s, slots } = useChartParts()
   const animation = useChartAnimation()
-  const [hidden, setHidden] = useControllableState<readonly string[]>({
+  const [hiddenState, setHidden] = useControllableState<readonly string[]>({
     value: props.hiddenSlices,
     defaultValue: [],
     onChange: props.onHiddenSlicesChange as ((value: readonly string[]) => void) | undefined,
@@ -71,11 +73,15 @@ export function PieChart<T extends object>(props: PieChartProps<T>) {
     name: String(row[category]),
     color: categoryColor(props.colors?.[i], i),
   }))
+  const hidden = currentHidden(
+    hiddenState,
+    colored.map((item) => item.name),
+  )
   const visible = colored.filter((item) => !hidden.includes(item.name))
   const total = visible.reduce((sum, item) => sum + (Number(item.row[value]) || 0), 0)
   const table = {
     columns: [String(category), String(value)],
-    rows: rows.map((row) => [String(row[category]), valueFormatter(Number(row[value]))]),
+    rows: rows.map((row) => [String(row[category]), formatCell(row[value], valueFormatter)]),
   }
   const legend =
     (props.showLegend ?? true)

@@ -107,6 +107,21 @@ test.describe('invoices', () => {
   })
 })
 
+test('a shared link with one status filter loads and can add another', async ({ page }) => {
+  // A single value in the URL used to decode as a string where the filter needs an array.
+  await page.goto('/app/invoices?f.status=overdue')
+  const table = page.getByRole('table', { name: 'Invoices' })
+  await expect(table.locator('tbody tr')).toHaveCount(5)
+  await page
+    .getByRole('button', { name: /Status/ })
+    .first()
+    .click()
+  await page.getByRole('option', { name: /Open/ }).click()
+  await page.keyboard.press('Escape')
+  await expect(page).toHaveURL(/f\.status=overdue&f\.status=open|f\.status=open&f\.status=overdue/)
+  await expect(table.locator('tbody tr')).not.toHaveCount(5)
+})
+
 test('command menu opens an invoice in the table', async ({ page }) => {
   await page.goto('/app')
   await page.keyboard.press('ControlOrMeta+k')

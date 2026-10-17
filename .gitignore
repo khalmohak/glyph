@@ -19,3 +19,6 @@ apps/docs/e2e/__screenshots__/**/*-win32.png
 # Local secrets
 git-token.txt
 npm-token.txt
+
+# Claude Code agent worktrees
+.claude/worktrees/

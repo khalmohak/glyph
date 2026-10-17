@@ -51,13 +51,13 @@ export default function Example() {
               <TabsTrigger value="activity">Activity</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
-            <TabsContent value="overview" className="sr-only">
+            <TabsContent value="overview" className="sr-only" tabIndex={-1}>
               Overview
             </TabsContent>
-            <TabsContent value="activity" className="sr-only">
+            <TabsContent value="activity" className="sr-only" tabIndex={-1}>
               Activity
             </TabsContent>
-            <TabsContent value="settings" className="sr-only">
+            <TabsContent value="settings" className="sr-only" tabIndex={-1}>
               Settings
             </TabsContent>
           </Tabs>

@@ -5,6 +5,8 @@ import { fieldControl } from '../input/input.styles'
 
 export const datePickerStyles = /* @__PURE__ */ tv({
   slots: {
+    // Holds the trigger and the clear button side by side (a button can't contain a button).
+    root: 'relative flex w-full min-w-0',
     trigger: [
       ...fieldControl,
       'flex cursor-pointer items-center gap-2 px-3 text-left outline-none',
@@ -14,8 +16,10 @@ export const datePickerStyles = /* @__PURE__ */ tv({
     icon: 'size-4 shrink-0 text-faint-foreground',
     value: 'min-w-0 flex-1 truncate',
     placeholder: 'min-w-0 flex-1 truncate text-faint-foreground',
-    clear:
-      'inline-flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-xs text-faint-foreground hover:bg-muted hover:text-foreground [&>svg]:size-3.5',
+    clear: [
+      'absolute top-1/2 right-2.5 inline-flex size-5 -translate-y-1/2 cursor-pointer items-center justify-center rounded-xs text-faint-foreground outline-none hover:bg-muted hover:text-foreground [&>svg]:size-3.5',
+      'focus-visible:ring-2 focus-visible:ring-ring',
+    ],
     content: [popover, 'origin-(--radix-popover-content-transform-origin) w-auto p-0'],
     layout: 'flex flex-col sm:flex-row',
     presets:

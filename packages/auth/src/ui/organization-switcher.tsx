@@ -19,6 +19,12 @@ export interface OrganizationSwitcherProps {
   onCreate?: () => void
   /** Called after switching, e.g. to reload data for the new organization. */
   onSwitch?: (organization: Organization) => void
+  /** Called when a switch fails; the previous organization stays active. Default: logs it. */
+  onError?: (error: unknown) => void
+  /** Heading of the list. Use your product's word: "Workspaces", "Teams". Default "Organizations". */
+  label?: string
+  /** Text of the `onCreate` item. Default "Create organization". */
+  createLabel?: string
   className?: string
 }
 
@@ -44,7 +50,14 @@ function ChevronsIcon() {
  * Switches the active organization (workspace, team). Renders nothing unless the adapter
  * supports organizations and the user belongs to at least one.
  */
-export function OrganizationSwitcher({ onCreate, onSwitch, className }: OrganizationSwitcherProps) {
+export function OrganizationSwitcher({
+  onCreate,
+  onSwitch,
+  onError = (error) => console.error(error),
+  label = 'Organizations',
+  createLabel = 'Create organization',
+  className,
+}: OrganizationSwitcherProps) {
   const { session, capabilities, switchOrganization } = useAuth()
   const [switching, setSwitching] = useState(false)
   const organizations = session?.organizations ?? []
@@ -68,7 +81,7 @@ export function OrganizationSwitcher({ onCreate, onSwitch, className }: Organiza
         <ChevronsIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-56">
-        <DropdownMenuLabel>Organizations</DropdownMenuLabel>
+        <DropdownMenuLabel>{label}</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={active.id}
           onValueChange={async (id) => {
@@ -78,13 +91,19 @@ export function OrganizationSwitcher({ onCreate, onSwitch, className }: Organiza
             try {
               await switchOrganization(id)
               onSwitch?.(next)
+            } catch (error) {
+              onError(error)
             } finally {
               setSwitching(false)
             }
           }}
         >
           {organizations.map((organization) => (
-            <DropdownMenuRadioItem key={organization.id} value={organization.id}>
+            <DropdownMenuRadioItem
+              key={organization.id}
+              value={organization.id}
+              disabled={switching}
+            >
               <span className="truncate">{organization.name}</span>
               {organization.role && (
                 <span className="ml-auto pl-3 text-caption text-muted-foreground capitalize">
@@ -97,7 +116,7 @@ export function OrganizationSwitcher({ onCreate, onSwitch, className }: Organiza
         {onCreate && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={onCreate}>Create organization</DropdownMenuItem>
+            <DropdownMenuItem onSelect={onCreate}>{createLabel}</DropdownMenuItem>
           </>
         )}
       </DropdownMenuContent>

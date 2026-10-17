@@ -9,7 +9,7 @@ export const buttonStyles = /* @__PURE__ */ tv({
       themedBorder,
       transition,
       focusRing,
-      'disabled:pointer-events-none disabled:opacity-50 aria-busy:cursor-progress',
+      'disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 aria-busy:cursor-progress',
       // Press feedback. CSS only, so Button stays free of animation libraries.
       'active:scale-[0.98] motion-expressive:active:scale-[0.95]',
     ],

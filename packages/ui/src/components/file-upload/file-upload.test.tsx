@@ -71,4 +71,18 @@ describe('helpers', () => {
       matchesAccept(new File([''], 'a.zip', { type: 'application/zip' }), 'image/*,.pdf'),
     ).toBe(false)
   })
+
+  it('lists two rejected files with the same name without key clashes', () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { container } = render(<FileUpload maxSize={10} />)
+    const input = container.querySelector('input[type="file"]')!
+    fireEvent.change(input, {
+      target: {
+        files: [file('scan.pdf', 50, 'application/pdf'), file('scan.pdf', 60, 'application/pdf')],
+      },
+    })
+    expect(screen.getAllByText(/scan\.pdf is too large/)).toHaveLength(2)
+    expect(errors).not.toHaveBeenCalled()
+    errors.mockRestore()
+  })
 })

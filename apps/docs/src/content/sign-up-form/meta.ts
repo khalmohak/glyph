@@ -18,6 +18,12 @@ export default defineDoc({
       description:
         'The 6-digit code arrives as a toast; it submits itself once all digits are in. ada@example.com is taken.',
     },
+    {
+      file: 'extra-fields',
+      title: 'Invite code and workspace',
+      description:
+        'extraFields adds validated fields; their values reach signUp as extra, and the REST adapter sends them with the request.',
+    },
   ],
   notes: [
     'An "email taken" error from the server shows on the email field.',

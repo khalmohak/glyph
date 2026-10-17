@@ -32,6 +32,7 @@ import { virtualRows } from '@glyphui/ui/data-table/virtual'
 import { Form, FormError, FormField, FormSubmit, useForm } from '@glyphui/ui/form'
 import { useState } from 'react'
 import { z } from 'zod'
+import { Viewers } from './viewers'
 
 interface Invoice {
   id: string
@@ -171,6 +172,7 @@ export function App() {
       />
       <DataTable aria-label="Invoices" data={invoices} columns={columns} search selectable />
       <ServerInvoices />
+      <Viewers />
       <DataTable
         aria-label="All invoices"
         data={invoices}

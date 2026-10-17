@@ -63,3 +63,9 @@ describe('exportTableCsv', () => {
     click.mockRestore()
   })
 })
+
+describe('CSV injection in list cells', () => {
+  it('escapes a formula at the start of a joined list, like a tags column', () => {
+    expect(toCsv([[['=HYPERLINK("http://x")', 'vip']]])).toBe('"\'=HYPERLINK(""http://x""), vip"')
+  })
+})

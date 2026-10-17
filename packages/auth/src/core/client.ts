@@ -3,12 +3,15 @@ import { can, hasRole } from './permissions'
 import type {
   AuthAdapter,
   AuthCapabilities,
+  AuthChallenge,
   AuthSession,
   AuthStatus,
   AuthUser,
+  SecondFactorInput,
   SignInInput,
   SignInResult,
   SignUpInput,
+  VerifyEmailInput,
 } from './types'
 
 export type SignOutReason = 'user' | 'idle' | 'expired' | 'remote'
@@ -27,6 +30,11 @@ export interface AuthState {
   expired: boolean
   /** When the idle timer will sign the user out (ms timestamp), while its warning shows. */
   idleDeadline: number | null
+  /**
+   * The latest sign-out and why it happened (`idle`, `remote` for another tab or the server,
+   * `expired`, `user`). Router integrations use it to leave protected pages.
+   */
+  lastSignOut: { reason: SignOutReason; at: number } | null
 }
 
 export interface AuthClientOptions {
@@ -64,10 +72,16 @@ export interface AuthClient {
   signOut(options?: { reason?: SignOutReason }): Promise<void>
   refresh(): Promise<AuthSession | null>
   requestPasswordReset(email: string): Promise<void>
-  resetPassword(input: { token: string; password: string }): Promise<void>
-  verifyEmail(input: { email: string; code: string }): Promise<SignInResult>
+  resetPassword(input: {
+    token: string
+    password: string
+    email?: string | undefined
+  }): Promise<void>
+  verifyEmail(input: VerifyEmailInput): Promise<SignInResult>
   resendVerification(email: string): Promise<void>
-  verifySecondFactor(input: { code: string }): Promise<SignInResult>
+  verifySecondFactor(input: SecondFactorInput): Promise<SignInResult>
+  /** Signs in with the token from an emailed sign-in link (`?token=` on your callback page). */
+  completeMagicLink(token: string): Promise<SignInResult>
   switchOrganization(organizationId: string): Promise<AuthSession>
   updateUser(patch: Partial<AuthUser>): Promise<AuthSession>
   /**
@@ -85,8 +99,13 @@ export interface AuthClient {
 
 const DEFAULT_REFRESH = 5 * 60_000
 const DEFAULT_IDLE_WARNING = 60_000
-/** Refresh this long before `expiresAt`, so requests never race the expiry. */
+/** Refresh this long before `expiresAt` (at most half the remaining time), so requests never race the expiry. */
 const EXPIRY_MARGIN = 30_000
+/**
+ * Never refresh for expiry more often than this. Short sessions or a server clock ahead of
+ * the browser's would otherwise make every refreshed session look due immediately.
+ */
+const MIN_EXPIRY_REFRESH_GAP = 10_000
 
 const initialState: AuthState = {
   status: 'loading',
@@ -95,6 +114,7 @@ const initialState: AuthState = {
   error: null,
   expired: false,
   idleDeadline: null,
+  lastSignOut: null,
 }
 
 function toAuthError(error: unknown): AuthError {
@@ -139,8 +159,54 @@ export function createAuthClient(
   let expiryTimer: ReturnType<typeof setTimeout> | undefined
   let idleTimer: ReturnType<typeof setTimeout> | undefined
   let lastActivity = Date.now()
+  let lastExpiryRefresh = 0
   let starts = 0
   let stopListeners: (() => void) | null = null
+  // Latest-wins for organization switches whose responses can arrive out of order.
+  let organizationRequest = 0
+  // The challenge from the latest code step, sent back with the code when the caller omits it.
+  let pendingChallenge: { step: 'verify' | 'second-factor'; challenge: AuthChallenge } | null = null
+  /**
+   * The server sign-out failed, so the server may still accept the session (an httpOnly
+   * cookie can't be cleared from JavaScript). Until a retry succeeds or the user signs in
+   * again, this tab must not restore the session. Kept in sessionStorage to survive reloads.
+   */
+  const pendingSignOutKey = `${channelName}:sign-out-pending`
+  let pendingSignOut = readFlag(pendingSignOutKey)
+
+  function readFlag(key: string): boolean {
+    try {
+      return typeof sessionStorage !== 'undefined' && sessionStorage.getItem(key) === '1'
+    } catch {
+      return false
+    }
+  }
+
+  function setPendingSignOut(value: boolean) {
+    pendingSignOut = value
+    try {
+      if (value) sessionStorage.setItem(pendingSignOutKey, '1')
+      else sessionStorage.removeItem(pendingSignOutKey)
+    } catch {}
+  }
+
+  // Idle activity is shared between tabs, so a tab nobody looks at doesn't sign out a user
+  // who is busy in another one.
+  const activityKey = `${channelName}:activity`
+  function shareActivity(at: number) {
+    if (!syncTabs) return
+    try {
+      localStorage.setItem(activityKey, String(at))
+    } catch {}
+  }
+  function latestActivity(): number {
+    if (!syncTabs) return lastActivity
+    let shared = 0
+    try {
+      shared = Number(localStorage.getItem(activityKey)) || 0
+    } catch {}
+    return Math.max(lastActivity, shared)
+  }
 
   function setState(patch: Partial<AuthState>) {
     state = { ...state, ...patch }
@@ -177,25 +243,42 @@ export function createAuthClient(
     clearTimeout(expiryTimer)
     const expiresAt = state.session?.expiresAt
     if (!expiresAt || starts === 0) return
-    const delay = Math.max(0, expiresAt - Date.now() - EXPIRY_MARGIN)
+    const now = Date.now()
+    const remaining = expiresAt - now
+    // Refreshable sessions renew at half their remaining time at the latest, so short ones
+    // don't renew constantly; others are marked expired a full margin early.
+    const margin = adapter.refresh ? Math.min(EXPIRY_MARGIN, remaining / 2) : EXPIRY_MARGIN
+    let delay = Math.max(0, remaining - margin)
+    if (adapter.refresh) delay = Math.max(delay, lastExpiryRefresh + MIN_EXPIRY_REFRESH_GAP - now)
     // setTimeout overflows above ~24.8 days; the interval refresh covers long sessions.
     if (delay > 2 ** 31 - 1) return
     expiryTimer = setTimeout(() => {
-      if (adapter.refresh) void client.refresh().catch(() => {})
-      else markExpired()
+      if (adapter.refresh) {
+        lastExpiryRefresh = Date.now()
+        void client.refresh().catch(() => {})
+      } else markExpired()
     }, delay)
   }
 
   function scheduleIdle() {
     clearTimeout(idleTimer)
     if (!idleTimeout || starts === 0 || state.status !== 'authenticated') return
-    const warnAt = lastActivity + idleTimeout - idleWarning
+    const warnAt = latestActivity() + idleTimeout - idleWarning
     idleTimer = setTimeout(
       () => {
-        const deadline = lastActivity + idleTimeout
+        // Activity in another tab moves the whole schedule.
+        if (latestActivity() + idleTimeout - idleWarning > Date.now()) return scheduleIdle()
+        const deadline = latestActivity() + idleTimeout
         setState({ idleDeadline: deadline })
         idleTimer = setTimeout(
-          () => void client.signOut({ reason: 'idle' }),
+          () => {
+            if (latestActivity() + idleTimeout > Date.now()) {
+              setState({ idleDeadline: null })
+              return scheduleIdle()
+            }
+            // The local sign-out always happens; a failed server call is reported in state.
+            client.signOut({ reason: 'idle' }).catch(() => {})
+          },
           Math.max(0, deadline - Date.now()),
         )
       },
@@ -217,22 +300,59 @@ export function createAuthClient(
   }
 
   function settle(result: SignInResult): SignInResult {
+    if (result.status === 'needs-verification' || result.status === 'needs-second-factor') {
+      pendingChallenge = result.challenge
+        ? {
+            step: result.status === 'needs-verification' ? 'verify' : 'second-factor',
+            challenge: result.challenge,
+          }
+        : null
+    }
     if (result.status === 'signed-in') {
+      pendingChallenge = null
+      setPendingSignOut(false)
       setSession(result.session)
       broadcast()
     }
     return result
   }
 
+  function signedOut(reason: SignOutReason) {
+    setState({ lastSignOut: { reason, at: Date.now() } })
+    onSignOut?.(reason)
+  }
+
+  function withChallenge<T extends { challenge?: AuthChallenge | undefined }>(
+    input: T,
+    step: 'verify' | 'second-factor',
+  ): T {
+    if (input.challenge !== undefined || pendingChallenge?.step !== step) return input
+    return { ...input, challenge: pendingChallenge.challenge }
+  }
+
   async function load(): Promise<AuthState> {
     loading ??= (async () => {
       const wasSignedIn = state.status === 'authenticated'
+      if (pendingSignOut) {
+        // Finish the sign-out the server missed before trusting any session it reports.
+        try {
+          await adapter.signOut()
+          setPendingSignOut(false)
+        } catch (error) {
+          setState({
+            ...(state.status !== 'unauthenticated' && { session: null }),
+            status: 'unauthenticated',
+            error: toAuthError(error),
+          })
+          return state
+        }
+      }
       try {
         const session = await adapter.getSession()
         if (!session && wasSignedIn) {
           // Another tab signed out, or the server dropped the session.
           setSession(null)
-          onSignOut?.('remote')
+          signedOut('remote')
         } else setSession(session)
       } catch (error) {
         // A network blip must not sign anyone out: keep the session, report the error.
@@ -290,11 +410,17 @@ export function createAuthClient(
     async signOut({ reason = 'user' } = {}) {
       try {
         await adapter.signOut()
+        setPendingSignOut(false)
+      } catch (error) {
+        // The server may still accept the session; don't restore it until a retry succeeds.
+        setPendingSignOut(true)
+        throw toAuthError(error)
       } finally {
         // Sign out locally even if the server call fails: the user asked to leave.
+        pendingChallenge = null
         setSession(null)
         broadcast()
-        onSignOut?.(reason)
+        signedOut(reason)
       }
     },
     refresh() {
@@ -328,7 +454,7 @@ export function createAuthClient(
     verifyEmail: (input) =>
       run(async () => {
         if (!adapter.verifyEmail) throw notSupported('email codes')
-        return settle(await adapter.verifyEmail(input))
+        return settle(await adapter.verifyEmail(withChallenge(input, 'verify')))
       }),
     resendVerification: (email) =>
       run(async () => {
@@ -338,12 +464,20 @@ export function createAuthClient(
     verifySecondFactor: (input) =>
       run(async () => {
         if (!adapter.verifySecondFactor) throw notSupported('two-factor codes')
-        return settle(await adapter.verifySecondFactor(input))
+        return settle(await adapter.verifySecondFactor(withChallenge(input, 'second-factor')))
+      }),
+    completeMagicLink: (token) =>
+      run(async () => {
+        if (!adapter.completeMagicLink) throw notSupported('magic links')
+        return settle(await adapter.completeMagicLink(token))
       }),
     switchOrganization: (organizationId) =>
       run(async () => {
         if (!adapter.switchOrganization) throw notSupported('organizations')
+        const request = ++organizationRequest
         const session = await adapter.switchOrganization(organizationId)
+        // A later switch already started: its result wins, whichever response came first.
+        if (request !== organizationRequest) return state.session ?? session
         setSession(session)
         broadcast()
         return session
@@ -357,28 +491,36 @@ export function createAuthClient(
         return session
       }),
     async fetch(input, init) {
-      const send = async () => {
-        const headers = new Headers(init?.headers)
+      // A Request's body can be read once: keep an untouched copy for the retry.
+      const original = input instanceof Request ? input : null
+      const spare = original?.clone() ?? null
+      const send = async (target: RequestInfo | URL) => {
+        // Start from the Request's own headers; `init.headers` would otherwise replace them.
+        const headers = new Headers(original?.headers)
+        for (const [name, value] of new Headers(init?.headers)) headers.set(name, value)
         const extra = (await adapter.getAuthHeaders?.()) ?? {}
         for (const [name, value] of Object.entries(extra)) headers.set(name, value)
         const credentials = init?.credentials ?? adapter.credentials
-        return fetch(input, { ...init, headers, ...(credentials && { credentials }) })
+        return fetch(target, { ...init, headers, ...(credentials && { credentials }) })
       }
-      const response = await send()
+      const response = await send(input)
       if (response.status !== 401 || state.status !== 'authenticated') return response
       const session = await client.refresh()
-      if (session) {
-        const retried = await send()
-        if (retried.status !== 401) return retried
+      if (!session) {
         markExpired()
-        return retried
+        return response
       }
-      markExpired()
-      return response
+      // A streamed body is gone after the first attempt; the caller has to send it again.
+      if (typeof ReadableStream !== 'undefined' && init?.body instanceof ReadableStream)
+        return response
+      const retried = await send(spare ?? input)
+      if (retried.status === 401) markExpired()
+      return retried
     },
     markExpired,
     keepAlive() {
       lastActivity = Date.now()
+      shareActivity(lastActivity)
       if (state.idleDeadline !== null) setState({ idleDeadline: null })
       scheduleIdle()
     },
@@ -431,7 +573,7 @@ export function createAuthClient(
         adapter.subscribe((session) => {
           const wasSignedIn = state.status === 'authenticated'
           setSession(session)
-          if (!session && wasSignedIn) onSignOut?.('remote')
+          if (!session && wasSignedIn) signedOut('remote')
         }),
       )
     }
@@ -445,6 +587,7 @@ export function createAuthClient(
         if (now - last < 1000) return
         last = now
         lastActivity = now
+        shareActivity(now)
         scheduleIdle()
       }
       const events = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const

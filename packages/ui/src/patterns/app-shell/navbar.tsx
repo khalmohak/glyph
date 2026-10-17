@@ -1,8 +1,9 @@
 import { Dialog } from 'radix-ui'
-import { type ComponentProps, type ReactNode, useState } from 'react'
+import { type ComponentProps, type MouseEvent, type ReactNode, useEffect, useState } from 'react'
 import { IconButton } from '../../components/button'
 import { Container, type ContainerProps } from '../../components/container'
 import { useComponentConfig } from '../../hooks/use-component-config'
+import { useMediaQuery } from '../../hooks/use-media-query'
 import { useScrolled } from '../../hooks/use-scrolled'
 import { MenuIcon, XIcon } from '../../internal/icons'
 import { useIsActive, useLinkComponent } from '../../provider/glyph-context'
@@ -73,6 +74,17 @@ export function Navbar(inProps: NavbarProps) {
   } = props
   const [open, setOpen] = useState(false)
   const scrolled = useScrolled(8, blurOnScroll)
+  // The menu panel is for small screens: close it when the window grows past `md`.
+  const wide = useMediaQuery('(min-width: 768px)')
+  useEffect(() => {
+    if (wide) setOpen(false)
+  }, [wide])
+  // Using an action in the panel (Sign in, a same-page link) closes it, like the links do.
+  // Popup triggers (a user menu) keep it open so their menu can show.
+  const closeOnAction = (event: MouseEvent<HTMLElement>) => {
+    const target = (event.target as Element).closest('a, button')
+    if (target && !target.hasAttribute('aria-haspopup')) setOpen(false)
+  }
   const s = navbarStyles({ sticky, blur: blurOnScroll })
 
   return (
@@ -86,8 +98,13 @@ export function Navbar(inProps: NavbarProps) {
         <div className={s.brand({ class: slots.brand })}>{brand}</div>
         {links.length > 0 && (
           <nav aria-label="Main" className={s.links({ class: slots.links })}>
-            {links.map((link) => (
-              <NavbarLink key={link.href} link={link} className={s.link({ class: slots.link })} />
+            {links.map((link, i) => (
+              <NavbarLink
+                // Placeholder links often share an href ("#").
+                key={`${i}:${link.href}`}
+                link={link}
+                className={s.link({ class: slots.link })}
+              />
             ))}
           </nav>
         )}
@@ -116,9 +133,9 @@ export function Navbar(inProps: NavbarProps) {
                 </Dialog.Close>
               </div>
               <nav aria-label="Main" className={s.panelLinks({ class: slots.panelLinks })}>
-                {links.map((link) => (
+                {links.map((link, i) => (
                   <NavbarLink
-                    key={link.href}
+                    key={`${i}:${link.href}`}
                     link={link}
                     className={s.panelLink({ class: slots.panelLink })}
                     onClick={() => setOpen(false)}
@@ -126,7 +143,14 @@ export function Navbar(inProps: NavbarProps) {
                 ))}
               </nav>
               {actions && (
-                <div className={s.panelActions({ class: slots.panelActions })}>{actions}</div>
+                // biome-ignore lint/a11y/noStaticElementInteractions: delegates clicks from the buttons and links inside
+                // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard activation of those controls fires click too
+                <div
+                  className={s.panelActions({ class: slots.panelActions })}
+                  onClick={closeOnAction}
+                >
+                  {actions}
+                </div>
               )}
             </Dialog.Content>
           </Dialog.Portal>

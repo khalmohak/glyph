@@ -69,7 +69,14 @@ export function useAsync<T>(fn: () => Promise<T>, deps: DependencyList): AsyncRe
   useEffect(() => {
     let active = true
     setState((prev) => ({ ...prev, status: 'pending' }))
-    fn().then(
+    // A function that throws before returning a promise is an error state, not a crash.
+    let promise: Promise<T>
+    try {
+      promise = Promise.resolve(fn())
+    } catch (error) {
+      promise = Promise.reject(error)
+    }
+    promise.then(
       (data) => active && setState({ status: 'success', data }),
       (error: unknown) => active && setState({ status: 'error', error }),
     )

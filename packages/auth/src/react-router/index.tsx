@@ -1,5 +1,5 @@
 import { EmptyState, LoadingState } from '@glyphui/ui'
-import { type ReactNode, useCallback } from 'react'
+import { type ReactNode, useCallback, useEffect, useRef } from 'react'
 import {
   type LoaderFunction,
   type LoaderFunctionArgs,
@@ -8,6 +8,7 @@ import {
   redirect,
   useLocation,
   useNavigate,
+  useRevalidator,
   useSearchParams,
 } from 'react-router'
 import type { AuthClient } from '../core/client'
@@ -200,3 +201,29 @@ export function useRedirectAfterSignIn(fallback = '/'): () => void {
 }
 
 export { NEXT_PARAM, safeRedirectPath, signInPathFor }
+
+/**
+ * Re-runs the route loaders whenever the user signs in or out, including when the idle
+ * timer, another tab or the server ends the session. Routes guarded only by
+ * `protectedLoader` then send the user to sign-in instead of leaving a dead page on screen,
+ * and `guestLoader` pages move on after signing in. Data routers only (`createBrowserRouter`).
+ *
+ * Call it once in a component that renders inside the router, such as your root layout.
+ */
+export function useAuthRevalidation(): void {
+  const { status } = useAuth()
+  const { revalidate } = useRevalidator()
+  const previous = useRef(status)
+  useEffect(() => {
+    const before = previous.current
+    previous.current = status
+    // The first load isn't a change: loaders already ran with the right session.
+    if (before !== status && before !== 'loading') void revalidate()
+  }, [status, revalidate])
+}
+
+/** `useAuthRevalidation` as a component, for your root route's element. */
+export function AuthRevalidator(): null {
+  useAuthRevalidation()
+  return null
+}

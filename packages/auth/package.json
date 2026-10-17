@@ -83,14 +83,14 @@
     "check:exports": "attw --pack . --profile esm-only --exclude-entrypoints ./styles.css"
   },
   "dependencies": {
-    "@glyphui/blocks": "workspace:^",
-    "@glyphui/tokens": "workspace:^",
-    "@glyphui/ui": "workspace:^",
     "@standard-schema/spec": "^1.1.0",
     "tailwind-variants": "^3.3.1"
   },
   "peerDependencies": {
     "@clerk/react": ">=6",
+    "@glyphui/blocks": ">=0.7.0",
+    "@glyphui/tokens": ">=0.7.0",
+    "@glyphui/ui": ">=0.7.0",
     "@hookform/resolvers": ">=5.1.0",
     "firebase": ">=11",
     "react": ">=19",
@@ -119,7 +119,10 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@clerk/react": "6.17.5",
+    "@glyphui/blocks": "workspace:*",
+    "@glyphui/tokens": "workspace:*",
     "@glyphui/tsconfig": "workspace:*",
+    "@glyphui/ui": "workspace:*",
     "@hookform/resolvers": "^5.9.1",
     "@testing-library/jest-dom": "^6.10.0",
     "@testing-library/react": "^16.3.3",

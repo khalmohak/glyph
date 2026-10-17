@@ -54,4 +54,14 @@ describe('Slider', () => {
     expect(screen.getByText('$30')).toBeInTheDocument()
     expect(screen.getByText('Max')).toBeInTheDocument()
   })
+
+  it('updates the shown value while uncontrolled', () => {
+    const onValueChange = vi.fn()
+    render(<Slider aria-label="Volume" defaultValue={20} showValue onValueChange={onValueChange} />)
+    const thumb = screen.getByRole('slider', { name: 'Volume' })
+    expect(thumb).toHaveTextContent('20')
+    fireEvent.keyDown(thumb, { key: 'ArrowRight' })
+    expect(onValueChange).toHaveBeenLastCalledWith(21)
+    expect(thumb).toHaveTextContent('21')
+  })
 })

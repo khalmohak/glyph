@@ -28,7 +28,7 @@ export const navigationMenuStyles = /* @__PURE__ */ tv({
     ],
     link: topLevel,
     card: [
-      'flex select-none gap-3 rounded-md p-3 text-foreground no-underline outline-none',
+      'flex select-none gap-3 rounded-lg p-3 text-foreground no-underline outline-none',
       transition,
       focusRing,
       'hover:bg-muted focus-visible:bg-muted',

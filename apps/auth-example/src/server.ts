@@ -29,10 +29,15 @@ export interface InboxMessage {
 
 interface Db {
   users: User[]
-  codes: { kind: 'verify' | 'two-factor' | 'reset'; email: string; value: string }[]
+  codes: {
+    kind: 'verify' | 'two-factor' | 'reset' | 'magic-link'
+    email: string
+    value: string
+  }[]
   access: Record<string, { userId: string; expiresAt: number }>
   refresh: Record<string, string>
-  pendingSecondFactor: string | null
+  /** Sign-ins waiting for their second factor, by challenge id. */
+  challenges: Record<string, { userId: string; expiresAt: number }>
   activeOrganization: Record<string, string>
   inbox: InboxMessage[]
 }
@@ -72,14 +77,18 @@ const seedUsers: User[] = [
 function load(): Db {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return JSON.parse(raw) as Db
+    if (raw) {
+      // Data saved by older versions of this demo has no challenges yet.
+      const db = JSON.parse(raw) as Partial<Db> & Omit<Db, 'challenges'>
+      return { ...db, challenges: db.challenges ?? {} }
+    }
   } catch {}
   return {
     users: seedUsers,
     codes: [],
     access: {},
     refresh: {},
-    pendingSecondFactor: null,
+    challenges: {},
     activeOrganization: {},
     inbox: [],
   }
@@ -186,10 +195,20 @@ async function handle(path: string, request: Request): Promise<Response> {
       }
       if (user.twoFactor) {
         const value = sixDigits()
-        db.pendingSecondFactor = user.id
+        // Each sign-in gets its own challenge, so a code can only finish the sign-in it was
+        // sent for. Bearer mode has no cookie to tell sign-ins apart.
+        const challenge = `ch_${random(16)}`
+        db.challenges[challenge] = { userId: user.id, expiresAt: Date.now() + 10 * 60_000 }
         db.codes.push({ kind: 'two-factor', email: user.email, value })
         mail(db, { to: user.email, subject: 'Your sign-in code', code: value })
-        return done(json(202, { status: 'needs-second-factor' }))
+        return done(
+          json(202, {
+            status: 'needs-second-factor',
+            challenge,
+            method: 'email',
+            email: user.email,
+          }),
+        )
       }
       return done(json(200, issue(db, user)))
     }
@@ -211,7 +230,11 @@ async function handle(path: string, request: Request): Promise<Response> {
         roles: ['member'],
         permissions: ['invoices:read'],
         organizations: [
-          { id: `org_${random(6)}`, name: `${body.name || 'My'}’s workspace`, role: 'owner' },
+          {
+            id: `org_${random(6)}`,
+            name: body.workspace?.trim() || `${body.name || 'My'}’s workspace`,
+            role: 'owner',
+          },
         ],
       }
       db.users.push(created)
@@ -242,7 +265,11 @@ async function handle(path: string, request: Request): Promise<Response> {
       return done(json(204))
     }
     case 'POST /auth/two-factor': {
-      const pending = db.users.find((u) => u.id === db.pendingSecondFactor)
+      const entry = body.challenge ? db.challenges[body.challenge] : undefined
+      const pending =
+        entry && entry.expiresAt > Date.now()
+          ? db.users.find((u) => u.id === entry.userId)
+          : undefined
       const found =
         pending &&
         db.codes.find(
@@ -254,7 +281,7 @@ async function handle(path: string, request: Request): Promise<Response> {
           errors: { code: 'That code isn’t right. Use the newest code.' },
         })
       db.codes = db.codes.filter((c) => c !== found)
-      db.pendingSecondFactor = null
+      if (body.challenge) delete db.challenges[body.challenge]
       return done(json(200, issue(db, pending)))
     }
     case 'POST /auth/refresh': {
@@ -268,7 +295,29 @@ async function handle(path: string, request: Request): Promise<Response> {
     case 'POST /auth/sign-out': {
       const token = request.headers.get('Authorization')?.replace(/^Bearer /, '')
       if (token) delete db.access[token]
+      if (body.refreshToken) delete db.refresh[body.refreshToken]
       return done(json(204))
+    }
+    case 'POST /auth/magic-link': {
+      // Same answer whether or not the account exists.
+      if (user) {
+        const value = random()
+        db.codes.push({ kind: 'magic-link', email: user.email, value })
+        mail(db, {
+          to: user.email,
+          subject: 'Your sign-in link',
+          link: `${import.meta.env.BASE_URL}magic-link?token=${value}`,
+        })
+      }
+      return done(json(202, { status: 'magic-link-sent', email }))
+    }
+    case 'POST /auth/magic-link/verify': {
+      const found = db.codes.find((c) => c.kind === 'magic-link' && c.value === body.token)
+      const owner = found && db.users.find((u) => u.email === found.email)
+      if (!found || !owner)
+        return json(410, { message: 'This sign-in link has expired. Request a new one.' })
+      db.codes = db.codes.filter((c) => c !== found)
+      return done(json(200, issue(db, owner)))
     }
     case 'POST /auth/password/forgot': {
       // Same answer whether or not the account exists.

@@ -2,7 +2,7 @@ import { AuthCard } from '@glyphui/blocks'
 import { Button, Input, Link, PasswordInput } from '@glyphui/ui'
 import { Form, FormError, FormField, FormSubmit, useForm } from '@glyphui/ui/form'
 import { type ReactNode, useRef, useState } from 'react'
-import type { AuthSession, OAuthProvider } from '../core/types'
+import type { AuthSession, OAuthProvider, SecondFactorMethod } from '../core/types'
 import { useAuth } from '../react/provider'
 import { TwoFactorForm, VerifyEmailForm } from './code-forms'
 import { email, fields, required } from './schema'
@@ -21,12 +21,14 @@ export interface SignInFormProps extends AuthScreenProps {
   /** OAuth buttons to show. Default: every provider the adapter supports; `[]` for none. */
   providers?: readonly OAuthProvider[]
   defaultEmail?: string
+  /** Wording for the two-step code screen. By default it follows how the server sends codes. */
+  twoFactor?: { title?: ReactNode; description?: ReactNode }
 }
 
 type Step =
   | { step: 'credentials' }
   | { step: 'verify'; email: string }
-  | { step: 'two-factor' }
+  | { step: 'two-factor'; method?: SecondFactorMethod | undefined; email?: string | undefined }
   | { step: 'magic-link'; email: string }
 
 /**
@@ -40,6 +42,7 @@ export function SignInForm({
   magicLink = true,
   providers,
   defaultEmail = '',
+  twoFactor,
   title = 'Welcome back',
   description = 'Sign in to continue.',
   headingLevel,
@@ -88,6 +91,10 @@ export function SignInForm({
     return (
       <TwoFactorForm
         {...shared}
+        method={state.method}
+        email={state.email}
+        {...(twoFactor?.title !== undefined && { title: twoFactor.title })}
+        {...(twoFactor?.description !== undefined && { description: twoFactor.description })}
         onBack={() => setState({ step: 'credentials' })}
         {...(onSuccess && { onSuccess })}
       />
@@ -137,7 +144,8 @@ export function SignInForm({
             if (result.status === 'signed-in') onSuccess?.(result.session)
             else if (result.status === 'needs-verification')
               setState({ step: 'verify', email: result.email })
-            else if (result.status === 'needs-second-factor') setState({ step: 'two-factor' })
+            else if (result.status === 'needs-second-factor')
+              setState({ step: 'two-factor', method: result.method, email: result.email })
             else if (result.status === 'magic-link-sent')
               setState({ step: 'magic-link', email: result.email })
           } catch (error) {

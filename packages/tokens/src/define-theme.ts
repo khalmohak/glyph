@@ -12,7 +12,7 @@ import {
   statusTextTokens,
   type ThemeTokens,
 } from './schema'
-import { deriveTextColor, statusTextTone } from './text-colors'
+import { deriveForeground, deriveTextColor, solidTones, statusTextTone } from './text-colors'
 
 /** A fully resolved theme: every token present, shadows split per color mode. */
 export interface Theme extends Omit<ThemeTokens, 'shadow'> {
@@ -70,7 +70,30 @@ export function defineTheme(input: ThemeInput): Theme {
   const own = { ...tokens, name, components: components ?? {}, shadow: normalizeShadow(shadow) }
 
   const theme = base === undefined ? (own as Theme) : deepMerge(base, own)
-  return withTextColors(withChartColors(theme), input, base)
+  return withTextColors(withChartColors(withForegrounds(theme, input)), input, base)
+}
+
+/**
+ * A theme that changes a solid tone but not the text on it (say a brighter `primary` and no
+ * `primary-foreground`) keeps the base's text color, which may no longer be readable. Then
+ * that text becomes white or dark ink, whichever reads better. Explicit values are kept.
+ */
+function withForegrounds(theme: Theme, input: ThemeInput): Theme {
+  let colors: Theme['colors'] | undefined
+  for (const mode of colorModes) {
+    const own = input.colors?.[mode] as Partial<ColorScale> | undefined
+    if (!own) continue
+    for (const tone of solidTones) {
+      const fg = `${tone}-foreground` as const
+      if (own[tone] === undefined || own[fg] !== undefined) continue
+      const scale = (colors ?? theme.colors)[mode]
+      const next = deriveForeground(scale[tone], scale[fg])
+      if (next === scale[fg]) continue
+      colors ??= { light: { ...theme.colors.light }, dark: { ...theme.colors.dark } }
+      colors[mode][fg] = next
+    }
+  }
+  return colors ? { ...theme, colors } : theme
 }
 
 /** Status text colors each theme derived (rather than set), so extensions re-derive them. */

@@ -1,7 +1,8 @@
 import { tv, type VariantProps } from '../../utils/tv'
 
 export const headingStyles = /* @__PURE__ */ tv({
-  slots: { base: 'font-display text-balance text-foreground' },
+  // break-words: a long word in a wide display font (brutalist) wraps instead of overflowing phones.
+  slots: { base: 'font-display text-balance break-words hyphens-auto text-foreground' },
   variants: {
     size: {
       display: { base: 'text-display' },

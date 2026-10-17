@@ -215,15 +215,22 @@ describe('password reset', () => {
     Object.assign(client.capabilities, { passwordResetMethod: 'code' })
     const resetPassword = vi.spyOn(client, 'resetPassword').mockResolvedValue()
     renderWithAuth(<ForgotPasswordForm />, client)
+    // The copy matches the method: a code, not a link.
+    expect(await screen.findByText(/send you a code/)).toBeInTheDocument()
     await user().type(await screen.findByRole('textbox', { name: /email/i }), ada.email)
-    await user().click(screen.getByRole('button', { name: 'Send reset link' }))
+    await user().click(screen.getByRole('button', { name: 'Send reset code' }))
     expect(await screen.findByText(/Enter the code we sent to/)).toBeInTheDocument()
     await typeCode('123456')
     await user().type(screen.getByLabelText(/^New password/), 'brand new pw')
     await user().type(screen.getByLabelText(/^Repeat new password/), 'brand new pw')
     await user().click(screen.getByRole('button', { name: 'Update password' }))
     await waitFor(() =>
-      expect(resetPassword).toHaveBeenCalledWith({ token: '123456', password: 'brand new pw' }),
+      // The email goes along: a 6-digit code alone must not identify the account.
+      expect(resetPassword).toHaveBeenCalledWith({
+        token: '123456',
+        password: 'brand new pw',
+        email: ada.email,
+      }),
     )
   })
 })

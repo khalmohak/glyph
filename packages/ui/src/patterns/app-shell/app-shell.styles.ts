@@ -42,7 +42,8 @@ export const sidebarStyles = /* @__PURE__ */ tv({
       'border-r-(length:--glyph-border-width)',
       'transition-[width] duration-(--glyph-duration-base) ease-standard data-[collapsed=true]:w-15',
     ],
-    header: 'flex h-14 shrink-0 items-center gap-2 px-3',
+    // A minimum height, not a fixed one: a workspace switcher can sit under the brand.
+    header: 'flex min-h-14 shrink-0 flex-wrap items-center gap-2 px-3 py-2',
     content: 'flex flex-1 flex-col gap-5 overflow-y-auto overflow-x-hidden px-3 py-3',
     section: 'flex flex-col gap-0.5',
     sectionLabel:

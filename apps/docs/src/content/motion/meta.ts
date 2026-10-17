@@ -48,6 +48,7 @@ export default defineDoc({
     },
   ],
   notes: [
+    'StaggerItem orders itself by document order when you leave out index; pass index only to override the cascade.',
     'Set theme.motion.level to none, subtle or expressive, and theme.motion.spring to { stiffness, damping, mass? } — overlays, indicators and reveals all follow it. Brutalist snaps with no bounce; Playful is expressive.',
     'GlyphProvider motion="none" overrides the theme for the whole app, e.g. in tests or from a user setting. Visitors who ask their system for reduced motion never get animation.',
     'The spring is compiled to a CSS linear() easing (--glyph-ease-spring, with --glyph-duration-spring), so plain CSS can use it: ease-spring duration-(--glyph-duration-spring).',

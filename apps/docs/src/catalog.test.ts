@@ -13,6 +13,15 @@ import * as dataTableVirtual from '@glyphui/ui/data-table/virtual'
 import * as form from '@glyphui/ui/form'
 import * as reactRouter from '@glyphui/ui/react-router'
 import * as vite from '@glyphui/ui/vite'
+import * as viewers from '@glyphui/viewers'
+import * as viewersCode from '@glyphui/viewers/code'
+import * as viewersCsv from '@glyphui/viewers/csv'
+import * as viewersDiff from '@glyphui/viewers/diff'
+import * as viewersJson from '@glyphui/viewers/json'
+import * as viewersMarkdown from '@glyphui/viewers/markdown'
+import * as viewersMedia from '@glyphui/viewers/media'
+import * as viewersPdf from '@glyphui/viewers/pdf'
+import * as viewersSpreadsheet from '@glyphui/viewers/spreadsheet'
 import { describe, expect, it } from 'vitest'
 import { catalog, docs } from './lib/catalog'
 
@@ -32,6 +41,15 @@ const entries = {
   '@glyphui/auth/clerk': authClerk,
   '@glyphui/auth/react-router': authRouter,
   '@glyphui/auth/ui': authUi,
+  '@glyphui/viewers': viewers,
+  '@glyphui/viewers/pdf': viewersPdf,
+  '@glyphui/viewers/csv': viewersCsv,
+  '@glyphui/viewers/spreadsheet': viewersSpreadsheet,
+  '@glyphui/viewers/json': viewersJson,
+  '@glyphui/viewers/code': viewersCode,
+  '@glyphui/viewers/markdown': viewersMarkdown,
+  '@glyphui/viewers/diff': viewersDiff,
+  '@glyphui/viewers/media': viewersMedia,
 } as const
 
 const exampleFiles = Object.keys(import.meta.glob('./content/*/examples/*.tsx')).map((path) =>

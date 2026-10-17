@@ -20,6 +20,7 @@ export default defineDoc({
   ],
   notes: [
     'Items with href navigate through your router (GlyphProvider router).',
+    'OrganizationSwitcher takes label and createLabel, so it can say Workspaces or Teams instead of Organizations.',
     'The Theme submenu sets light, dark or system mode; turn it off with colorMode={false}.',
     'compact shows only the avatar; the name stays available to screen readers.',
     'OrganizationSwitcher renders nothing unless the adapter supports organizations and the user has one.',

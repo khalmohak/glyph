@@ -25,18 +25,18 @@ export function CountUp({ value, animate }: { value: ReactNode; animate: boolean
   const number = Number(digits.replaceAll(',', ''))
   if (!Number.isFinite(number)) return value
   const decimals = digits.split('.')[1]?.length ?? 0
+  const format: Intl.NumberFormatOptions = {
+    useGrouping: digits.includes(','),
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }
+  // Only count up when the number reads back exactly as written: "007", ".5", "00:05" or
+  // "1,2,3" would otherwise end on different text ("7", "0.5", "0:05", "123").
+  if (new Intl.NumberFormat('en-US', format).format(number) !== digits) return value
   return (
     <>
       {prefix}
-      <AnimatedNumber
-        value={number}
-        locale="en-US"
-        format={{
-          useGrouping: digits.includes(','),
-          minimumFractionDigits: decimals,
-          maximumFractionDigits: decimals,
-        }}
-      />
+      <AnimatedNumber value={number} locale="en-US" format={format} />
       {suffix}
     </>
   )

@@ -64,4 +64,20 @@ describe('Button iconOnly with asChild', () => {
     expect(link).toHaveAttribute('data-slot', 'button')
     expect(within(link).getByTestId('icon')).toBeInTheDocument()
   })
+
+  it('disables an asChild link: not focusable, click prevented', async () => {
+    const onClick = vi.fn((event: { defaultPrevented: boolean }) => event.defaultPrevented)
+    render(
+      <Button asChild disabled onClick={onClick}>
+        <a href="/billing">Billing</a>
+      </Button>,
+    )
+    const link = screen.getByRole('link', { name: 'Billing' })
+    expect(link).toHaveAttribute('aria-disabled', 'true')
+    expect(link).toHaveAttribute('tabindex', '-1')
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true })
+    link.dispatchEvent(click)
+    expect(click.defaultPrevented).toBe(true)
+    expect(onClick).not.toHaveBeenCalled()
+  })
 })

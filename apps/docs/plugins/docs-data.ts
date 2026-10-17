@@ -38,15 +38,15 @@ export interface PropDoc {
   description?: string
 }
 
-function extractProps(uiRoot: string): Record<string, PropDoc[]> {
-  const parser = withCustomConfig(join(uiRoot, 'tsconfig.json'), {
+function extractProps(root: string): Record<string, PropDoc[]> {
+  const parser = withCustomConfig(join(root, 'tsconfig.json'), {
     savePropValueAsString: true,
     shouldExtractLiteralValuesFromEnum: true,
     shouldRemoveUndefinedFromOptional: true,
     propFilter: (prop) =>
       prop.name !== 'key' && !(prop.parent?.fileName.includes('node_modules') ?? false),
   })
-  const files = walk(join(uiRoot, 'src'), (f) => f.endsWith('.tsx') && !f.includes('.test'))
+  const files = walk(join(root, 'src'), (f) => f.endsWith('.tsx') && !f.includes('.test'))
   const out: Record<string, PropDoc[]> = {}
   for (const doc of parser.parse(files)) {
     if (out[doc.displayName]) continue
@@ -134,6 +134,8 @@ const escapeAttr = (s: string) =>
 
 export function docsData(): Plugin {
   const uiRoot = resolve(__dirname, '../../../packages/ui')
+  const viewersRoot = resolve(__dirname, '../../../packages/viewers')
+  const sources = [uiRoot, viewersRoot]
   const contentRoot = resolve(__dirname, '../src/content')
   let props: Record<string, PropDoc[]> | null = null
   let server: ViteDevServer | undefined
@@ -169,9 +171,9 @@ export function docsData(): Plugin {
     },
     configureServer(s) {
       server = s
-      s.watcher.add([join(uiRoot, 'src'), contentRoot])
+      s.watcher.add([...sources.map((root) => join(root, 'src')), contentRoot])
       s.watcher.on('change', (file) => {
-        if (file.startsWith(join(uiRoot, 'src')) && file.endsWith('.tsx')) {
+        if (sources.some((root) => file.startsWith(join(root, 'src'))) && file.endsWith('.tsx')) {
           props = null
           invalidate(PROPS_ID)
         }
@@ -188,6 +190,7 @@ export function docsData(): Plugin {
           {},
           extractProps(resolve(__dirname, '../../../packages/auth')),
           extractProps(resolve(__dirname, '../../../packages/blocks')),
+          extractProps(viewersRoot),
           extractProps(uiRoot),
         )
         return `export default ${JSON.stringify(props)}`

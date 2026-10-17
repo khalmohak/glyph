@@ -4,11 +4,11 @@ import { Snippet } from '../components/snippet'
 
 function Step({ n, title, children }: { n: number; title: string; children: ReactNode }) {
   return (
-    <section className="grid gap-3 sm:grid-cols-[2.5rem_1fr]">
+    <section className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-[2.5rem_minmax(0,1fr)]">
       <span className="flex size-8 items-center justify-center rounded-pill border-(length:--glyph-border-width) border-border font-mono text-caption text-muted-foreground">
         {n}
       </span>
-      <div className="grid min-w-0 gap-3">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3">
         <Heading level={2} size="h4">
           {title}
         </Heading>
@@ -60,7 +60,7 @@ export const nextRouter: GlyphRouter = {
 
 export function GettingStartedPage() {
   return (
-    <div className="grid gap-10">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-10">
       <header className="grid gap-3">
         <Eyebrow>Guide</Eyebrow>
         <Heading level={1}>Getting started</Heading>
@@ -78,6 +78,11 @@ export function GettingStartedPage() {
         <Snippet code="npm install @glyphui/blocks" />
         <Text size="small" tone="muted">
           Page sections: Hero, Pricing, FAQ, AuthCard and more.
+        </Text>
+        <Text size="small" tone="muted">
+          Every <Code>@glyphui</Code> package is released with the same version number, so keep them
+          in step. Blocks, auth and viewers use your app's <Code>@glyphui/ui</Code> as a peer
+          dependency instead of bringing their own copy.
         </Text>
         <Snippet code="npm install react-hook-form @hookform/resolvers zod @tanstack/react-table@8" />
         <Text size="small" tone="muted">

@@ -9,7 +9,7 @@ export const auth = createAuthClient(
   restAdapter({
     baseUrl: `${import.meta.env.BASE_URL}api`,
     mode: 'bearer',
-    capabilities: { twoFactor: true, organizations: true },
+    capabilities: { twoFactor: true, organizations: true, magicLink: true },
   }),
   { idleTimeout: 30 * 60_000 },
 )

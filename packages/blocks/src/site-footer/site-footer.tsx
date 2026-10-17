@@ -68,8 +68,8 @@ export function SiteFooter({
                     {column.title}
                   </p>
                   <ul className="grid gap-2">
-                    {column.links.map((link) => (
-                      <li key={link.href}>
+                    {column.links.map((link, j) => (
+                      <li key={`${j}-${link.href}`}>
                         <Link
                           href={link.href}
                           className="rounded-xs text-small text-muted-foreground transition-colors duration-(--glyph-duration-fast) hover:text-foreground"

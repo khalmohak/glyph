@@ -1,0 +1,101 @@
+/*
+ * Import after @glyphui/ui/styles.css so Tailwind generates the classes viewers use:
+ *
+ *   @import "tailwindcss";
+ *   @import "@glyphui/ui/styles.css";
+ *   @import "@glyphui/viewers/styles.css";
+ */
+@source "./src";
+
+/* Lets viewers detect, in development, that this stylesheet is loaded. */
+:root {
+  --glyph-viewers-css: 1;
+}
+
+/* Syntax colors for CodeViewer, MarkdownViewer and DiffViewer follow the active theme. */
+[data-glyph-code] {
+  --shiki-foreground: var(--glyph-foreground);
+  --shiki-background: transparent;
+  --shiki-token-keyword: var(--glyph-primary-text);
+  --shiki-token-string: color-mix(in oklab, var(--glyph-success-text) 80%, var(--glyph-foreground));
+  --shiki-token-string-expression: color-mix(
+    in oklab,
+    var(--glyph-success-text) 80%,
+    var(--glyph-foreground)
+  );
+  --shiki-token-comment: var(--glyph-faint-foreground);
+  --shiki-token-constant: color-mix(
+    in oklab,
+    var(--glyph-warning-text) 75%,
+    var(--glyph-foreground)
+  );
+  --shiki-token-function: color-mix(in oklab, var(--glyph-info-text) 75%, var(--glyph-foreground));
+  --shiki-token-parameter: var(--glyph-foreground);
+  --shiki-token-punctuation: var(--glyph-muted-foreground);
+  --shiki-token-link: var(--glyph-primary-text);
+}
+
+/*
+ * PdfViewer's selectable text layer (adapted from pdf.js's pdf_viewer.css, Apache-2.0).
+ * Text is transparent and sits over the rendered page so it can be selected and searched.
+ */
+.glyph-pdf-text {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  line-height: 1;
+  text-align: initial;
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  z-index: 0;
+  --scale-round-x: 1px;
+  --scale-round-y: 1px;
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+}
+.glyph-pdf-text :is(span, br) {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+  user-select: text;
+}
+.glyph-pdf-text > :not(.markedContent),
+.glyph-pdf-text .markedContent span:not(.markedContent) {
+  z-index: 1;
+  --font-height: 0;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  --scale-x: 1;
+  --rotate: 0deg;
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
+}
+.glyph-pdf-text .markedContent {
+  display: contents;
+}
+.glyph-pdf-text ::selection {
+  background: color-mix(in oklab, var(--glyph-primary) 30%, transparent);
+  color: transparent;
+}
+.glyph-pdf-text mark {
+  color: transparent;
+  background: color-mix(in oklab, var(--glyph-warning) 45%, transparent);
+  border-radius: 2px;
+}
+.glyph-pdf-text mark[data-current] {
+  background: color-mix(in oklab, var(--glyph-primary) 50%, transparent);
+  outline: 2px solid var(--glyph-primary);
+}
+.glyph-pdf-text[data-main-rotation="90"] {
+  transform: rotate(90deg) translateY(-100%);
+}
+.glyph-pdf-text[data-main-rotation="180"] {
+  transform: rotate(180deg) translate(-100%, -100%);
+}
+.glyph-pdf-text[data-main-rotation="270"] {
+  transform: rotate(270deg) translateX(-100%);
+}

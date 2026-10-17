@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { Newsletter } from './newsletter'
@@ -27,5 +27,17 @@ describe('Newsletter', () => {
     await userEvent.type(input, 'c@d.co')
     await userEvent.click(screen.getByRole('button', { name: 'Subscribe' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Rate limited')
+  })
+
+  it('subscribes once while a request is in flight', async () => {
+    let finish = () => {}
+    const onSubscribe = vi.fn(() => new Promise<void>((resolve) => (finish = resolve)))
+    const { container } = render(<Newsletter title="News" onSubscribe={onSubscribe} />)
+    await userEvent.type(screen.getByLabelText('Email address'), 'a@b.co')
+    const form = container.querySelector('form') as HTMLFormElement
+    fireEvent.submit(form)
+    fireEvent.submit(form)
+    expect(onSubscribe).toHaveBeenCalledTimes(1)
+    await act(async () => finish())
   })
 })

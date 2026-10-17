@@ -59,6 +59,14 @@ export interface CarouselProps
   'aria-label': string
 }
 
+/** Arrow keys in text fields, selects and sliders move the caret or value, not the carousel. */
+function isEditable(target: EventTarget): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  if (target.isContentEditable) return true
+  if (target.closest('input, textarea, select, [role="slider"], [role="spinbutton"]')) return true
+  return false
+}
+
 /**
  * Swipeable, keyboard-accessible slides. Compose with CarouselContent, CarouselItem,
  * CarouselPrevious, CarouselNext and CarouselDots.
@@ -73,6 +81,7 @@ export function Carousel(inProps: CarouselProps) {
     orientation = 'horizontal',
     className,
     children,
+    onKeyDownCapture: userKeyDownCapture,
     ...rest
   } = props
   const [viewportRef, api] = useEmblaCarousel(
@@ -114,6 +123,8 @@ export function Carousel(inProps: CarouselProps) {
   const scrollTo = useCallback((index: number) => api?.scrollTo(index), [api])
 
   const onKeyDownCapture = (event: KeyboardEvent<HTMLElement>) => {
+    userKeyDownCapture?.(event)
+    if (event.defaultPrevented || isEditable(event.target)) return
     const prevKey = orientation === 'horizontal' ? 'ArrowLeft' : 'ArrowUp'
     const nextKey = orientation === 'horizontal' ? 'ArrowRight' : 'ArrowDown'
     if (event.key === prevKey) {
@@ -217,7 +228,7 @@ type ControlProps = Omit<IconButtonProps, 'icon' | 'aria-label'> & {
   icon?: ReactNode
 }
 
-export function CarouselPrevious({ className, icon, ...props }: ControlProps) {
+export function CarouselPrevious({ className, icon, onClick, ...props }: ControlProps) {
   const { scrollPrev, canScrollPrev, orientation, s, slots } = useCarousel()
   return (
     <IconButton
@@ -226,7 +237,10 @@ export function CarouselPrevious({ className, icon, ...props }: ControlProps) {
       aria-label="Previous slide"
       icon={icon ?? <Chevron direction="left" />}
       disabled={!canScrollPrev}
-      onClick={scrollPrev}
+      onClick={(event) => {
+        onClick?.(event)
+        if (!event.defaultPrevented) scrollPrev()
+      }}
       className={s.control({
         class: [slots.control, orientation === 'horizontal' ? 'left-3' : 'top-3', className],
       })}
@@ -235,7 +249,7 @@ export function CarouselPrevious({ className, icon, ...props }: ControlProps) {
   )
 }
 
-export function CarouselNext({ className, icon, ...props }: ControlProps) {
+export function CarouselNext({ className, icon, onClick, ...props }: ControlProps) {
   const { scrollNext, canScrollNext, orientation, s, slots } = useCarousel()
   return (
     <IconButton
@@ -244,7 +258,10 @@ export function CarouselNext({ className, icon, ...props }: ControlProps) {
       aria-label="Next slide"
       icon={icon ?? <Chevron direction="right" />}
       disabled={!canScrollNext}
-      onClick={scrollNext}
+      onClick={(event) => {
+        onClick?.(event)
+        if (!event.defaultPrevented) scrollNext()
+      }}
       className={s.control({
         class: [slots.control, orientation === 'horizontal' ? 'right-3' : 'bottom-3', className],
       })}

@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const PORT = 4400
+// Override with PLAYWRIGHT_PORT to run several checkouts (e.g. git worktrees) side by side.
+const PORT = Number(process.env.PLAYWRIGHT_PORT ?? 4400)
 const isLinux = process.platform === 'linux'
 
 /**
@@ -40,6 +41,13 @@ export default defineConfig({
     {
       name: 'interactions',
       testMatch: 'interactions.spec.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // Exploratory sweep over every route × preset × mode × viewport. Opt-in: GLYPH_QA=1.
+      name: 'qa',
+      testMatch: 'qa.spec.ts',
+      grep: process.env.GLYPH_QA === '1' ? undefined : /$^/,
       use: { ...devices['Desktop Chrome'] },
     },
     {

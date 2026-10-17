@@ -18,6 +18,7 @@ export {
 } from './editable-cell'
 export { type CsvOptions, type ExportTableCsvOptions, exportTableCsv, toCsv } from './export'
 export { filterChipStyles } from './filters/filter-bar'
+export { getFilterList } from './filters/filter-fns'
 export type {
   CellEdit,
   ColumnFilterConfig,
@@ -34,6 +35,7 @@ export {
   historyAdapter,
   parseTableSearch,
   type TableUrlState,
+  tableSearch,
   type UrlAdapter,
   type UseTableUrlStateOptions,
   useTableUrlState,

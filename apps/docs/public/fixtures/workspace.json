@@ -1,0 +1,115 @@
+{
+  "workspace": {
+    "id": "wks_8f2a",
+    "name": "Ledgerline",
+    "plan": "growth",
+    "createdAt": "2025-03-14T09:26:53Z",
+    "trial": false
+  },
+  "owner": {
+    "name": "Ada Lovelace",
+    "email": "ada@ledgerline.app",
+    "roles": ["admin", "billing"],
+    "mfa": true
+  },
+  "limits": {
+    "seats": 25,
+    "invoicesPerMonth": null,
+    "apiRateLimit": 600
+  },
+  "features": ["usage-billing", "dunning", "tax", "revenue-reports"],
+  "invoices": [
+    {
+      "id": "INV-1040",
+      "total": 80,
+      "paid": true,
+      "lines": [
+        {
+          "sku": "seat",
+          "qty": 3,
+          "unit": 16
+        },
+        {
+          "sku": "usage",
+          "qty": 1200,
+          "unit": 0.002
+        }
+      ]
+    },
+    {
+      "id": "INV-1041",
+      "total": 7999,
+      "paid": false,
+      "lines": [
+        {
+          "sku": "seat",
+          "qty": 4,
+          "unit": 16
+        },
+        {
+          "sku": "usage",
+          "qty": 2400,
+          "unit": 0.002
+        }
+      ]
+    },
+    {
+      "id": "INV-1042",
+      "total": 3918,
+      "paid": true,
+      "lines": [
+        {
+          "sku": "seat",
+          "qty": 5,
+          "unit": 16
+        },
+        {
+          "sku": "usage",
+          "qty": 3600,
+          "unit": 0.002
+        }
+      ]
+    },
+    {
+      "id": "INV-1043",
+      "total": 11837,
+      "paid": false,
+      "lines": [
+        {
+          "sku": "seat",
+          "qty": 6,
+          "unit": 16
+        },
+        {
+          "sku": "usage",
+          "qty": 4800,
+          "unit": 0.002
+        }
+      ]
+    },
+    {
+      "id": "INV-1044",
+      "total": 7756,
+      "paid": true,
+      "lines": [
+        {
+          "sku": "seat",
+          "qty": 7,
+          "unit": 16
+        },
+        {
+          "sku": "usage",
+          "qty": 6000,
+          "unit": 0.002
+        }
+      ]
+    }
+  ],
+  "webhooks": [
+    {
+      "url": "https://api.ledgerline.app/hooks/invoices",
+      "events": ["invoice.paid", "invoice.overdue"],
+      "active": true
+    }
+  ]
+}

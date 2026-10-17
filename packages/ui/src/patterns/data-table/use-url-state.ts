@@ -1,6 +1,12 @@
-import type { ColumnFiltersState, SortingState, VisibilityState } from '@tanstack/react-table'
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+} from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import type { DataTableState, DataTableStateKey } from './types'
+import { filterConfigsOf } from './filters/filter-fns'
+import type { DataTableState, DataTableStateKey, FilterType } from './types'
 
 /** Where URL state is read from and written to. The default uses `window.history`. */
 export interface UrlAdapter {
@@ -50,6 +56,14 @@ export interface UseTableUrlStateOptions {
   searchDebounce?: number
   /** Swap in your router's search params. Defaults to the History API. */
   adapter?: UrlAdapter
+  /**
+   * The table's columns. Filters are then decoded by their `meta.filter` type, so a deep
+   * link like `?f.status=open` gives a `multi` filter the array `['open']`, not a string.
+   */
+  // biome-ignore lint/suspicious/noExplicitAny: TanStack's own convention for mixed column value types
+  columns?: readonly ColumnDef<any, any>[]
+  /** Filter types by column id, for filters without a column definition here. */
+  filterTypes?: Record<string, FilterType>
 }
 
 export interface TableUrlState {
@@ -81,7 +95,14 @@ function encodeFilter(value: unknown): string[] {
   return value === undefined || value === null || value === '' ? [] : [String(value)]
 }
 
-function decodeFilter(values: string[]): unknown {
+function decodeFilter(values: string[], type?: FilterType, options?: ReadonlySet<string>): unknown {
+  // Hand-written links often join values with commas (`f.status=open,pending`). Split them,
+  // unless the whole value is itself one of the column's options.
+  if (type === 'multi')
+    return values.flatMap((value) =>
+      options?.has(value) || !value.includes(',') ? [value] : value.split(',').filter(Boolean),
+    )
+  if (type === 'select' || type === 'text') return values[0] ?? ''
   if (values.length > 1) return values
   const [value = ''] = values
   const at = value.indexOf(RANGE)
@@ -103,7 +124,13 @@ function decodeFilter(values: string[]): unknown {
 /** Reads table state from a query string. Exported for tests and server-side rendering. */
 export function parseTableSearch(
   search: string,
-  { prefix = '', pageSize = 10, slices = ALL_SLICES }: UseTableUrlStateOptions = {},
+  {
+    prefix = '',
+    pageSize = 10,
+    slices = ALL_SLICES,
+    columns,
+    filterTypes,
+  }: UseTableUrlStateOptions = {},
 ): Partial<DataTableState> {
   const params = new URLSearchParams(search)
   const key = (name: string) => (prefix ? `${prefix}.${name}` : name)
@@ -132,12 +159,15 @@ export function parseTableSearch(
     const filterPrefix = key('f.')
     const ids = new Set<string>()
     for (const name of params.keys()) if (name.startsWith(filterPrefix)) ids.add(name)
+    const configs = columns ? filterConfigsOf(columns) : {}
     const filters: ColumnFiltersState = []
     for (const name of ids) {
-      filters.push({
-        id: name.slice(filterPrefix.length),
-        value: decodeFilter(params.getAll(name)),
-      })
+      const id = name.slice(filterPrefix.length)
+      const config = configs[id]
+      const options =
+        config && 'options' in config ? new Set(config.options.map((o) => o.value)) : undefined
+      const type = filterTypes?.[id] ?? config?.type
+      filters.push({ id, value: decodeFilter(params.getAll(name), type, options) })
     }
     state.columnFilters = filters
   }
@@ -193,6 +223,24 @@ export function writeTableSearch(
   return text ? `?${text}` : ''
 }
 
+/**
+ * A query string for a table view, e.g. to deep-link from search results or a dashboard:
+ *
+ * ```ts
+ * navigate(`/tickets${tableSearch({ search: 'printer', columnFilters: [{ id: 'status', value: ['open'] }] })}`)
+ * ```
+ *
+ * Same format `useTableUrlState` reads: `page` (1-based), `size`, `sort=col` or `col.desc`
+ * (comma-separated for several), `q`, one `f.<column>` per filter value, `hide=col,col`.
+ * Pass the same `prefix` and `pageSize` options as the table's `useTableUrlState`.
+ */
+export function tableSearch(
+  state: Partial<DataTableState>,
+  options: Pick<UseTableUrlStateOptions, 'prefix' | 'pageSize'> = {},
+): string {
+  return writeTableSearch('', state, options)
+}
+
 const subscribeNoop = () => () => {}
 
 /**
@@ -222,7 +270,19 @@ export function useTableUrlState(options: UseTableUrlStateOptions = {}): TableUr
   // Typing shows immediately; the URL catches up after the debounce.
   const [pendingSearch, setPendingSearch] = useState<string | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const typing = useRef(false)
   useEffect(() => () => clearTimeout(timer.current), [])
+
+  // The query string this hook last wrote. Any other change (back, forward, a link) while
+  // a search is still being typed wins: the typed text is dropped instead of being written
+  // over the page the user navigated to.
+  const written = useRef<string | null>(null)
+  useEffect(() => {
+    if (!typing.current || normalize(search) === written.current) return
+    clearTimeout(timer.current)
+    typing.current = false
+    setPendingSearch(null)
+  }, [search])
 
   // Changes from one user action (a sort that also resets the page) land in one history
   // entry: they are collected and written together at the end of the task.
@@ -240,6 +300,7 @@ export function useTableUrlState(options: UseTableUrlStateOptions = {}): TableUr
         queued.current = null
         if (!batch) return
         const next = writeTableSearch(adapter.getSearch(), batch.state, optionsRef.current)
+        written.current = next
         if (next !== normalize(adapter.getSearch()))
           adapter.setSearch(next, batch.push ? 'push' : 'replace')
       })
@@ -254,7 +315,10 @@ export function useTableUrlState(options: UseTableUrlStateOptions = {}): TableUr
       if (changed === 'search') {
         setPendingSearch(state.search)
         clearTimeout(timer.current)
+        typing.current = true
+        written.current = normalize(adapter.getSearch())
         timer.current = setTimeout(() => {
+          typing.current = false
           // The page resets with the search; both land in one history entry.
           write({ search: state.search, pagination: state.pagination }, 'replace')
           setPendingSearch(null)
@@ -263,11 +327,12 @@ export function useTableUrlState(options: UseTableUrlStateOptions = {}): TableUr
       }
       write({ [changed]: state[changed] }, changed === 'columnVisibility' ? 'replace' : 'push')
     },
-    [write, searchDebounce],
+    [write, searchDebounce, adapter],
   )
 
   const reset = useCallback(() => {
     clearTimeout(timer.current)
+    typing.current = false
     setPendingSearch(null)
     const params = new URLSearchParams(adapter.getSearch())
     const prefix = optionsRef.current.prefix

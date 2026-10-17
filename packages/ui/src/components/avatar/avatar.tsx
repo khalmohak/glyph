@@ -9,10 +9,13 @@ export interface AvatarProps extends ComponentProps<typeof AvatarPrimitive.Root>
   src?: string | undefined
 }
 
+/** First character by code point, so emoji and other astral characters aren't split in half. */
+const firstChar = (text: string | undefined) => (text ? ([...text][0] ?? '') : '')
+
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/)
-  const first = parts[0]?.[0] ?? ''
-  const last = parts.length > 1 ? (parts.at(-1)?.[0] ?? '') : ''
+  const first = firstChar(parts[0])
+  const last = parts.length > 1 ? firstChar(parts.at(-1)) : ''
   return (first + last).toUpperCase()
 }
 

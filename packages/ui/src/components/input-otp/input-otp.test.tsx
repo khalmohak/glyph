@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { Field } from '../field'
-import { InputOTP } from './input-otp'
+import { InputOTP, InputOTPGroup, InputOTPSlot } from './input-otp'
 
 // input-otp checks for password-manager badges with elementFromPoint, which jsdom lacks.
 document.elementFromPoint ??= () => null
@@ -32,5 +32,20 @@ describe('InputOTP', () => {
       'aria-invalid',
       'true',
     )
+  })
+})
+
+describe('InputOTP on phones', () => {
+  it('uses smaller slots and gaps below sm so eight slots fit a 390px screen', () => {
+    render(
+      <InputOTP aria-label="Code" length={8}>
+        <InputOTPGroup>
+          <InputOTPSlot index={0} />
+        </InputOTPGroup>
+      </InputOTP>,
+    )
+    const slot = document.querySelector('[data-slot="input-otp-slot"]')
+    expect(slot?.className).toMatch(/max-sm:size-8/)
+    expect(slot?.className).toMatch(/(^|\s)size-10(\s|$)/)
   })
 })

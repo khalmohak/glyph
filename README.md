@@ -22,7 +22,10 @@ pnpm add @glyphui/blocks                                                   # opt
 pnpm add @glyphui/auth                                                     # optional: auth and protected routes
 pnpm add react-hook-form @hookform/resolvers zod @tanstack/react-table@8   # optional: forms and data tables
 pnpm add recharts                                                          # optional: charts
+pnpm add @glyphui/viewers                                                  # optional: PDF, CSV, JSON, code, media viewers
 ```
+
+All `@glyphui/*` packages are released together with one version number; keep them on the same version. `blocks`, `auth` and `viewers` use your app's copy of `@glyphui/ui` (a peer dependency), so there is only ever one Glyph context in the app.
 
 ```css
 /* index.css */
@@ -31,6 +34,7 @@ pnpm add recharts                                                          # opt
 @import "@glyphui/ui/styles.css";
 @import "@glyphui/blocks/styles.css"; /* only with @glyphui/blocks */
 @import "@glyphui/auth/styles.css";   /* only with @glyphui/auth screens */
+@import "@glyphui/viewers/styles.css"; /* only with @glyphui/viewers */
 ```
 
 ```ts
@@ -129,7 +133,7 @@ function SignInPage() {
 
 ## Components
 
-| Category | Components (121) |
+| Category | Components (132) |
 |---|---|
 | Actions | Button · CopyButton · Toggle |
 | Forms | Calendar · Checkbox · Combobox · DatePicker · Field · FileUpload · Input · InputOTP · Label · NumberInput · PasswordInput · RadioGroup · SegmentedControl · Select · Slider · Switch · TagInput · Textarea |
@@ -142,6 +146,7 @@ function SignInPage() {
 | Patterns | AppShell · Async · DataTable · Form · Motion · Navbar · PageHeader · Router integration · Sidebar · Theming · Utilities · Virtual rows · Vite plugin |
 | Auth | Auth provider · AuthLayout · Clerk bridge · Code forms · Firebase adapter · Memory adapter · Password reset · Protected routes · REST adapter · Session dialogs · SignInForm · SignUpForm · SocialButtons · UserMenu |
 | Blocks (`@glyphui/blocks`) | AuthCard · Cta · Faq · FeatureGrid · FeatureSplit · Hero · LogoCloud · Newsletter · Pricing · SectionHeader · SiteFooter · Stats · Testimonials |
+| Viewers (`@glyphui/viewers`) | AudioPlayer · CodeViewer · CsvViewer · DiffViewer · FilePreview · ImageViewer · JsonViewer · MarkdownViewer · PdfViewer · SpreadsheetViewer · VideoPlayer |
 
 Every component has a page with live examples, props and theming slots in the [docs](https://khalmohak.github.io/glyph/components). Regenerate this table with `pnpm -C apps/docs readme:components`.
 
@@ -159,6 +164,7 @@ Showcase deep links: `?theme=brutalist&mode=light`.
 ```
 packages/tokens   theme engine (no React)
 packages/blocks   page sections built from @glyphui/ui
+packages/viewers  file and data viewers (PDF, CSV, spreadsheets, JSON, code, Markdown, diffs, media)
 packages/ui       components/, patterns/, provider/, hooks/, utils/, register.ts, themes.ts
 apps/docs         component catalog, examples, prop tables, roadmap (GitHub Pages /glyph/)
 apps/showcase     one app, four themes (GitHub Pages /glyph/showcase/)

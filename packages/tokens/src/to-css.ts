@@ -43,13 +43,34 @@ export function staticVars(theme: Theme): Vars {
 /** Variables that differ per color mode: colors and shadows. */
 export function modeVars(theme: Theme, mode: ColorMode): Vars {
   const vars: Vars = { ...theme.colors[mode] }
-  for (const [key, value] of Object.entries(theme.shadow[mode])) vars[`shadow-${key}`] = value
+  for (const [key, value] of Object.entries(theme.shadow[mode])) {
+    // Tailwind puts the shadow and the focus ring in one box-shadow list, and `none` inside a
+    // list makes the whole value invalid, which would drop the focus ring. Use an empty shadow.
+    vars[`shadow-${key}`] = String(value).trim() === 'none' ? '0 0 #0000' : value
+  }
   return vars
+}
+
+/**
+ * Themes can come from data (per-tenant branding, a theme editor), so a value must stay a
+ * single declaration: no characters that end it (`;`), open or close a rule (`{` `}`), start
+ * a comment, escape the delimiter (`\`) or close the surrounding `<style>` element.
+ */
+function safeValue(value: unknown): string {
+  return String(value)
+    .replace(/\/\*|\*\//g, '')
+    .replace(/[;{}<>\\\r\n]/g, '')
+    .trim()
+}
+
+/** Token names become custom property names; keep them to identifier characters. */
+function safeName(key: string): string {
+  return key.replace(/[^a-zA-Z0-9-]/g, '')
 }
 
 function block(selector: string, vars: Vars, extra = ''): string {
   const body = Object.entries(vars)
-    .map(([key, value]) => `  ${tokenVarName(key)}: ${value};`)
+    .map(([key, value]) => `  ${tokenVarName(safeName(key))}: ${safeValue(value)};`)
     .join('\n')
   return `${selector} {\n${body}${extra ? `\n  ${extra}` : ''}\n}`
 }
@@ -97,5 +118,10 @@ export function themeToCss(theme: Theme, options: ThemeCssOptions = {}): string 
 
 /** The attribute selector `ThemeScope` uses for a theme. */
 export function scopeSelector(theme: Pick<Theme, 'name'>): string {
-  return `[data-glyph-theme="${theme.name}"]`
+  // Escaped as a CSS string so it matches the attribute value exactly, whatever the name is.
+  const name = String(theme.name)
+    .replace(/["\\]/g, '\\$&')
+    .replace(/\n/g, '\\a ')
+    .replace(/</g, '\\3c ')
+  return `[data-glyph-theme="${name}"]`
 }

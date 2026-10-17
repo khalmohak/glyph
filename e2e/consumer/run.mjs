@@ -4,7 +4,7 @@
  * type-checks (skipLibCheck: false) and builds.
  *
  * 1. Build the packages (skip with --skip-build).
- * 2. `pnpm pack` tokens, ui, blocks and auth into a temp folder.
+ * 2. `pnpm pack` tokens, ui, blocks, auth and viewers into a temp folder.
  * 3. Copy ./template into the temp folder. Every dependency is resolved to the newest
  *    version that is inside the range Glyph declares (peers) or the `latest` tag (tooling),
  *    and at least MIN_AGE_DAYS old, matching the repo's release-age policy.
@@ -27,7 +27,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const MIN_AGE_DAYS = 14
-const PACKAGES = ['tokens', 'ui', 'blocks', 'auth']
+const PACKAGES = ['tokens', 'ui', 'blocks', 'auth', 'viewers']
 const here = dirname(fileURLToPath(import.meta.url))
 const root = resolve(here, '../..')
 const args = new Set(process.argv.slice(2))
@@ -85,8 +85,13 @@ for (const pkg of PACKAGES) {
 }
 
 const ui = JSON.parse(readFileSync(join(root, 'packages/ui/package.json'), 'utf8'))
+const viewers = JSON.parse(readFileSync(join(root, 'packages/viewers/package.json'), 'utf8'))
+// Every optional peer is installed, so each entry point is type-checked and bundled.
 const peers = Object.fromEntries(
-  Object.entries(ui.peerDependencies).map(([name, range]) => [name, resolveVersion(name, range)]),
+  Object.entries({ ...ui.peerDependencies, ...viewers.peerDependencies })
+    // Glyph's own packages are peers of each other; they come from the local tarballs.
+    .filter(([name]) => !name.startsWith('@glyphui/'))
+    .map(([name, range]) => [name, resolveVersion(name, range)]),
 )
 const tailwind = peers.tailwindcss
 const tooling = {
@@ -107,8 +112,9 @@ const manifest = {
   type: 'module',
   dependencies: { ...tarball, ...runtimePeers, zod },
   devDependencies: { ...tooling, tailwindcss: tailwind },
-  // Packages depend on each other by version; point those at the local tarballs too.
-  overrides: tarball,
+  // No overrides: Glyph packages are peers of each other, so the root tarballs satisfy them,
+  // and ui's own dependency on tokens dedupes to the root tokens tarball. (Overriding a
+  // peer range makes npm fail with ERESOLVE.)
 }
 writeFileSync(join(app, 'package.json'), `${JSON.stringify(manifest, null, 2)}\n`)
 console.log('\nResolved versions:')

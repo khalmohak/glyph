@@ -35,6 +35,33 @@ describe('DatePicker', () => {
     expect(screen.getByRole('button', { name: 'Due' })).toHaveTextContent('Pick a date')
   })
 
+  it('keeps the clear button out of the trigger and returns focus to it', async () => {
+    render(<DatePicker aria-label="Due" clearable defaultValue={new Date(2026, 0, 5)} />)
+    const trigger = screen.getByRole('button', { name: 'Due' })
+    const clear = screen.getByRole('button', { name: 'Clear date' })
+    // A button inside a button is invalid HTML and confuses screen readers.
+    expect(trigger.contains(clear)).toBe(false)
+    clear.focus()
+    await userEvent.keyboard('{Enter}')
+    expect(screen.queryByRole('button', { name: 'Clear date' })).not.toBeInTheDocument()
+    expect(trigger).toHaveFocus()
+  })
+
+  it('clears a date range the same way', async () => {
+    render(
+      <DateRangePicker
+        aria-label="Period"
+        clearable
+        defaultValue={{ from: new Date(2026, 0, 5), to: new Date(2026, 0, 9) }}
+      />,
+    )
+    const trigger = screen.getByRole('button', { name: 'Period' })
+    const clear = screen.getByRole('button', { name: 'Clear dates' })
+    expect(trigger.contains(clear)).toBe(false)
+    await userEvent.click(clear)
+    expect(trigger).toHaveFocus()
+  })
+
   it('submits an ISO date with a native form', () => {
     const { container } = render(
       <DatePicker aria-label="Due" name="due" defaultValue={new Date(2026, 2, 9)} />,

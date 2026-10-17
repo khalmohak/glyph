@@ -49,7 +49,11 @@ describe('createAuthClient', () => {
     const { client, adapter } = setup()
     await client.ready()
     const result = await client.signIn({ email: 'grace@example.com', password: 'cobol rules' })
-    expect(result).toEqual({ status: 'needs-second-factor' })
+    expect(result).toMatchObject({
+      status: 'needs-second-factor',
+      method: 'email',
+      challenge: expect.any(String),
+    })
     expect(client.getState().status).toBe('unauthenticated')
     const code = adapter.lastCode('grace@example.com', 'two-factor') as string
     await client.verifySecondFactor({ code })

@@ -1,4 +1,4 @@
-import { type ComponentProps, useEffect, useRef } from 'react'
+import { type ComponentProps, useRef } from 'react'
 import { cn } from '../utils/cn'
 
 export interface PageTransitionProps extends ComponentProps<'div'> {
@@ -15,15 +15,17 @@ export interface PageTransitionProps extends ComponentProps<'div'> {
  * Enter-only by design: the old page leaves immediately, so nothing ever overlaps or flickers.
  */
 export function PageTransition({ transitionKey, className, ...props }: PageTransitionProps) {
-  const mounted = useRef(false)
-  useEffect(() => {
-    mounted.current = true
-  }, [])
+  // Animate once the key has changed from the first page. Keying the div remounts it, so
+  // each later page plays the entrance once; re-renders of the same page never replay it
+  // (adding the class to an existing element would).
+  const firstKey = useRef(transitionKey)
+  const navigated = useRef(false)
+  if (transitionKey !== firstKey.current) navigated.current = true
   return (
     <div
       key={transitionKey}
       data-slot="page-transition"
-      className={cn(mounted.current && 'animate-page-in', className)}
+      className={cn(navigated.current && 'animate-page-in', className)}
       {...props}
     />
   )

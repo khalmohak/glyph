@@ -50,4 +50,19 @@ describe('CommandMenu', () => {
     await userEvent.keyboard('zzzz')
     expect(screen.getByText('Nothing found')).toBeInTheDocument()
   })
+
+  it('shortcut ignores keydown events without a key (autofill) and key repeat', () => {
+    const setOpen = vi.fn()
+    function Probe() {
+      useCommandMenuShortcut(setOpen)
+      return null
+    }
+    render(<Probe />)
+    // Chrome autofill dispatches keydown events whose `key` is undefined.
+    expect(() => document.dispatchEvent(new Event('keydown'))).not.toThrow()
+    fireEvent.keyDown(document, { key: 'k', metaKey: true, repeat: true })
+    expect(setOpen).not.toHaveBeenCalled()
+    fireEvent.keyDown(document, { key: 'k', metaKey: true })
+    expect(setOpen).toHaveBeenCalledTimes(1)
+  })
 })

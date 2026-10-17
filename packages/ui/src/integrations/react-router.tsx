@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate, useResolvedPath } from 'react-router'
 import type { UrlAdapter } from '../patterns/data-table/use-url-state'
 import type { GlyphRouter, IsActiveOptions, LinkComponentProps } from '../provider/glyph-context'
 
@@ -30,7 +30,10 @@ export function matchPath(href: string, pathname: string, { end = false }: IsAct
 /** Marks a link active when the current location matches it, like React Router's `NavLink`. */
 export function useRouterIsActive(href: string, options?: IsActiveOptions): boolean {
   const { pathname } = useLocation()
-  return matchPath(href, pathname, options)
+  // Relative hrefs ("invoices") resolve against the current route, as Link does.
+  const resolved = useResolvedPath(isOutsideApp(href) || !href ? '.' : href)
+  if (!href || isOutsideApp(href)) return false
+  return matchPath(resolved.pathname, pathname, options)
 }
 
 /**
@@ -53,6 +56,8 @@ export function useRouterUrlAdapter(): UrlAdapter {
   const navigate = useNavigate()
   const current = useRef(location.search)
   current.current = location.search
+  const hash = useRef(location.hash)
+  hash.current = location.hash
   const listeners = useRef(new Set<() => void>())
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: notify subscribers whenever the search changes
@@ -65,7 +70,11 @@ export function useRouterUrlAdapter(): UrlAdapter {
       getSearch: () => current.current,
       setSearch: (search, mode) => {
         current.current = search
-        navigate({ search }, { replace: mode === 'replace', preventScrollReset: true })
+        // Keep the hash: navigating to a bare `{ search }` would drop it.
+        navigate(
+          { search, hash: hash.current },
+          { replace: mode === 'replace', preventScrollReset: true },
+        )
       },
       subscribe: (onChange) => {
         listeners.current.add(onChange)

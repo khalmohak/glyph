@@ -21,7 +21,7 @@ export const fileUploadStyles = /* @__PURE__ */ tv({
     rejections: 'grid gap-1 text-small font-medium text-danger-text',
     list: 'grid gap-2',
     item: [
-      'grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-md border-border bg-surface px-3 py-2.5',
+      'grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg border-border bg-surface px-3 py-2.5',
       themedBorder,
     ],
     fileIcon:

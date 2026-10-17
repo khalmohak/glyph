@@ -65,4 +65,13 @@ describe('TreeView', () => {
     await userEvent.click(screen.getByText('src'))
     expect(screen.queryByRole('treeitem', { name: 'app.tsx' })).not.toBeInTheDocument()
   })
+
+  it('keeps keyboard navigation when given its own onKeyDown', async () => {
+    const onKeyDown = vi.fn()
+    render(<TreeView aria-label="Files" nodes={nodes} onKeyDown={onKeyDown} />)
+    await userEvent.tab()
+    await userEvent.keyboard('{ArrowRight}')
+    expect(onKeyDown).toHaveBeenCalled()
+    expect(screen.getByRole('treeitem', { name: 'src' })).toHaveAttribute('aria-expanded', 'true')
+  })
 })

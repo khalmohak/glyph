@@ -1,5 +1,5 @@
 import { Slot } from 'radix-ui'
-import { type ComponentProps, Fragment, type ReactNode } from 'react'
+import { type ComponentProps, Fragment, type MouseEvent, type ReactNode } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { Spinner } from '../spinner'
 import { type ButtonVariants, buttonStyles } from './button.styles'
@@ -47,6 +47,14 @@ export function Button(inProps: ButtonProps) {
       aria-busy={loading || undefined}
       {...(!asChild && { type: type ?? 'button', disabled: disabled || loading })}
       {...rest}
+      {...(asChild &&
+        (disabled || loading) && {
+          // Links and other child elements can't be `disabled`: take them out of the tab
+          // order and stop the click, like a disabled <button>.
+          'aria-disabled': true,
+          tabIndex: -1,
+          onClick: (event: MouseEvent) => event.preventDefault(),
+        })}
     >
       {iconOnly && asChild
         ? // The child element (e.g. a link) holds its own icon; Slot merges button props onto it.

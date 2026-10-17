@@ -123,7 +123,7 @@ function TopBar() {
           onValueChange={setTheme}
           size="sm"
           aria-label="Theme"
-          className="w-32"
+          className="w-32 max-sm:w-28"
         >
           {(Object.keys(presets) as PresetName[]).map((name) => (
             <SelectItem key={name} value={name}>
