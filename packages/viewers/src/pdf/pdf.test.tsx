@@ -13,6 +13,8 @@ const pages = [
 
 let passwordNeeded = false
 const options = { workerSrc: '', workerPort: null as unknown }
+// Loading tasks created and destroyed, to catch documents that outlive the viewer.
+const tasks = { created: 0, destroyed: 0 }
 
 function fakePage(n: number) {
   return {
@@ -44,10 +46,13 @@ vi.mock('pdfjs-dist', () => ({
     cancel() {}
   },
   getDocument: () => {
+    tasks.created++
     const task = {
       onProgress: undefined as undefined | ((p: { loaded: number; total: number }) => void),
       onPassword: undefined as undefined | ((update: (pw: string) => void, reason: number) => void),
-      destroy: async () => {},
+      destroy: async () => {
+        tasks.destroyed++
+      },
       promise: new Promise((resolve) => {
         const open = () =>
           resolve({ numPages: pages.length, getPage: async (n: number) => fakePage(n) })
@@ -92,6 +97,25 @@ describe('pdf.js helpers', () => {
 })
 
 describe('PdfViewer', () => {
+  it('destroys every loading task, even when it unmounts mid-load', async () => {
+    tasks.created = 0
+    tasks.destroyed = 0
+    // Blob bytes are read asynchronously, so cleanup runs before the task exists.
+    const { unmount } = renderWithGlyph(<PdfViewer source={new Blob([new Uint8Array([1])])} />)
+    unmount()
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(tasks.created - tasks.destroyed).toBe(0)
+
+    // Switching sources tears down the previous document too.
+    const view = renderWithGlyph(<PdfViewer source={new Uint8Array([1])} />)
+    await screen.findByText('/ 3')
+    view.rerender(<PdfViewer source={new Uint8Array([2])} />)
+    await screen.findByText('/ 3')
+    view.unmount()
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(tasks.created - tasks.destroyed).toBe(0)
+  })
+
   it('opens a document and moves between pages', async () => {
     const onLoad = vi.fn()
     renderWithGlyph(<PdfViewer source={new Blob([new Uint8Array([1])])} onLoad={onLoad} />)

@@ -130,10 +130,11 @@ export function detectFileKind({
 }): FileKind {
   const base = name?.split(/[?#]/)[0]?.split('/').pop()?.toLowerCase() ?? ''
   const ext = base.includes('.') ? (base.split('.').pop() ?? '') : base
-  if (ext && byExtension[ext]) return byExtension[ext]
+  // Own keys only: names like `constructor` must not find Object.prototype members.
+  if (ext && Object.hasOwn(byExtension, ext)) return byExtension[ext] as FileKind
   if (ext && codeExtensions.has(ext)) return 'code'
   const mime = type?.split(';')[0]?.trim().toLowerCase() ?? ''
-  if (byMime[mime]) return byMime[mime]
+  if (mime && Object.hasOwn(byMime, mime)) return byMime[mime] as FileKind
   if (mime.startsWith('image/')) return 'image'
   if (mime.startsWith('video/')) return 'video'
   if (mime.startsWith('audio/')) return 'audio'

@@ -69,6 +69,23 @@ describe('JsonViewer', () => {
     expect(screen.getByLabelText('JSON, raw text')).toHaveTextContent('"a": 1')
   })
 
+  it('shows circular and BigInt data as raw text and copies it', async () => {
+    const shared = { id: 1 }
+    const data: Record<string, unknown> = { total: 12n, a: shared, b: shared }
+    data.self = data
+    const writeText = vi.fn(async () => {})
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    renderWithGlyph(<JsonViewer data={data} />)
+    await userEvent.click(screen.getByRole('radio', { name: 'Raw' }))
+    const raw = screen.getByLabelText('JSON, raw text')
+    expect(raw).toHaveTextContent('"self": "[Circular]"')
+    expect(raw).toHaveTextContent('"total": "12"')
+    // A shared, non-circular object prints in full both times.
+    expect(raw.textContent?.match(/"id": 1/g)).toHaveLength(2)
+    await userEvent.click(screen.getByRole('button', { name: 'Copy JSON' }))
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('[Circular]'))
+  })
+
   it('parses text and points at syntax errors', async () => {
     renderWithGlyph(<JsonViewer content={'{"a": 1,}'} />)
     expect(await screen.findByText("This isn't valid JSON")).toBeInTheDocument()

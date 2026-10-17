@@ -51,6 +51,39 @@ export function slugify(text: string): string {
     .replace(/-+/g, '-')
 }
 
+interface HastNode {
+  type: string
+  tagName?: string
+  value?: string
+  properties?: Record<string, unknown>
+  children?: HastNode[]
+}
+
+const hastText = (node: HastNode): string =>
+  node.type === 'text' ? (node.value ?? '') : (node.children ?? []).map(hastText).join('')
+
+/**
+ * Gives every heading a unique id, deduplicated the way GitHub does (`setup`, `setup-1`,
+ * …), so repeated headings still get working anchors and the page has no duplicate ids.
+ */
+function rehypeHeadingIds() {
+  return (tree: HastNode) => {
+    const seen = new Map<string, number>()
+    const visit = (node: HastNode) => {
+      if (node.type === 'element' && /^h[1-6]$/.test(node.tagName ?? '')) {
+        const base = slugify(hastText(node))
+        if (base) {
+          const count = seen.get(base) ?? 0
+          seen.set(base, count + 1)
+          node.properties = { ...node.properties, id: count ? `${base}-${count}` : base }
+        }
+      }
+      for (const child of node.children ?? []) visit(child)
+    }
+    visit(tree)
+  }
+}
+
 function textOf(node: ReactNode): string {
   if (typeof node === 'string' || typeof node === 'number') return String(node)
   if (Array.isArray(node)) return node.map(textOf).join('')
@@ -77,8 +110,7 @@ export function MarkdownViewer(inProps: MarkdownViewerProps) {
   const renderers = useMemo<Components>(() => {
     const heading =
       (Tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') =>
-      ({ children, node: _node, ...rest }: ComponentProps<'h1'> & { node?: unknown }) => {
-        const id = slugify(textOf(children))
+      ({ children, node: _node, id, ...rest }: ComponentProps<'h1'> & { node?: unknown }) => {
         return (
           <Tag id={id} className={headingAnchors ? 'group scroll-mt-20' : undefined} {...rest}>
             {children}
@@ -116,6 +148,9 @@ export function MarkdownViewer(inProps: MarkdownViewerProps) {
           />
         )
       },
+      // Unsafe image URLs are emptied by react-markdown; an empty src would refetch the page.
+      img: ({ node: _node, src, alt, ...rest }) =>
+        src ? <img src={src} alt={alt ?? ''} {...rest} /> : null,
       input: ({ node: _node, ...rest }) => (
         <input {...rest} disabled aria-label={rest.checked ? 'Done' : 'Not done'} />
       ),
@@ -131,7 +166,7 @@ export function MarkdownViewer(inProps: MarkdownViewerProps) {
     <Prose data-slot="markdown-viewer" className={cn(s.root({ class: slots.root }), className)}>
       <Markdown
         remarkPlugins={[remarkGfm]}
-        {...(rehypePlugins && { rehypePlugins })}
+        rehypePlugins={[rehypeHeadingIds, ...(rehypePlugins ?? [])]}
         components={renderers}
       >
         {text.data}

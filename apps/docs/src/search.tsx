@@ -34,10 +34,11 @@ export function SearchCommand() {
         variant="outline"
         size="sm"
         leftIcon={<Search />}
-        className="text-muted-foreground"
+        // Icon-only on phones so the top bar fits every theme (brutalist controls are larger).
+        className="text-muted-foreground max-sm:gap-0 max-sm:px-2"
         onClick={() => setOpen(true)}
       >
-        Search components
+        <span className="max-sm:sr-only">Search components</span>
         <Kbd className="ml-2 max-sm:hidden">⌘K</Kbd>
       </Button>
       <CommandMenu open={open} onOpenChange={setOpen} label="Search the docs">

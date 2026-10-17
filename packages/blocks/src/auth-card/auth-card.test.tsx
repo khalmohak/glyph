@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { AuthCard } from './auth-card'
@@ -40,5 +40,22 @@ describe('AuthCard', () => {
     const password = container.querySelector('input[type="password"]')
     expect(password).toHaveAccessibleName('Password')
     expect(screen.getByRole('link', { name: 'Forgot password?' })).toBeInTheDocument()
+  })
+
+  it('submits once while a request is in flight', async () => {
+    let finish = () => {}
+    const onSubmit = vi.fn(() => new Promise<void>((resolve) => (finish = resolve)))
+    const { container } = render(<AuthCard title="Sign in" onSubmit={onSubmit} />)
+    await userEvent.type(screen.getByRole('textbox', { name: 'Email' }), 'ada@example.com')
+    await userEvent.type(
+      container.querySelector('input[type="password"]') as HTMLElement,
+      'correct horse',
+    )
+    const form = container.querySelector('form') as HTMLFormElement
+    // A password manager's auto-submit doesn't go through the disabled button.
+    fireEvent.submit(form)
+    fireEvent.submit(form)
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+    await act(async () => finish())
   })
 })

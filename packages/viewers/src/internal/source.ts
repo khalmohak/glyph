@@ -4,10 +4,15 @@
  */
 export type ViewerSource = string | URL | ArrayBuffer | Uint8Array | Blob
 
+function isArrayBuffer(value: unknown): value is ArrayBuffer {
+  return Object.prototype.toString.call(value) === '[object ArrayBuffer]'
+}
+
 /** Reads a source as bytes. URLs are fetched with `fetch`. */
 export async function readBytes(source: ViewerSource, signal?: AbortSignal): Promise<ArrayBuffer> {
-  if (source instanceof ArrayBuffer) return source
-  if (source instanceof Uint8Array) {
+  // Realm-safe checks: bytes from an iframe, a worker or Node's TextEncoder fail `instanceof`.
+  if (isArrayBuffer(source)) return source
+  if (ArrayBuffer.isView(source)) {
     return source.buffer.slice(
       source.byteOffset,
       source.byteOffset + source.byteLength,
@@ -19,10 +24,38 @@ export async function readBytes(source: ViewerSource, signal?: AbortSignal): Pro
   return response.arrayBuffer()
 }
 
-/** Reads a source as UTF-8 text, dropping a byte-order mark. */
+/**
+ * Reads a source as text. UTF-16 files are recognized by their byte-order mark (Excel's
+ * "Unicode text" export), UTF-8 is used when the bytes are valid UTF-8, and anything else
+ * is read as Windows-1252, the default for CSV files saved by Excel on Windows.
+ */
 export async function readText(source: ViewerSource, signal?: AbortSignal): Promise<string> {
-  const bytes = await readBytes(source, signal)
-  return new TextDecoder('utf-8').decode(bytes).replace(/^\uFEFF/, '')
+  return decodeText(new Uint8Array(await readBytes(source, signal)))
+}
+
+export type TextEncodingName = 'utf-8' | 'utf-16le' | 'utf-16be' | 'windows-1252'
+
+/**
+ * Guesses a text file's encoding from its bytes (or the first few KB of it): a UTF-16
+ * byte-order mark, else UTF-8 when the bytes are valid UTF-8, else Windows-1252.
+ */
+export function detectEncoding(bytes: Uint8Array): TextEncodingName {
+  if (bytes[0] === 0xff && bytes[1] === 0xfe) return 'utf-16le'
+  if (bytes[0] === 0xfe && bytes[1] === 0xff) return 'utf-16be'
+  try {
+    // `stream` tolerates a multi-byte character cut off at the end of a sample.
+    new TextDecoder('utf-8', { fatal: true }).decode(bytes, { stream: true })
+    return 'utf-8'
+  } catch {
+    return 'windows-1252'
+  }
+}
+
+/** Decodes bytes as text; see `readText`. */
+export function decodeText(bytes: Uint8Array): string {
+  const encoding = detectEncoding(bytes)
+  const text = new TextDecoder(encoding).decode(bytes)
+  return encoding === 'utf-8' ? text.replace(/^\uFEFF/, '') : text
 }
 
 /** Blob → ArrayBuffer, also where `Blob.arrayBuffer` is missing (older jsdom, Safari 13). */
@@ -49,7 +82,13 @@ export function sourceName(source: ViewerSource | undefined): string | undefined
       path = String(source).split(/[?#]/)[0] ?? ''
     }
     const last = path.split('/').filter(Boolean).pop()
-    return last ? decodeURIComponent(last) : undefined
+    if (!last) return undefined
+    try {
+      return decodeURIComponent(last)
+    } catch {
+      // Not valid percent-encoding (e.g. `report%.pdf`): show it as it is.
+      return last
+    }
   }
   return undefined
 }

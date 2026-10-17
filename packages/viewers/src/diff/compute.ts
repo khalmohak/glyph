@@ -32,6 +32,16 @@ export interface DiffResult {
   deletions: number
 }
 
+/**
+ * Windows (`\r\n`) and old Mac (`\r`) line endings become `\n`, and the text ends with
+ * one newline, so a file saved on another OS or without a final newline doesn't show
+ * every line as changed.
+ */
+function normalize(text: string): string {
+  const unix = text.replace(/\r\n?/g, '\n')
+  return unix === '' || unix.endsWith('\n') ? unix : `${unix}\n`
+}
+
 function splitLines(value: string): string[] {
   const lines = value.split('\n')
   if (lines.at(-1) === '') lines.pop()
@@ -76,7 +86,7 @@ export function computeDiff(oldText: string, newText: string, { context = 3 } = 
     addedBlock = []
   }
 
-  for (const part of diffLines(oldText, newText)) {
+  for (const part of diffLines(normalize(oldText), normalize(newText))) {
     for (const text of splitLines(part.value)) {
       if (part.added) {
         const line: DiffLine = { type: 'added', newNumber: newNumber++, text }

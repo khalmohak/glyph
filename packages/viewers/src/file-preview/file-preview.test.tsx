@@ -19,6 +19,13 @@ describe('detectFileKind', () => {
     expect(detectFileKind({ type: 'text/x-log' })).toBe('text')
     expect(detectFileKind({ name: 'archive.zip' })).toBe('unknown')
   })
+
+  it('never returns prototype members for odd names or types', () => {
+    expect(detectFileKind({ name: 'constructor' })).toBe('unknown')
+    expect(detectFileKind({ name: '__proto__' })).toBe('unknown')
+    expect(detectFileKind({ name: 'file.constructor' })).toBe('unknown')
+    expect(detectFileKind({ type: 'constructor' })).toBe('unknown')
+  })
 })
 
 describe('FilePreview', () => {

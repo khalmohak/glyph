@@ -44,6 +44,13 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
+      // Exploratory sweep over every route × preset × mode × viewport. Opt-in: GLYPH_QA=1.
+      name: 'qa',
+      testMatch: 'qa.spec.ts',
+      grep: process.env.GLYPH_QA === '1' ? undefined : /$^/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       name: 'visual',
       testMatch: 'visual.spec.ts',
       grep: isLinux || process.env.GLYPH_VISUAL === '1' ? undefined : /$^/,

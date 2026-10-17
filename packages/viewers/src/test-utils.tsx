@@ -1,15 +1,19 @@
 import { GlyphProvider } from '@glyphui/ui'
 import { render } from '@testing-library/react'
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { vi } from 'vitest'
 
-/** Renders inside GlyphProvider with motion off, as apps do. */
-export function renderWithGlyph(ui: ReactElement) {
-  return render(
+function Providers({ children }: { children: ReactNode }) {
+  return (
     <GlyphProvider storageKey={null} motion="none">
-      {ui}
-    </GlyphProvider>,
+      {children}
+    </GlyphProvider>
   )
+}
+
+/** Renders inside GlyphProvider with motion off, as apps do. `rerender` keeps the provider. */
+export function renderWithGlyph(ui: ReactElement) {
+  return render(ui, { wrapper: Providers })
 }
 
 /** A virtualizer for jsdom (no layout): renders the first `limit` rows. */

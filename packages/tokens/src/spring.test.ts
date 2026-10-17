@@ -48,4 +48,18 @@ describe('springEasing', () => {
     expect(springPosition({ stiffness: 420, damping: 34 }, 0)).toBeCloseTo(0)
     expect(springPosition({ stiffness: 420, damping: 34 }, 2)).toBeCloseTo(1)
   })
+
+  it.each([
+    { stiffness: 0, damping: 10 },
+    { stiffness: 300, damping: 20, mass: 0 },
+    { stiffness: -5, damping: 10 },
+    { stiffness: Number.NaN, damping: 10 },
+    { stiffness: 300, damping: -1 },
+  ])('falls back to a valid easing for an unusable spring %o', (spring) => {
+    const { easing, duration } = springEasing(spring)
+    expect(easing).not.toContain('NaN')
+    expect(easing).not.toContain('Infinity')
+    expect(Number.isFinite(duration)).toBe(true)
+    expect(duration).toBeGreaterThan(0)
+  })
 })

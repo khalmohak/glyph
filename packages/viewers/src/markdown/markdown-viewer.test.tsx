@@ -43,6 +43,24 @@ describe('MarkdownViewer', () => {
     expect(container.querySelector('script')).toBeNull()
   })
 
+  it('neutralizes script URLs in links and images', async () => {
+    const { container } = renderWithGlyph(
+      <MarkdownViewer
+        content={'[click](javascript:alert(1)) ![x](javascript:alert(2)) [ok](https://glyph.dev)'}
+      />,
+    )
+    await screen.findByRole('link', { name: 'ok' })
+    for (const el of container.querySelectorAll('a[href], img[src]')) {
+      expect(el.getAttribute('href') ?? el.getAttribute('src')).not.toMatch(/^\s*javascript:/i)
+    }
+  })
+
+  it('gives repeated headings unique ids, like GitHub', async () => {
+    renderWithGlyph(<MarkdownViewer content={'## Setup\n\n## Setup\n\n## Setup'} />)
+    const headings = await screen.findAllByRole('heading', { name: /Setup/ })
+    expect(headings.map((h) => h.id)).toEqual(['setup', 'setup-1', 'setup-2'])
+  })
+
   it('can leave out heading anchors and load a source', async () => {
     renderWithGlyph(<MarkdownViewer source={new Blob(['## Notes'])} headingAnchors={false} />)
     expect(await screen.findByRole('heading', { name: 'Notes' })).toBeInTheDocument()

@@ -44,14 +44,29 @@ export function springPosition({ stiffness, damping, mass = 1 }: SpringConfig, t
 
 const round = (n: number) => Math.round(n * 10_000) / 10_000
 
+const positive = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n > 0
+
+function isValidSpring({ stiffness, damping, mass = 1 }: SpringConfig): boolean {
+  return (
+    positive(stiffness) &&
+    positive(mass) &&
+    typeof damping === 'number' &&
+    Number.isFinite(damping) &&
+    damping >= 0
+  )
+}
+
 /**
  * Turns a physical spring into a CSS easing and duration, so CSS animations and transitions
  * can move with the same spring as JavaScript-driven ones.
  */
 export function springEasing(
-  spring: SpringConfig,
+  input: SpringConfig,
   { samples = 48, threshold = 0.002, maxDuration = 1200 }: SpringEasingOptions = {},
 ): SpringEasing {
+  // A spring needs positive stiffness and mass and non-negative damping; anything else
+  // (e.g. a theme loaded from data) would produce NaN or a curve that never comes back.
+  const spring = isValidSpring(input) ? input : defaultSpring
   // Find the last moment the spring is still outside the threshold, at 1 ms resolution.
   let settled = 0
   for (let ms = 0; ms <= maxDuration; ms++) {

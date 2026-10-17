@@ -1,4 +1,5 @@
 import type Papa from 'papaparse'
+import { blobBytes, detectEncoding } from '../internal/source'
 
 export interface CsvParseError {
   /** 1-based data row the problem was found on. */
@@ -46,6 +47,11 @@ export async function parseCsv(
       : input instanceof File
         ? input
         : new File([input], 'data.csv', { type: input.type })
+  // papaparse reads files as UTF-8 unless told otherwise; Excel writes Windows-1252 or UTF-16.
+  const encoding =
+    typeof input === 'string'
+      ? undefined
+      : detectEncoding(new Uint8Array(await blobBytes(input.slice(0, 64 * 1024))))
 
   return new Promise((resolve, reject) => {
     const rows: string[][] = []
@@ -75,6 +81,7 @@ export async function parseCsv(
 
     const config = {
       delimiter,
+      ...(encoding && encoding !== 'utf-8' && { encoding }),
       skipEmptyLines: false,
       worker: big && typeof Worker !== 'undefined' && papa.WORKERS_SUPPORTED,
       chunk: (results: Papa.ParseResult<string[]>, parser: Papa.Parser) => {

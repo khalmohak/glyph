@@ -43,6 +43,7 @@ import {
   type JsonParseError,
   parseJson,
   searchJson,
+  stringifyJson,
   summary,
 } from './model'
 
@@ -389,7 +390,7 @@ function JsonTree({
           label={copied ? 'Copied' : 'Copy JSON'}
           icon={copied ? <CheckIcon /> : <CopyIcon />}
           onClick={async () => {
-            if (await copyText(JSON.stringify(value, null, 2))) flashCopied()
+            if (await copyText(stringifyJson(value))) flashCopied()
           }}
         />
       </div>
@@ -402,7 +403,7 @@ function JsonTree({
             // biome-ignore lint/a11y/noNoninteractiveTabindex: scrollable text must be keyboard reachable
             tabIndex={0}
           >
-            <pre className="m-0">{JSON.stringify(value, null, 2)}</pre>
+            <pre className="m-0">{stringifyJson(value)}</pre>
           </section>
         ) : (
           <div
@@ -493,7 +494,7 @@ function JsonTree({
                 copyText(
                   typeof activeNode.value === 'string'
                     ? activeNode.value
-                    : JSON.stringify(activeNode.value, null, 2),
+                    : stringifyJson(activeNode.value),
                 )
               }
             />

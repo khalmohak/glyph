@@ -64,4 +64,36 @@ describe('JSON model', () => {
     }
     expect(parseJson('[1,2]')).toEqual({ ok: true, value: [1, 2] })
   })
+
+  it('shows in-memory data the way JSON.stringify would', () => {
+    const when = new Date('2026-10-17T09:00:00Z')
+    const index = indexJson({
+      gone: undefined,
+      fn: () => 1,
+      when,
+      big: 12n,
+      list: [undefined, 1],
+    })
+    expect(index.root.children).toEqual(['$.when', '$.big', '$.list'])
+    expect(formatPrimitive(index.nodes.get('$.when')!)).toBe('"2026-10-17T09:00:00.000Z"')
+    expect(formatPrimitive(index.nodes.get('$.big')!)).toBe('12')
+    expect(index.nodes.get('$.list[0]')?.type).toBe('null')
+  })
+
+  it('marks circular references instead of recursing forever', () => {
+    const user: Record<string, unknown> = { name: 'Ada' }
+    user.self = user
+    const index = indexJson({ user })
+    const self = index.nodes.get('$.user.self')!
+    expect(self.circular).toBe(true)
+    expect(self.children).toEqual([])
+    expect(summary(self)).toBe('[Circular]')
+  })
+
+  it('indexes very deep documents without overflowing the stack', () => {
+    let deep: unknown = 1
+    for (let i = 0; i < 20_000; i++) deep = [deep]
+    const index = indexJson(deep)
+    expect(index.nodes.size).toBe(20_001)
+  })
 })

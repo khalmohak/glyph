@@ -22,7 +22,7 @@ export default function Example() {
     <ThemeScope
       theme={acme}
       mode={resolvedMode}
-      className="flex gap-2 rounded-lg border border-border p-4"
+      className="flex flex-wrap gap-2 rounded-lg border border-border p-4"
     >
       <Button>Orange, pill, large</Button>
       <Button variant="outline">Same theme file</Button>

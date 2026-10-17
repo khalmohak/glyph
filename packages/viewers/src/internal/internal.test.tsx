@@ -43,6 +43,30 @@ describe('sources', () => {
     expect(formatBytes(15 * 1024 * 1024)).toBe('15 MB')
     expect(formatBytes(-1)).toBe('')
   })
+
+  it('decodes UTF-16 (Excel "Unicode text") and Windows-1252 (Excel CSV) files', async () => {
+    const text = 'name,city\nRené,Zürich'
+    // UTF-16LE with BOM
+    const le = new Uint8Array(2 + text.length * 2)
+    le.set([0xff, 0xfe])
+    for (let i = 0; i < text.length; i++) le[2 + i * 2] = text.charCodeAt(i)
+    expect(await readText(le)).toBe(text)
+    // UTF-16BE with BOM
+    const be = new Uint8Array(2 + text.length * 2)
+    be.set([0xfe, 0xff])
+    for (let i = 0; i < text.length; i++) be[3 + i * 2] = text.charCodeAt(i)
+    expect(await readText(be)).toBe(text)
+    // Windows-1252: é = 0xE9, ü = 0xFC, not valid UTF-8
+    const latin = Uint8Array.from(text, (c) => c.charCodeAt(0))
+    expect(await readText(latin)).toBe(text)
+    // UTF-8 still wins when valid, BOM dropped
+    expect(await readText(new TextEncoder().encode(`﻿${text}`))).toBe(text)
+  })
+
+  it('names URLs with broken percent-encoding without throwing', () => {
+    expect(sourceName('https://x.dev/files/report%.pdf')).toBe('report%.pdf')
+    expect(sourceName('https://x.dev/files/q3%20report.pdf')).toBe('q3 report.pdf')
+  })
 })
 
 describe('useResource', () => {

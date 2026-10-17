@@ -9,6 +9,18 @@ const lines = (n: number, prefix = 'line') =>
   Array.from({ length: n }, (_, i) => `${prefix} ${i + 1}`)
 
 describe('computeDiff', () => {
+  it('ignores Windows line endings and a missing final newline', () => {
+    const crlf = computeDiff('a\r\nb\r\nc\r\n', 'a\nb\nc\n')
+    expect([crlf.additions, crlf.deletions]).toEqual([0, 0])
+    const eof = computeDiff('a\nb', 'a\nb\n')
+    expect([eof.additions, eof.deletions]).toEqual([0, 0])
+    const real = computeDiff('a\r\nold\r\n', 'a\nnew\n')
+    expect([real.additions, real.deletions]).toEqual([1, 1])
+    for (const item of real.items) {
+      if ('text' in item) expect(item.text).not.toContain('\r')
+    }
+  })
+
   it('numbers lines and counts additions and deletions', () => {
     const { items, additions, deletions } = computeDiff('a\nb\nc\n', 'a\nB\nc\nd\n')
     expect(additions).toBe(2)

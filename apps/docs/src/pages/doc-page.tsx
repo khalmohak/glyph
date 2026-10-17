@@ -1,6 +1,7 @@
 import examples from 'virtual:glyph-examples'
 import { Button, EmptyState, Eyebrow, Heading, Separator, Text } from '@glyphui/ui'
 import { ArrowLeft, Github, Hammer } from 'lucide-react'
+import { Fragment } from 'react'
 import { Link, useParams } from 'react-router'
 import { ExampleView } from '../components/example-view'
 import { PropsTable } from '../components/props-table'
@@ -11,6 +12,16 @@ import { getDoc } from '../lib/catalog'
 import { NotFoundPage } from './not-found'
 
 const REPO = 'https://github.com/khalmohak/glyph'
+
+/** `SpreadsheetViewer` → `Spreadsheet<wbr>Viewer`, so it wraps between words when it must. */
+function wordBreaks(name: string) {
+  return name.split(/(?=[A-Z][a-z])/).map((part, i) => (
+    <Fragment key={`${i}-${part}`}>
+      {i > 0 && <wbr />}
+      {part}
+    </Fragment>
+  ))
+}
 
 export function DocPage() {
   const { slug = '' } = useParams()
@@ -44,7 +55,10 @@ export function DocPage() {
           <Eyebrow>{doc.category}</Eyebrow>
           <StatusBadge status={doc.status} />
         </div>
-        <Heading level={1}>{doc.name}</Heading>
+        {/* Long names (SpreadsheetViewer) in wide display fonts must wrap on phones. */}
+        <Heading level={1} className="[overflow-wrap:anywhere]">
+          {wordBreaks(doc.name)}
+        </Heading>
         <Text size="lead" tone="muted" className="max-w-2xl">
           {doc.description}
         </Text>

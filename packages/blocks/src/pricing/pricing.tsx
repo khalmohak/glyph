@@ -42,7 +42,7 @@ export interface PricingProps extends Omit<ComponentProps<'section'>, 'title'>, 
   billingLabels?: Record<Billing, ReactNode>
   /** Shown after each numeric price above zero, per billing period. */
   periodLabels?: Record<Billing, ReactNode>
-  /** Turns numeric prices into text. Default: `$` + the number. */
+  /** Turns numeric prices into text. Default: US dollars, with cents only when there are some. */
   formatPrice?: (amount: number) => string
   headingLevel?: HeadingLevel
 }
@@ -51,6 +51,18 @@ const defaultBillingLabels: Record<Billing, ReactNode> = { monthly: 'Monthly', y
 const defaultPeriodLabels: Record<Billing, ReactNode> = {
   monthly: 'per month',
   yearly: 'per month, billed yearly',
+}
+
+const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+const usdWhole = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+})
+
+/** `$1,250` and `$19.50`: cents only when the amount has some. */
+function formatUsd(amount: number): string {
+  return (Number.isInteger(amount) ? usdWhole : usd).format(amount)
 }
 
 /** Rounds an in-between value to the decimals of the price it is heading to. */
@@ -86,7 +98,7 @@ export function Pricing({
   defaultBilling = 'monthly',
   billingLabels = defaultBillingLabels,
   periodLabels = defaultPeriodLabels,
-  formatPrice = (amount) => `$${amount}`,
+  formatPrice = formatUsd,
   headingLevel = 2,
   animate = true,
   className,

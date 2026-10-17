@@ -1,5 +1,5 @@
 import { Alert, Button, Card, cn, Field, Heading, Input, Text } from '@glyphui/ui'
-import { type ComponentProps, type FormEvent, type ReactNode, useId, useState } from 'react'
+import { type ComponentProps, type FormEvent, type ReactNode, useId, useRef, useState } from 'react'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 import type { HeadingLevel } from '../section-header'
 
@@ -52,10 +52,13 @@ export function AuthCard({
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const inFlight = useRef(false)
   const minLength = mode === 'sign-up' ? 8 : 1
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    // A ref, not state: a second submit can arrive before React re-renders the button.
+    if (inFlight.current) return
     const next: typeof errors = {}
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
       next.email = 'Enter a valid email address.'
@@ -65,6 +68,7 @@ export function AuthCard({
     }
     setErrors(next)
     if (next.email || next.password || !onSubmit) return
+    inFlight.current = true
     setSubmitting(true)
     setFormError(null)
     try {
@@ -72,6 +76,7 @@ export function AuthCard({
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'Something went wrong. Try again.')
     } finally {
+      inFlight.current = false
       setSubmitting(false)
     }
   }

@@ -1,5 +1,5 @@
 import { Button, Container, cn, Heading, Input, Reveal, Section, Stagger, Text } from '@glyphui/ui'
-import { type ComponentProps, type FormEvent, type ReactNode, useId, useState } from 'react'
+import { type ComponentProps, type FormEvent, type ReactNode, useId, useRef, useState } from 'react'
 import type { BlockMotionProps } from '../internal/motion'
 import { useBlocksStylesCheck } from '../internal/styles-check'
 import type { HeadingLevel } from '../section-header'
@@ -51,15 +51,19 @@ export function Newsletter({
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<Status>('idle')
   const [message, setMessage] = useState<ReactNode>(null)
+  const inFlight = useRef(false)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    // A ref, not state: a second submit can arrive before React re-renders the button.
+    if (inFlight.current) return
     const value = email.trim()
     if (!EMAIL.test(value)) {
       setStatus('error')
       setMessage(invalidMessage)
       return
     }
+    inFlight.current = true
     setStatus('loading')
     setMessage(null)
     try {
@@ -73,6 +77,8 @@ export function Newsletter({
         errorMessage ??
           (error instanceof Error ? error.message : 'Something went wrong. Try again.'),
       )
+    } finally {
+      inFlight.current = false
     }
   }
 

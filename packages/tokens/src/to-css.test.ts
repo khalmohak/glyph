@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { glyph } from './presets'
+import { editorial, glyph } from './presets'
 import { scopeSelector, themeToCss, tokenVar } from './to-css'
 
 describe('themeToCss', () => {
@@ -39,5 +39,47 @@ describe('themeToCss', () => {
 describe('tokenVar', () => {
   it('references the generated custom property', () => {
     expect(tokenVar('primary')).toBe('var(--glyph-primary)')
+  })
+})
+
+describe('themeToCss shadows', () => {
+  it('writes a shadow of `none` as an empty shadow so focus rings still compose', () => {
+    // Tailwind combines shadow and ring in one box-shadow list; `none` inside a list makes
+    // the whole declaration invalid, which removed focus rings from editorial's buttons.
+    const css = themeToCss(editorial)
+    expect(editorial.shadow.light.sm).toBe('none')
+    expect(css).toContain('--glyph-shadow-sm: 0 0 #0000;')
+    expect(css).not.toMatch(/--glyph-shadow-\w+: none;/)
+  })
+})
+
+describe('themeToCss safety', () => {
+  // Themes can come from data (per-tenant branding, a theme editor), so a value must never
+  // close its rule or the <style> element it is rendered into.
+  const hostile = {
+    ...glyph,
+    colors: {
+      ...glyph.colors,
+      light: { ...glyph.colors.light, primary: 'red; } body { display: none' },
+      dark: { ...glyph.colors.dark, primary: 'blue</style><script>alert(1)</script>' },
+    },
+  }
+
+  it('keeps every value inside its declaration', () => {
+    const css = themeToCss(hostile)
+    expect(css).not.toContain('body {')
+    // The hostile text stays inside the one --glyph-primary declaration.
+    expect(css).not.toMatch(/^\s*(body|display)/m)
+    expect(css).not.toMatch(/<\/style/i)
+    expect(css).not.toContain('<script')
+    // Every rule still opens and closes exactly once.
+    expect(css.split('{').length).toBe(css.split('}').length)
+  })
+
+  it('escapes the theme name in its scope selector', () => {
+    const selector = scopeSelector({ name: 'x"] body, [a="' })
+    expect(selector).toBe('[data-glyph-theme="x\\"] body, [a=\\""]')
+    const css = themeToCss(glyph, { selector })
+    expect(css).not.toMatch(/^body/m)
   })
 })

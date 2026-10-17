@@ -29,6 +29,13 @@ describe('highlighting', () => {
       [{ content: 'b' }],
     ])
   })
+
+  it('falls back to plain text when a grammar fails to load', async () => {
+    // `constructor` resolves to Object.prototype.constructor in the grammar table.
+    expect(await highlightCode('x', 'constructor')).toEqual([[{ content: 'x' }]])
+    expect(await highlightCode('x', 'toString')).toEqual([[{ content: 'x' }]])
+    expect(resolveLanguage('constructor')).toBe('constructor')
+  })
 })
 
 describe('parseLineRanges', () => {

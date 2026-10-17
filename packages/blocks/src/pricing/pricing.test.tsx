@@ -53,4 +53,19 @@ describe('Pricing', () => {
     expect(card('Free')).not.toHaveTextContent('per month')
     expect(card('Pro')).toHaveTextContent('per month')
   })
+
+  it('shows cents with two digits and thousands with separators by default', () => {
+    render(
+      <Pricing
+        tiers={[
+          { name: 'Lite', price: 19.5, features: [], cta: { label: 'Go' } },
+          { name: 'Scale', price: 1250, features: [], cta: { label: 'Go' } },
+        ]}
+      />,
+    )
+    const card = (name: string) =>
+      screen.getByRole('heading', { name }).closest('[data-slot=card]') as HTMLElement
+    expect(card('Lite')).toHaveTextContent('$19.50')
+    expect(card('Scale')).toHaveTextContent('$1,250')
+  })
 })

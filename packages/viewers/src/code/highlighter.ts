@@ -43,7 +43,7 @@ const aliases: Record<string, string> = {
 /** Normalizes a language name or file extension to a Shiki language id. */
 export function resolveLanguage(lang: string | undefined): string {
   const key = (lang ?? 'plaintext').toLowerCase().replace(/^\./, '')
-  return aliases[key] ?? key
+  return Object.hasOwn(aliases, key) ? (aliases[key] as string) : key
 }
 
 /** Guesses a language from a file name, e.g. `reminders.ts` → `typescript`. */
@@ -82,15 +82,25 @@ export async function highlightCode(
   const id = resolveLanguage(lang)
   const plain = () => code.split('\n').map((line) => [{ content: line }])
   if (id === 'plaintext') return plain()
-  const shiki = await getHighlighter()
-  if (!loaded.has(id)) {
-    const { bundledLanguages } = await import('shiki/langs')
-    const load = (bundledLanguages as Record<string, (() => Promise<unknown>) | undefined>)[id]
-    if (!load) return plain()
-    await shiki.loadLanguage(load as never)
-    loaded.add(id)
+  let tokens: Awaited<ReturnType<HighlighterCore['codeToTokens']>>['tokens']
+  try {
+    const shiki = await getHighlighter()
+    if (!loaded.has(id)) {
+      const { bundledLanguages } = await import('shiki/langs')
+      const table = bundledLanguages as Record<string, (() => Promise<unknown>) | undefined>
+      const load = Object.hasOwn(table, id) ? table[id] : undefined
+      if (!load) return plain()
+      await shiki.loadLanguage(load as never)
+      loaded.add(id)
+    }
+    tokens = shiki.codeToTokens(code, { lang: id, theme: THEME }).tokens
+  } catch {
+    // A grammar or the highlighter failed to load (offline, bad chunk): show plain text,
+    // and let the next call try again instead of reusing a failed highlighter.
+    highlighter = undefined
+    loaded.clear()
+    return plain()
   }
-  const { tokens } = shiki.codeToTokens(code, { lang: id, theme: THEME })
   return tokens.map((line) =>
     line.map((token) => ({
       content: token.content,

@@ -11,6 +11,8 @@ export interface JsonNode {
   /** Children's paths, for objects and arrays. */
   children: string[]
   parent: string | undefined
+  /** In-memory data only: this container is one of its own ancestors. */
+  circular?: boolean
 }
 
 export interface JsonIndex {
@@ -19,10 +21,12 @@ export interface JsonIndex {
 }
 
 export function jsonType(value: unknown): JsonType {
-  if (value === null) return 'null'
+  if (value === null || value === undefined) return 'null'
   if (Array.isArray(value)) return 'array'
   const t = typeof value
   if (t === 'string' || t === 'number' || t === 'boolean') return t
+  if (t === 'bigint') return 'number'
+  if (t === 'function' || t === 'symbol') return 'null'
   return 'object'
 }
 
@@ -35,32 +39,74 @@ export function childPath(parent: string, key: string | number): string {
   return `${parent}['${key.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}']`
 }
 
-/** Indexes every node of a parsed JSON value by its path. */
+/** Values JSON.stringify leaves out of objects (and writes as `null` in arrays). */
+const omitted = (v: unknown) => v === undefined || typeof v === 'function' || typeof v === 'symbol'
+
+/** Dates and other objects with `toJSON` show what JSON.stringify would write. */
+function toJsonValue(v: unknown, key: string | number | undefined): unknown {
+  if (
+    v !== null &&
+    typeof v === 'object' &&
+    typeof (v as { toJSON?: unknown }).toJSON === 'function'
+  ) {
+    return (v as { toJSON: (key: string) => unknown }).toJSON(String(key ?? ''))
+  }
+  return v
+}
+
+type Frame =
+  | { exit: object }
+  | {
+      exit?: undefined
+      value: unknown
+      path: string
+      key: string | number | undefined
+      depth: number
+      parent: JsonNode | undefined
+    }
+
+/**
+ * Indexes every node of a JSON value by its path. Also accepts in-memory data, shown the
+ * way JSON.stringify would write it; circular references are marked instead of followed.
+ * Iterative, so very deep documents don't overflow the stack.
+ */
 export function indexJson(value: unknown): JsonIndex {
   const nodes = new Map<string, JsonNode>()
-  const visit = (
-    v: unknown,
-    path: string,
-    key: string | number | undefined,
-    depth: number,
-    parent: string | undefined,
-  ): JsonNode => {
-    const type = jsonType(v)
-    const node: JsonNode = { path, key, value: v, type, depth, children: [], parent }
-    nodes.set(path, node)
-    if (type === 'array') {
-      ;(v as unknown[]).forEach((item, i) => {
-        node.children.push(visit(item, childPath(path, i), i, depth + 1, path).path)
-      })
-    } else if (type === 'object') {
-      for (const [k, item] of Object.entries(v as Record<string, unknown>)) {
-        node.children.push(visit(item, childPath(path, k), k, depth + 1, path).path)
-      }
+  // Containers on the path from the root to the current node: seeing one again is a cycle.
+  const onPath = new Set<object>()
+  const stack: Frame[] = [{ value, path: '$', key: undefined, depth: 0, parent: undefined }]
+  let root: JsonNode | undefined
+  while (stack.length > 0) {
+    const frame = stack.pop() as Frame
+    if (frame.exit) {
+      onPath.delete(frame.exit)
+      continue
     }
-    return node
+    const { path, key, depth, parent } = frame
+    const v = toJsonValue(frame.value, key)
+    const type = jsonType(v)
+    const node: JsonNode = { path, key, value: v, type, depth, children: [], parent: parent?.path }
+    nodes.set(path, node)
+    parent?.children.push(path)
+    root ??= node
+    if (type !== 'array' && type !== 'object') continue
+    const container = v as object
+    if (onPath.has(container)) {
+      node.circular = true
+      continue
+    }
+    onPath.add(container)
+    stack.push({ exit: container })
+    const entries: [string | number, unknown][] = Array.isArray(container)
+      ? container.map((item, i) => [i, omitted(item) ? null : item])
+      : Object.entries(container).filter(([, item]) => !omitted(toJsonValue(item, undefined)))
+    // Pushed in reverse so children are visited, and listed, in document order.
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const [k, item] = entries[i] as [string | number, unknown]
+      stack.push({ value: item, path: childPath(path, k), key: k, depth: depth + 1, parent: node })
+    }
   }
-  const root = visit(value, '$', undefined, 0, undefined)
-  return { root, nodes }
+  return { root: root as JsonNode, nodes }
 }
 
 /** Paths of every container at or above `depth`, i.e. what "expand to depth" opens. */
@@ -156,10 +202,34 @@ export function parseJson(
 
 /** A one-line preview of a container: `{ 3 keys }`, `[ 12 items ]`. */
 export function summary(node: JsonNode): string {
+  if (node.circular) return '[Circular]'
   const n = node.children.length
   if (node.type === 'array') return `[ ${n} ${n === 1 ? 'item' : 'items'} ]`
   if (node.type === 'object') return `{ ${n} ${n === 1 ? 'key' : 'keys'} }`
   return ''
+}
+
+/**
+ * JSON.stringify for in-memory data too: a circular reference becomes `"[Circular]"` and a
+ * BigInt becomes a string, instead of throwing. Shared, non-circular objects print in full.
+ */
+export function stringifyJson(value: unknown, space = 2): string {
+  const ancestors: unknown[] = []
+  return (
+    JSON.stringify(
+      value,
+      function (this: unknown, _key, v: unknown) {
+        if (typeof v === 'bigint') return v.toString()
+        if (typeof v !== 'object' || v === null) return v
+        // `this` is the object holding `v`; drop ancestors we have finished with.
+        while (ancestors.length > 0 && ancestors.at(-1) !== this) ancestors.pop()
+        if (ancestors.includes(v)) return '[Circular]'
+        ancestors.push(v)
+        return v
+      },
+      space,
+    ) ?? ''
+  )
 }
 
 /** A primitive as it appears in JSON. */

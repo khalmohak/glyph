@@ -34,6 +34,20 @@ describe('parseCsv', () => {
     ])
   })
 
+  it('reads Excel CSV files in Windows-1252 and UTF-16', async () => {
+    const text = 'name,city\nRené,Zürich'
+    const latin = Uint8Array.from(text, (c) => c.charCodeAt(0))
+    expect((await parseCsv(new File([latin], 'excel.csv'))).rows[1]).toEqual(['René', 'Zürich'])
+
+    const utf16 = new Uint8Array(2 + text.length * 2)
+    utf16.set([0xff, 0xfe])
+    for (let i = 0; i < text.length; i++) utf16[2 + i * 2] = text.charCodeAt(i)
+    expect((await parseCsv(new Blob([utf16]))).rows).toEqual([
+      ['name', 'city'],
+      ['René', 'Zürich'],
+    ])
+  })
+
   it('stops at maxRows and says so', async () => {
     const text = Array.from({ length: 50 }, (_, i) => `${i},row`).join('\n')
     const result = await parseCsv(text, { maxRows: 10 })

@@ -171,12 +171,16 @@ export function PdfViewer(inProps: PdfViewerProps) {
     let pdf: PdfDocument | undefined
     setLoad({ status: 'loading', progress: null })
     setTexts(null)
+    setMatchIndex(0)
     ;(async () => {
       const lib = await loadPdfjs(workerSrc)
       const isUrl = typeof source === 'string' || source instanceof URL
-      const loadingTask = lib.getDocument(
-        isUrl ? { url: String(source) } : { data: new Uint8Array(await readBytes(source)) },
-      )
+      const params = isUrl
+        ? { url: String(source) }
+        : { data: new Uint8Array(await readBytes(source)) }
+      // Unmounted or switched source while pdf.js or the bytes loaded: don't open it at all.
+      if (cancelled) return
+      const loadingTask = lib.getDocument(params)
       task = loadingTask
       loadingTask.onProgress = ({ loaded, total }: { loaded: number; total: number }) => {
         if (!cancelled && total > 0) setLoad({ status: 'loading', progress: loaded / total })
