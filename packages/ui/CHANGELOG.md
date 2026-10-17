@@ -1,5 +1,14 @@
 # @glyphui/ui
 
+## 0.7.0
+
+### Patch Changes
+
+- [#24](https://github.com/khalmohak/glyph/pull/24) [`b746553`](https://github.com/khalmohak/glyph/commit/b746553b4d380dc7a2a523251b734128a9495b61) Thanks [@khalmohak](https://github.com/khalmohak)! - `DropdownMenuItem` supports `asChild`, so an item can be a router link while keeping its icon and shortcut.
+
+- Updated dependencies []:
+  - @glyphui/tokens@0.7.0
+
 ## 0.6.0
 
 ### Minor Changes
