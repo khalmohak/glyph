@@ -8,8 +8,19 @@ import {
   useMemo,
   useState,
 } from 'react'
+import {
+  type ColorModeOptions,
+  type ColorModePreference,
+  DARK_QUERY,
+  DEFAULT_STORAGE_KEY,
+  getColorModeScript,
+} from './color-mode-script'
 
-export type ColorModePreference = ColorMode | 'system'
+export {
+  type ColorModeOptions,
+  type ColorModePreference,
+  getColorModeScript,
+} from './color-mode-script'
 
 export interface ColorModeContextValue {
   /** What the user chose. */
@@ -21,15 +32,7 @@ export interface ColorModeContextValue {
 
 const ColorModeContext = createContext<ColorModeContextValue | null>(null)
 
-const DARK_QUERY = '(prefers-color-scheme: dark)'
 const isBrowser = typeof window !== 'undefined'
-
-export interface ColorModeOptions {
-  /** Used when nothing is stored yet. */
-  defaultMode?: ColorModePreference
-  /** localStorage key. Set to `null` to disable persistence. */
-  storageKey?: string | null
-}
 
 function readStoredMode(storageKey: string | null): ColorModePreference | null {
   if (!isBrowser || !storageKey) return null
@@ -59,7 +62,7 @@ function suppressTransitions(): () => void {
 export function ColorModeProvider({
   children,
   defaultMode = 'system',
-  storageKey = 'glyph-mode',
+  storageKey = DEFAULT_STORAGE_KEY,
 }: ColorModeOptions & { children: ReactNode }) {
   const [mode, setModeState] = useState<ColorModePreference>(
     () => readStoredMode(storageKey) ?? defaultMode,
@@ -112,15 +115,6 @@ export function useColorMode(): ColorModeContextValue {
  * Inline script that sets `data-mode` on `<html>` before first paint, so a dark-mode
  * visitor never sees a light flash. Put it in `<head>`.
  */
-export function getColorModeScript({
-  defaultMode = 'system',
-  storageKey = 'glyph-mode',
-}: ColorModeOptions = {}): string {
-  return `(function(){try{var d=${JSON.stringify(defaultMode)},m=null;${
-    storageKey ? `m=localStorage.getItem(${JSON.stringify(storageKey)});` : ''
-  }if(m!=='light'&&m!=='dark'&&m!=='system')m=d;if(m==='system')m=matchMedia('${DARK_QUERY}').matches?'dark':'light';var r=document.documentElement;r.dataset.mode=m;r.style.colorScheme=m}catch(e){}})()`
-}
-
 /** `<script>` element version of `getColorModeScript` for SSR frameworks. */
 export function ColorModeScript(props: ColorModeOptions) {
   return (

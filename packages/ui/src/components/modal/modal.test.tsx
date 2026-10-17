@@ -43,4 +43,22 @@ describe('Modal', () => {
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(screen.getByText('closed')).toBeInTheDocument())
   })
+
+  it('submits body fields from a footer button when onSubmit is set', async () => {
+    const submitted: string[] = []
+    render(
+      <Modal
+        defaultOpen
+        title="Rename project"
+        onSubmit={(event) => {
+          submitted.push(String(new FormData(event.currentTarget).get('name')))
+        }}
+        footer={<button type="submit">Save</button>}
+      >
+        <input aria-label="Name" name="name" defaultValue="Billing v2" />
+      </Modal>,
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(submitted).toEqual(['Billing v2'])
+  })
 })

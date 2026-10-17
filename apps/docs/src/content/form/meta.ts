@@ -21,6 +21,7 @@ export default defineDoc({
   notes: [
     'Works with any Standard Schema validator: zod, valibot, arktype.',
     'Return { errors } from onSubmit for field errors; throw to show a form-level error in FormError.',
+    'FormSubmit outside <Form>, such as in a Modal footer, needs the form: <FormSubmit form={form}>.',
     'Requires react-hook-form and @hookform/resolvers as peer dependencies.',
   ],
 })

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { FormEvent, ReactNode } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import {
   Dialog,
@@ -14,7 +14,7 @@ import {
 } from '../dialog'
 import { modalStyles } from './modal.styles'
 
-export interface ModalProps extends Omit<DialogContentProps, 'title' | 'children'> {
+export interface ModalProps extends Omit<DialogContentProps, 'title' | 'children' | 'onSubmit'> {
   open?: boolean
   defaultOpen?: boolean
   onOpenChange?: (open: boolean) => void
@@ -27,6 +27,12 @@ export interface ModalProps extends Omit<DialogContentProps, 'title' | 'children
   footer?: ReactNode
   /** Close when the backdrop is clicked. Default true. */
   closeOnOverlayClick?: boolean
+  /**
+   * Turns the body and footer into one `<form>`, so a `type="submit"` button in the footer
+   * submits the fields in the body. The page does not reload. With `@glyphui/ui/form`, use
+   * `<Form>` in the body and `<FormSubmit form={form}>` in the footer instead.
+   */
+  onSubmit?: (event: FormEvent<HTMLFormElement>) => void
   children?: ReactNode
 }
 
@@ -45,12 +51,21 @@ export function Modal(inProps: ModalProps) {
     trigger,
     footer,
     closeOnOverlayClick = true,
+    onSubmit,
     onPointerDownOutside,
     className,
     children,
     ...rest
   } = props
   const s = modalStyles()
+  const content = (
+    <>
+      {children && <DialogBody className={s.body({ class: slots.body })}>{children}</DialogBody>}
+      {footer && (
+        <DialogFooter className={s.footer({ class: slots.footer })}>{footer}</DialogFooter>
+      )}
+    </>
+  )
 
   return (
     <Dialog
@@ -73,9 +88,19 @@ export function Modal(inProps: ModalProps) {
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        {children && <DialogBody className={s.body({ class: slots.body })}>{children}</DialogBody>}
-        {footer && (
-          <DialogFooter className={s.footer({ class: slots.footer })}>{footer}</DialogFooter>
+        {onSubmit ? (
+          <form
+            data-slot="modal-form"
+            className={s.form({ class: slots.form })}
+            onSubmit={(event) => {
+              event.preventDefault()
+              onSubmit(event)
+            }}
+          >
+            {content}
+          </form>
+        ) : (
+          content
         )}
       </DialogContent>
     </Dialog>

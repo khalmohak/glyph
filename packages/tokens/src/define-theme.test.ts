@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { defineTheme } from './define-theme'
 import { brutalist, glyph, presets } from './presets'
-import { colorTokens } from './schema'
+import { chartTokens, colorTokens } from './schema'
 
 describe('defineTheme', () => {
   it('normalizes a shared shadow scale into per-mode scales', () => {
@@ -29,6 +29,41 @@ describe('defineTheme', () => {
     expect(theme.shadow.light.md).toBe('none')
     expect(theme.shadow.dark.md).toBe('none')
     expect(theme.shadow.dark.lg).toBe(glyph.shadow.dark.lg)
+  })
+
+  it('fills missing chart colors from status colors in a standalone theme', () => {
+    const {
+      'chart-1': _1,
+      'chart-2': _2,
+      'chart-3': _3,
+      'chart-4': _4,
+      'chart-5': _5,
+      ...dark
+    } = glyph.colors.dark
+    const theme = defineTheme({
+      name: 'standalone',
+      colors: { light: glyph.colors.light, dark: { ...dark, 'chart-2': 'teal' } },
+      radius: glyph.radius,
+      shadow: glyph.shadow,
+      font: glyph.font,
+      text: glyph.text,
+      border: glyph.border,
+      motion: glyph.motion,
+      control: glyph.control,
+    })
+    expect(theme.colors.dark['chart-1']).toBe(dark.primary)
+    expect(theme.colors.dark['chart-2']).toBe('teal')
+    expect(theme.colors.dark['chart-5']).toBe(dark.danger)
+    expect(theme.colors.light['chart-1']).toBe(glyph.colors.light['chart-1'])
+  })
+
+  it('gives every preset five distinct chart colors per mode', () => {
+    for (const preset of Object.values(presets)) {
+      for (const mode of ['light', 'dark'] as const) {
+        const chart = chartTokens.map((token) => preset.colors[mode][token])
+        expect(new Set(chart).size, `${preset.name} ${mode}`).toBe(5)
+      }
+    }
   })
 
   it('does not mutate the base theme', () => {

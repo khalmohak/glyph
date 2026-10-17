@@ -17,6 +17,7 @@ export default defineDoc({
     'useColorMode',
     'useGlyph',
     'useLinkComponent',
+    'useIsActive',
     'defineTheme',
     'themeToCss',
     'tokenVar',
@@ -38,7 +39,8 @@ export default defineDoc({
     { file: 'custom-theme', title: 'Extending a preset' },
   ],
   notes: [
-    'Render GlyphProvider once at the root. Put getColorModeScript() in <head> so dark-mode visitors never see a light flash.',
+    'Render GlyphProvider once at the root. Prevent the dark-mode flash with the Vite plugin (@glyphui/ui/vite), <ColorModeScript /> with SSR, or getColorModeScript() in <head>.',
+    'Pass router to connect your router: links navigate client-side and navigation items mark the current page. useIsActive(href) exposes the same matching to your own components.',
     'theme.components is typed per component: a Button size that does not exist is a compile error.',
   ],
 })

@@ -41,11 +41,13 @@
     "build": "tsdown",
     "typecheck": "tsc",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "check:exports": "attw --pack . --profile esm-only"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@glyphui/tsconfig": "workspace:*",
+    "@vitest/coverage-v8": "3.2.7",
     "tsdown": "^0.23.0",
     "typescript": "~5.9.3",
     "vitest": "^3.2.7"

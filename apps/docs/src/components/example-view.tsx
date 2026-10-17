@@ -35,7 +35,10 @@ export function ExampleView({ slug, example }: { slug: string; example: ExampleM
             </TabsList>
           </div>
           <TabsContent value="preview" className="min-w-0">
-            <div className="flex min-h-36 items-center justify-center overflow-x-auto bg-background p-6 sm:p-10 [&>*]:w-full [&>*]:max-w-full">
+            <div
+              data-example={`${slug}/${example.file}`}
+              className="flex min-h-36 items-center justify-center overflow-x-auto bg-background p-6 sm:p-10 [&>*]:w-full [&>*]:max-w-full"
+            >
               <Suspense fallback={<Spinner />}>
                 <div className="flex min-w-0 justify-center">
                   <Preview />

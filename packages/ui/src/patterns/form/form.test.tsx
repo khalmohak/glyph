@@ -52,4 +52,39 @@ describe('Form', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Sign up' }))
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Server unavailable'))
   })
+
+  it('submits from a FormSubmit outside the form when given form={form}', async () => {
+    const onSubmit = vi.fn()
+    function Outside() {
+      const form = useForm({ schema, defaultValues: { email: '' } })
+      return (
+        <>
+          <Form form={form} onSubmit={onSubmit}>
+            <FormField control={form.control} name="email" label="Email">
+              {(field) => <Input {...field} />}
+            </FormField>
+          </Form>
+          <footer>
+            <FormSubmit form={form}>Save</FormSubmit>
+          </footer>
+        </>
+      )
+    }
+    render(<Outside />)
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByText('Enter a valid email')).toBeInTheDocument()
+    expect(onSubmit).not.toHaveBeenCalled()
+
+    await userEvent.type(screen.getByLabelText('Email'), 'a@b.co')
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ email: 'a@b.co' }))
+  })
+
+  it('explains how to fix a FormSubmit with no form', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(() => render(<FormSubmit>Save</FormSubmit>)).toThrow(
+      /FormSubmit must be inside <Form> or receive form=\{form\}/,
+    )
+    vi.mocked(console.error).mockRestore()
+  })
 })

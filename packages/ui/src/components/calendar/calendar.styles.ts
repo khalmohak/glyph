@@ -29,10 +29,11 @@ export const calendarStyles = tv({
       transition,
       focusRing,
     ],
-    today: '[&>button]:font-semibold [&>button]:text-primary',
+    // Selected days keep primary-foreground on primary, whatever else applies to them.
+    today: '[&>button]:font-semibold [&:not([data-selected])>button]:text-primary-text',
     selected:
       '[&>button]:bg-primary [&>button]:text-primary-foreground [&>button]:hover:bg-primary/90',
-    outside: '[&>button]:text-faint-foreground [&>button]:opacity-60',
+    outside: '[&:not([data-selected])>button]:text-faint-foreground',
     disabled: '[&>button]:pointer-events-none [&>button]:opacity-35 [&>button]:line-through',
     rangeStart: 'rounded-l-md bg-primary/14',
     rangeMiddle:

@@ -16,9 +16,9 @@ export const fileUploadStyles = tv({
     ],
     icon: 'flex size-10 items-center justify-center rounded-md border border-border bg-surface text-muted-foreground shadow-xs [&>svg]:size-5',
     title: 'text-small font-medium text-foreground',
-    highlight: 'text-primary',
+    highlight: 'text-primary-text',
     hint: 'text-caption text-faint-foreground',
-    rejections: 'grid gap-1 text-small font-medium text-danger',
+    rejections: 'grid gap-1 text-small font-medium text-danger-text',
     list: 'grid gap-2',
     item: [
       'grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-md border-border bg-surface px-3 py-2.5',
@@ -29,7 +29,7 @@ export const fileUploadStyles = tv({
     fileText: 'grid min-w-0 gap-1',
     fileName: 'truncate text-small font-medium text-foreground',
     fileMeta: 'text-caption tabular-nums text-faint-foreground',
-    fileError: 'text-caption font-medium text-danger',
+    fileError: 'text-caption font-medium text-danger-text',
     progress: 'h-1 overflow-hidden rounded-pill bg-muted',
     progressBar:
       'h-full rounded-pill bg-primary transition-[width] duration-(--glyph-duration-base)',

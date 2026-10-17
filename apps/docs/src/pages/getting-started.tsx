@@ -1,4 +1,4 @@
-import { Eyebrow, Heading, Text } from '@glyphui/ui'
+import { Code, Eyebrow, Heading, Tabs, TabsContent, TabsList, TabsTrigger, Text } from '@glyphui/ui'
 import type { ReactNode } from 'react'
 import { Snippet } from '../components/snippet'
 
@@ -26,6 +26,38 @@ function Block({ code }: { code: string }) {
   )
 }
 
+const tanstackRouter = `
+// glyph-router.tsx
+import type { GlyphRouter } from '@glyphui/ui'
+import { Link, useLocation } from '@tanstack/react-router'
+
+export const tanstackRouter: GlyphRouter = {
+  Link: ({ href, ...props }) => <Link to={href} {...props} />,
+  useIsActive: (href, { end } = {}) => {
+    const pathname = useLocation({ select: (location) => location.pathname })
+    return end ? pathname === href : pathname === href || pathname.startsWith(\`\${href}/\`)
+  },
+}
+
+// <GlyphProvider router={tanstackRouter}>`
+
+const nextRouter = `
+// glyph-router.tsx
+'use client'
+import type { GlyphRouter } from '@glyphui/ui'
+import NextLink from 'next/link'
+import { usePathname } from 'next/navigation'
+
+export const nextRouter: GlyphRouter = {
+  Link: NextLink,
+  useIsActive: (href, { end } = {}) => {
+    const pathname = usePathname()
+    return end ? pathname === href : pathname === href || pathname.startsWith(\`\${href}/\`)
+  },
+}
+
+// <GlyphProvider router={nextRouter}> in a client component, e.g. app/providers.tsx`
+
 export function GettingStartedPage() {
   return (
     <div className="grid gap-10">
@@ -41,18 +73,37 @@ export function GettingStartedPage() {
       <Step n={1} title="Install">
         <Snippet code="npm install @glyphui/ui" />
         <Text size="small" tone="muted">
-          For forms and data tables, also install their peer dependencies:
+          Optional packages, only for what you use:
         </Text>
-        <Snippet code="npm install react-hook-form @hookform/resolvers zod @tanstack/react-table" />
+        <Snippet code="npm install @glyphui/blocks" />
+        <Text size="small" tone="muted">
+          Page sections: Hero, Pricing, FAQ, AuthCard and more.
+        </Text>
+        <Snippet code="npm install react-hook-form @hookform/resolvers zod @tanstack/react-table@8" />
+        <Text size="small" tone="muted">
+          Forms and data tables. The data table needs TanStack Table version 8; version 9 is not
+          supported yet.
+        </Text>
+        <Snippet code="npm install recharts" />
+        <Text size="small" tone="muted">
+          Charts from <Code>@glyphui/ui/chart</Code>.
+        </Text>
       </Step>
 
       <Step n={2} title="Import the styles">
-        <Text tone="muted">After Tailwind, in your main CSS file:</Text>
+        <Text tone="muted">In your main CSS file, in this order:</Text>
         <Block
           code={`
+@import "@glyphui/ui/fonts.css";     /* Geist and Geist Mono, used by the default theme */
 @import "tailwindcss";
-@import "@glyphui/ui/styles.css";`}
+@import "@glyphui/ui/styles.css";
+@import "@glyphui/blocks/styles.css"; /* only if you installed @glyphui/blocks */`}
         />
+        <Text size="small" tone="muted">
+          Each Glyph stylesheet tells Tailwind which classes its components use. Without the blocks
+          line, blocks render partly unstyled; in development they warn in the console. Skip the
+          fonts line if your theme uses other fonts, and load those instead.
+        </Text>
       </Step>
 
       <Step n={3} title="Create your theme file">
@@ -68,7 +119,7 @@ import { defineTheme, presets } from '@glyphui/ui'
 export default defineTheme({
   name: 'acme',
   extends: presets.glyph, // glyph · brutalist · editorial · playful
-  colors: { dark: { primary: 'oklch(70% 0.19 45)' } },
+  colors: { dark: { primary: 'oklch(70% 0.19 45)', 'chart-1': 'oklch(70% 0.19 45)' } },
   radius: { md: '6px' },
   components: { Button: { defaultVariants: { size: 'lg' } } },
 })`}
@@ -79,30 +130,60 @@ export default defineTheme({
         <Block
           code={`
 import { GlyphProvider } from '@glyphui/ui'
+import { reactRouter } from '@glyphui/ui/react-router'
 import theme from './glyph.theme'
 
 createRoot(root).render(
-  <GlyphProvider theme={theme} defaultMode="system" linkComponent={RouterLink}>
-    <App />
-  </GlyphProvider>,
+  <BrowserRouter>
+    <GlyphProvider theme={theme} defaultMode="system" router={reactRouter} toaster>
+      <App />
+    </GlyphProvider>
+  </BrowserRouter>,
 )`}
         />
         <Text size="small" tone="muted">
-          linkComponent is optional. Pass your router's link so Navbar, Sidebar and Breadcrumb
-          navigate client-side.
+          <Code>router</Code> is optional. With it, every Glyph link navigates client-side, and
+          Sidebar, Navbar and NavigationMenu items mark the current page automatically (pass{' '}
+          <Code>end</Code> on an index item such as <Code>/app</Code>). <Code>toaster</Code> mounts
+          the toast container so <Code>toast()</Code> works anywhere.
         </Text>
+        <Text size="small" tone="muted">
+          Another router? Pass an object with its <Code>Link</Code> and a <Code>useIsActive</Code>{' '}
+          hook:
+        </Text>
+        <Tabs defaultValue="tanstack">
+          <TabsList>
+            <TabsTrigger value="tanstack">TanStack Router</TabsTrigger>
+            <TabsTrigger value="next">Next.js</TabsTrigger>
+          </TabsList>
+          <TabsContent value="tanstack">
+            <Block code={tanstackRouter} />
+          </TabsContent>
+          <TabsContent value="next">
+            <Block code={nextRouter} />
+          </TabsContent>
+        </Tabs>
       </Step>
 
       <Step n={5} title="Prevent the dark-mode flash">
         <Text tone="muted">
-          Put the color-mode script in your HTML head so the right mode applies before React loads.
-          With an SSR framework, render {'<ColorModeScript />'} instead.
+          A tiny script sets the color mode before React loads. With Vite, add the plugin:
         </Text>
         <Block
           code={`
-import { getColorModeScript } from '@glyphui/ui'
-// <script>{getColorModeScript({ defaultMode: 'system' })}</script>`}
+// vite.config.ts
+import { glyphColorMode } from '@glyphui/ui/vite'
+
+export default defineConfig({
+  plugins: [react(), tailwindcss(), glyphColorMode({ defaultMode: 'system' })],
+})`}
         />
+        <Text size="small" tone="muted">
+          Pass the same <Code>defaultMode</Code> and <Code>storageKey</Code> as{' '}
+          <Code>GlyphProvider</Code>. With an SSR framework, render{' '}
+          <Code>{'<ColorModeScript />'}</Code> in the document head instead. Anywhere else, inline
+          the string from <Code>getColorModeScript()</Code> in a head script tag.
+        </Text>
       </Step>
     </div>
   )

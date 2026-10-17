@@ -16,9 +16,9 @@ export const passwordInputStyles = tv({
   },
   variants: {
     strength: {
-      weak: { label: 'text-danger' },
-      fair: { label: 'text-warning' },
-      strong: { label: 'text-success' },
+      weak: { label: 'text-danger-text' },
+      fair: { label: 'text-warning-text' },
+      strong: { label: 'text-success-text' },
     },
   },
 })

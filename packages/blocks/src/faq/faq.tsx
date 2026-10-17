@@ -8,6 +8,7 @@ import {
   Section,
 } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import { useBlocksStylesCheck } from '../internal/styles-check'
 import { type HeadingLevel, SectionHeader } from '../section-header'
 
 export interface FaqItem {
@@ -41,6 +42,7 @@ export function Faq({
   className,
   ...props
 }: FaqProps) {
+  useBlocksStylesCheck()
   const titleId = useId()
   const list = (
     <Accordion

@@ -6,6 +6,8 @@ export default defineConfig({
     form: 'src/patterns/form/index.ts',
     'data-table': 'src/patterns/data-table/index.ts',
     chart: 'src/patterns/chart/index.ts',
+    'react-router': 'src/integrations/react-router.tsx',
+    vite: 'src/integrations/vite.ts',
   },
   format: 'esm',
   platform: 'neutral',

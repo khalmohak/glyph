@@ -1,5 +1,6 @@
 import { Container, cn, Text, useLinkComponent } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import { useBlocksStylesCheck } from '../internal/styles-check'
 
 export interface FooterLink {
   label: ReactNode
@@ -36,6 +37,7 @@ export function SiteFooter({
   className,
   ...props
 }: SiteFooterProps) {
+  useBlocksStylesCheck()
   const Link = useLinkComponent()
   const baseId = useId()
   return (

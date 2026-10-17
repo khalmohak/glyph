@@ -28,7 +28,32 @@ export const colorTokens = [
   'danger-foreground',
   'info',
   'info-foreground',
+  'primary-text',
+  'success-text',
+  'warning-text',
+  'danger-text',
+  'info-text',
   'overlay',
+  'chart-1',
+  'chart-2',
+  'chart-3',
+  'chart-4',
+  'chart-5',
+] as const
+
+/** Categorical colors for chart series, in order. Optional in theme input. */
+export const chartTokens = ['chart-1', 'chart-2', 'chart-3', 'chart-4', 'chart-5'] as const
+
+/**
+ * Status colors used as text (links, field errors, tinted badges). Optional in theme input:
+ * `defineTheme` derives each one from its tone so it meets WCAG AA on the theme's surfaces.
+ */
+export const statusTextTokens = [
+  'primary-text',
+  'success-text',
+  'warning-text',
+  'danger-text',
+  'info-text',
 ] as const
 
 export const radiusTokens = ['xs', 'sm', 'md', 'lg', 'xl', 'pill'] as const
@@ -51,6 +76,8 @@ export const controlSizes = ['sm', 'md', 'lg'] as const
 export const colorModes = ['light', 'dark'] as const
 
 export type ColorToken = (typeof colorTokens)[number]
+export type ChartToken = (typeof chartTokens)[number]
+export type StatusTextToken = (typeof statusTextTokens)[number]
 export type RadiusToken = (typeof radiusTokens)[number]
 export type ShadowToken = (typeof shadowTokens)[number]
 export type FontToken = (typeof fontTokens)[number]
@@ -64,6 +91,13 @@ export type ColorMode = (typeof colorModes)[number]
 export type Tone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info'
 
 export type ColorScale = Record<ColorToken, string>
+/**
+ * Colors as a theme provides them. Chart colors are optional: missing ones fall back to
+ * primary, info, success, warning and danger. Status text colors are optional too: missing
+ * ones are derived from their tone so they stay readable.
+ */
+export type ColorScaleInput = Record<Exclude<ColorToken, ChartToken | StatusTextToken>, string> &
+  Partial<Record<ChartToken | StatusTextToken, string>>
 export type ShadowScale = Record<ShadowToken, string>
 
 /** A value that is either shared by both color modes or set per mode. */

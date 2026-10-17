@@ -1,5 +1,6 @@
 import { Container, Heading, Section, Text, tv } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import { useBlocksStylesCheck } from '../internal/styles-check'
 import type { HeadingLevel } from '../section-header'
 
 export const ctaStyles = tv({
@@ -39,6 +40,7 @@ export function Cta({
   className,
   ...props
 }: CtaProps) {
+  useBlocksStylesCheck()
   const titleId = useId()
   const s = ctaStyles({ variant })
   return (

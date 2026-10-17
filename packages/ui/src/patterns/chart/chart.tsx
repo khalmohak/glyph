@@ -135,7 +135,11 @@ export function LineChart<T extends object>(
   return (
     <ChartFrame {...frameProps(props)} legend={legend} table={table}>
       <R.ResponsiveContainer width="100%" height={props.height ?? 240}>
-        <R.LineChart data={props.data as T[]} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+        <R.LineChart
+          accessibilityLayer={false}
+          data={props.data as T[]}
+          margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+        >
           <Axes
             index={props.index}
             showGrid={props.showGrid}
@@ -169,7 +173,11 @@ export function AreaChart<T extends object>(props: CartesianChartProps<T> & { st
   return (
     <ChartFrame {...frameProps(props)} legend={legend} table={table}>
       <R.ResponsiveContainer width="100%" height={props.height ?? 240}>
-        <R.AreaChart data={props.data as T[]} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+        <R.AreaChart
+          accessibilityLayer={false}
+          data={props.data as T[]}
+          margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+        >
           <defs>
             {resolved.map((item, i) => (
               <linearGradient key={item.key} id={`${id}-${i}`} x1="0" x2="0" y1="0" y2="1">
@@ -216,7 +224,11 @@ export function BarChart<T extends object>(
   return (
     <ChartFrame {...frameProps(props)} legend={legend} table={table}>
       <R.ResponsiveContainer width="100%" height={props.height ?? 240}>
-        <R.BarChart data={props.data as T[]} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+        <R.BarChart
+          accessibilityLayer={false}
+          data={props.data as T[]}
+          margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+        >
           <Axes
             index={props.index}
             showGrid={props.showGrid}
@@ -286,9 +298,10 @@ export function DonutChart<T extends object>(props: DonutChartProps<T>) {
     >
       <div className="relative mx-auto" style={{ width: size, height: size }}>
         <R.ResponsiveContainer width="100%" height="100%">
-          <R.PieChart>
+          <R.PieChart accessibilityLayer={false}>
             {tooltip(valueFormatter, false)}
             <R.Pie
+              rootTabIndex={-1}
               data={rows}
               dataKey={value}
               nameKey={category}
@@ -346,7 +359,11 @@ export function Sparkline({
       style={{ height }}
     >
       <R.ResponsiveContainer width="100%" height="100%">
-        <R.AreaChart data={data} margin={{ top: 2, right: 2, bottom: 2, left: 2 }}>
+        <R.AreaChart
+          accessibilityLayer={false}
+          data={data}
+          margin={{ top: 2, right: 2, bottom: 2, left: 2 }}
+        >
           <defs>
             <linearGradient id={id} x1="0" x2="0" y1="0" y2="1">
               <stop offset="0%" stopColor={stroke} stopOpacity={area ? 0.25 : 0} />

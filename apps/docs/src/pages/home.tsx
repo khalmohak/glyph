@@ -3,6 +3,7 @@ import { ArrowRight, Sparkles } from 'lucide-react'
 import { Link } from 'react-router'
 import { Snippet } from '../components/snippet'
 import { countByStatus, docsByCategory } from '../lib/catalog'
+import { version } from '../lib/version'
 
 export function HomePage() {
   const counts = countByStatus()
@@ -10,7 +11,7 @@ export function HomePage() {
     <div className="grid gap-14">
       <section className="grid gap-6">
         <Badge tone="primary" dot className="w-fit">
-          v0.1 · Beta components landing weekly
+          v{version} · New components every release
         </Badge>
         <Heading level={1} size="display">
           One theme file. Every screen follows.

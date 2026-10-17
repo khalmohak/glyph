@@ -1,7 +1,7 @@
 import { NavigationMenu as NavPrimitive } from 'radix-ui'
 import type { ComponentProps, ReactNode } from 'react'
 import { useComponentConfig } from '../../hooks/use-component-config'
-import { useLinkComponent } from '../../provider/glyph-context'
+import { useIsActive, useLinkComponent } from '../../provider/glyph-context'
 import { navigationMenuStyles } from './navigation-menu.styles'
 
 const s = navigationMenuStyles()
@@ -132,25 +132,35 @@ export interface NavigationMenuLinkProps
   href?: string
 }
 
-/** A top-level link (no panel). Set `active` for the current page. */
+/**
+ * A top-level link (no panel). Marked active automatically from the provider's `router`;
+ * set `active` to override.
+ */
 export function NavigationMenuLink({
   href,
+  active: activeProp,
   className,
   children,
   ...props
 }: NavigationMenuLinkProps) {
   const slots = useSlots()
   const Link = useLinkComponent()
+  const active = useIsActive(href, { explicit: activeProp })
   const cls = s.link({ class: [slots.link, className] })
   if (href === undefined) {
     return (
-      <NavPrimitive.Link data-slot="navigation-menu-link" className={cls} {...props}>
+      <NavPrimitive.Link
+        data-slot="navigation-menu-link"
+        className={cls}
+        active={active}
+        {...props}
+      >
         {children}
       </NavPrimitive.Link>
     )
   }
   return (
-    <NavPrimitive.Link data-slot="navigation-menu-link" asChild {...props}>
+    <NavPrimitive.Link data-slot="navigation-menu-link" asChild active={active} {...props}>
       <Link href={href} className={cls}>
         {children}
       </Link>

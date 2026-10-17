@@ -6,6 +6,14 @@ dist
 coverage
 *.tgz
 
+# Playwright: results and reports are local; only Linux visual baselines are committed.
+apps/docs/e2e/.results
+apps/docs/e2e/.report
+apps/demo-saas/e2e/.results
+apps/demo-saas/e2e/.report
+apps/docs/e2e/__screenshots__/**/*-darwin.png
+apps/docs/e2e/__screenshots__/**/*-win32.png
+
 # Local secrets
 git-token.txt
 npm-token.txt

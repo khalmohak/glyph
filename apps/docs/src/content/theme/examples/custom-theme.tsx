@@ -4,8 +4,13 @@ const acme = defineTheme({
   name: 'acme',
   extends: presets.glyph,
   colors: {
-    light: { primary: 'oklch(58% 0.19 45)', ring: 'oklch(58% 0.19 45)' },
-    dark: { primary: 'oklch(72% 0.17 45)', ring: 'oklch(72% 0.17 45)' },
+    light: { primary: 'oklch(55% 0.19 45)', ring: 'oklch(55% 0.19 45)' },
+    // A bright orange needs dark text on top to stay readable.
+    dark: {
+      primary: 'oklch(72% 0.17 45)',
+      'primary-foreground': 'oklch(20% 0.04 45)',
+      ring: 'oklch(72% 0.17 45)',
+    },
   },
   radius: { md: '9999px' },
   components: { Button: { defaultVariants: { size: 'lg' } } },

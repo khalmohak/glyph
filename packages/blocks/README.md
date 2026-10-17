@@ -18,6 +18,8 @@ Import the styles after Glyph's, so Tailwind generates the classes blocks use:
 @import "@glyphui/blocks/styles.css";
 ```
 
+Without this line blocks render partly unstyled, with no error. In development, the first block you render warns in the console if the stylesheet is missing.
+
 Blocks must render inside `<GlyphProvider>` like any Glyph component.
 
 ## Blocks

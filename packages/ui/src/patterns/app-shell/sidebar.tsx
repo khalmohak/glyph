@@ -4,7 +4,7 @@ import { Tooltip } from '../../components/tooltip'
 import { useComponentConfig } from '../../hooks/use-component-config'
 import { useMediaQuery } from '../../hooks/use-media-query'
 import { PanelLeftIcon } from '../../internal/icons'
-import { useLinkComponent } from '../../provider/glyph-context'
+import { useIsActive, useLinkComponent } from '../../provider/glyph-context'
 import { sidebarStyles } from './app-shell.styles'
 import { useAppShell } from './app-shell-context'
 
@@ -75,7 +75,10 @@ export interface SidebarItemProps {
   icon?: ReactNode
   /** Count or short status shown at the end. */
   badge?: ReactNode
+  /** Marks the current page. Computed from the provider's `router` when not set. */
   active?: boolean
+  /** With automatic matching, only the exact path is active (not its children). */
+  end?: boolean
   onClick?: (event: MouseEvent<HTMLElement>) => void
   className?: string
   children: ReactNode
@@ -85,11 +88,13 @@ export function SidebarItem({
   href,
   icon,
   badge,
-  active,
+  active: activeProp,
+  end,
   onClick,
   className,
   children,
 }: SidebarItemProps) {
+  const active = useIsActive(href, { explicit: activeProp, ...(end !== undefined && { end }) })
   const { collapsed, inDrawer, setMobileOpen } = useAppShell()
   const Link = useLinkComponent()
   const slots = useSlots()

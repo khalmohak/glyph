@@ -32,4 +32,13 @@ describe('AuthCard', () => {
     expect(screen.getByText('Custom')).toBeInTheDocument()
     expect(screen.queryByLabelText(/Password/)).not.toBeInTheDocument()
   })
+
+  it('keeps the password hint out of the password field name', () => {
+    const { container } = render(
+      <AuthCard title="Sign in" passwordHint={<a href="#reset">Forgot password?</a>} />,
+    )
+    const password = container.querySelector('input[type="password"]')
+    expect(password).toHaveAccessibleName('Password')
+    expect(screen.getByRole('link', { name: 'Forgot password?' })).toBeInTheDocument()
+  })
 })

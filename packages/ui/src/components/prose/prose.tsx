@@ -20,7 +20,7 @@ export const proseStyles = tv({
       // Text
       '[&_p]:my-[1em] [&_p]:text-pretty',
       '[&_strong]:font-semibold [&_strong]:text-foreground',
-      '[&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:decoration-primary/40 [&_a]:underline-offset-4 [&_a:hover]:decoration-primary',
+      '[&_a]:font-medium [&_a]:text-primary-text [&_a]:underline [&_a]:decoration-primary/40 [&_a]:underline-offset-4 [&_a:hover]:decoration-primary',
       // Lists
       '[&_ul]:my-[1em] [&_ul]:list-disc [&_ul]:pl-[1.5em] [&_ol]:my-[1em] [&_ol]:list-decimal [&_ol]:pl-[1.5em]',
       '[&_li]:my-[0.35em] [&_li]:pl-[0.25em] [&_li::marker]:text-faint-foreground',

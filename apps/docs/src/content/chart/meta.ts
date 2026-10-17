@@ -19,7 +19,8 @@ export default defineDoc({
   ],
   notes: [
     'Install the optional peer dependency first: npm install recharts.',
-    'Series colors default to the theme palette (primary, info, success, warning, danger); pass a color name or any CSS color to override.',
+    'Series colors default to the theme chart palette (chart-1 to chart-5); pass a theme color name such as primary or chart-3, or any CSS color, to override.',
+    'Set the palette in your theme file: colors: { light: { "chart-1": "oklch(55% 0.2 30)" } }. A theme without chart colors falls back to primary, info, success, warning and danger.',
     'Every chart is a labelled figure with a visually hidden data table, so screen-reader users get the numbers.',
   ],
 })

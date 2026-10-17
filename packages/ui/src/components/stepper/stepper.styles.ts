@@ -41,7 +41,7 @@ export const stepperStyles = tv({
         title: 'text-foreground',
       },
       current: {
-        indicator: 'border-primary bg-surface text-primary ring-4 ring-primary/15',
+        indicator: 'border-primary bg-surface text-primary-text ring-4 ring-primary/15',
         connector: 'bg-border',
         title: 'text-foreground',
       },
@@ -53,7 +53,7 @@ export const stepperStyles = tv({
       error: {
         indicator: 'border-danger bg-danger text-danger-foreground',
         connector: 'bg-border',
-        title: 'text-danger',
+        title: 'text-danger-text',
       },
     },
     clickable: {

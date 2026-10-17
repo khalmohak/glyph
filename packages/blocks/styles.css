@@ -6,3 +6,8 @@
  *   @import "@glyphui/blocks/styles.css";
  */
 @source "./src";
+
+/* Lets blocks detect, in development, that this stylesheet is loaded. */
+:root {
+  --glyph-blocks-css: 1;
+}

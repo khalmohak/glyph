@@ -55,7 +55,7 @@ export const sidebarStyles = tv({
       'group-data-[collapsed=true]/sidebar:justify-center group-data-[collapsed=true]/sidebar:px-0',
     ],
     itemIcon: 'flex size-4 shrink-0 items-center justify-center [&>svg]:size-4',
-    itemLabel: 'min-w-0 flex-1 truncate text-left group-data-[collapsed=true]/sidebar:hidden',
+    itemLabel: 'min-w-0 flex-1 truncate text-left group-data-[collapsed=true]/sidebar:sr-only',
     itemBadge:
       'ml-auto font-mono text-caption text-faint-foreground tabular-nums group-data-[collapsed=true]/sidebar:hidden',
     footer: [

@@ -17,7 +17,7 @@ export const linkStyles = tv({
     tone: {
       default: { base: 'text-foreground' },
       muted: { base: 'text-muted-foreground hover:text-foreground' },
-      primary: { base: 'text-primary' },
+      primary: { base: 'text-primary-text' },
     },
     underline: {
       hover: {

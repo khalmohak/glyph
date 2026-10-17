@@ -1,6 +1,18 @@
 import { type DeepPartial, deepMerge, isPlainObject } from './merge'
 import type { ComponentOverrides } from './register'
-import type { ColorMode, ShadowScale, ThemeTokens } from './schema'
+import {
+  type ChartToken,
+  type ColorMode,
+  type ColorScale,
+  type ColorScaleInput,
+  chartTokens,
+  colorModes,
+  type ShadowScale,
+  type StatusTextToken,
+  statusTextTokens,
+  type ThemeTokens,
+} from './schema'
+import { deriveTextColor, statusTextTone } from './text-colors'
 
 /** A fully resolved theme: every token present, shadows split per color mode. */
 export interface Theme extends Omit<ThemeTokens, 'shadow'> {
@@ -16,8 +28,9 @@ interface ThemeMeta {
   components?: ComponentOverrides
 }
 
-/** A standalone theme must define every token. */
-export interface BaseThemeInput extends ThemeTokens, ThemeMeta {
+/** A standalone theme must define every token except the optional chart colors. */
+export interface BaseThemeInput extends Omit<ThemeTokens, 'colors'>, ThemeMeta {
+  colors: { light: ColorScaleInput; dark: ColorScaleInput }
   extends?: undefined
 }
 
@@ -56,6 +69,58 @@ export function defineTheme(input: ThemeInput): Theme {
   const { extends: base, shadow, name, components, ...tokens } = input
   const own = { ...tokens, name, components: components ?? {}, shadow: normalizeShadow(shadow) }
 
-  if (base === undefined) return own as Theme
-  return deepMerge(base, own)
+  const theme = base === undefined ? (own as Theme) : deepMerge(base, own)
+  return withTextColors(withChartColors(theme), input, base)
+}
+
+/** Status text colors each theme derived (rather than set), so extensions re-derive them. */
+const derivedText = new WeakMap<Theme, Record<ColorMode, Set<StatusTextToken>>>()
+
+/**
+ * Fills in status text colors the theme does not set, derived from the final tone and
+ * surface colors. Derived values are recomputed for every theme, so a theme that extends
+ * another and changes `primary` also gets a matching `primary-text`.
+ */
+function withTextColors(theme: Theme, input: ThemeInput, base: Theme | undefined): Theme {
+  const inherited = base && derivedText.get(base)
+  const derived: Record<ColorMode, Set<StatusTextToken>> = { light: new Set(), dark: new Set() }
+  const colors = { light: { ...theme.colors.light }, dark: { ...theme.colors.dark } }
+
+  for (const mode of colorModes) {
+    const ownColors = input.colors?.[mode] as Partial<ColorScale> | undefined
+    for (const token of statusTextTokens) {
+      const setHere = ownColors?.[token] !== undefined
+      const setByBase =
+        base?.colors[mode][token] !== undefined && !(inherited?.[mode].has(token) ?? false)
+      if (setHere || setByBase) continue
+      colors[mode][token] = deriveTextColor(colors[mode], statusTextTone[token])
+      derived[mode].add(token)
+    }
+  }
+
+  const result = { ...theme, colors }
+  derivedText.set(result, derived)
+  return result
+}
+
+/** Chart colors a theme leaves out reuse its status colors, so every series stays distinct. */
+const chartFallback: Record<ChartToken, keyof ColorScale> = {
+  'chart-1': 'primary',
+  'chart-2': 'info',
+  'chart-3': 'success',
+  'chart-4': 'warning',
+  'chart-5': 'danger',
+}
+
+function withChartColors(theme: Theme): Theme {
+  const complete = colorModes.every((mode) =>
+    chartTokens.every((token) => theme.colors[mode][token] !== undefined),
+  )
+  if (complete) return theme
+  const fill = (scale: ColorScale): ColorScale => {
+    const filled = { ...scale }
+    for (const token of chartTokens) filled[token] ??= scale[chartFallback[token]]
+    return filled
+  }
+  return { ...theme, colors: { light: fill(theme.colors.light), dark: fill(theme.colors.dark) } }
 }

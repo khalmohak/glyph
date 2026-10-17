@@ -1,5 +1,6 @@
 import { Alert, Button, Card, cn, Field, Heading, Input, Text } from '@glyphui/ui'
 import { type ComponentProps, type FormEvent, type ReactNode, useId, useState } from 'react'
+import { useBlocksStylesCheck } from '../internal/styles-check'
 import type { HeadingLevel } from '../section-header'
 
 export interface AuthCredentials {
@@ -44,6 +45,7 @@ export function AuthCard({
   className,
   ...props
 }: AuthCardProps) {
+  useBlocksStylesCheck()
   const titleId = useId()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -125,16 +127,8 @@ export function AuthCard({
             />
           </Field>
           <Field
-            label={
-              passwordHint ? (
-                <span className="flex w-full items-center justify-between gap-2">
-                  Password
-                  <span className="font-normal">{passwordHint}</span>
-                </span>
-              ) : (
-                'Password'
-              )
-            }
+            label="Password"
+            labelAction={passwordHint}
             error={errors.password}
             description={
               mode === 'sign-up' && !errors.password

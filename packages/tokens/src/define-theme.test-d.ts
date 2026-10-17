@@ -16,3 +16,9 @@ defineTheme({ name: 'typo', extends: glyph, colors: { light: { brand: 'red' } } 
 // Text steps only accept their four properties.
 // @ts-expect-error - 'family' is not part of a text step
 defineTheme({ name: 'typo2', extends: glyph, text: { h1: { family: 'serif' } } })
+
+// Chart colors can be overridden on an extended theme.
+defineTheme({ name: 'charts', extends: glyph, colors: { light: { 'chart-1': 'teal' } } })
+
+// @ts-expect-error - there are five chart colors
+defineTheme({ name: 'chart6', extends: glyph, colors: { light: { 'chart-6': 'teal' } } })

@@ -1,0 +1,45 @@
+name: Update visual baselines
+
+# Regenerates the Linux screenshot baselines for the docs visual tests and commits them to
+# the branch this workflow runs on. Run it from the Actions tab on your PR branch after an
+# intended visual change, then review the image diff in the PR.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-snapshots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    # Keep the tag in sync with @playwright/test in apps/docs/package.json.
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -C apps/docs build
+      - name: Regenerate baselines
+        run: pnpm -C apps/docs exec playwright test --project=visual --update-snapshots
+      - name: Commit changed baselines
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/docs/e2e/__screenshots__
+          if git diff --cached --quiet; then
+            echo 'Baselines unchanged.'
+          else
+            git commit -m 'test: update visual baselines'
+            git push
+          fi

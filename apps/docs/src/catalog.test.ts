@@ -3,6 +3,8 @@ import * as ui from '@glyphui/ui'
 import * as chart from '@glyphui/ui/chart'
 import * as dataTable from '@glyphui/ui/data-table'
 import * as form from '@glyphui/ui/form'
+import * as reactRouter from '@glyphui/ui/react-router'
+import * as vite from '@glyphui/ui/vite'
 import { describe, expect, it } from 'vitest'
 import { catalog, docs } from './lib/catalog'
 
@@ -11,6 +13,8 @@ const entries = {
   '@glyphui/ui/form': form,
   '@glyphui/ui/data-table': dataTable,
   '@glyphui/ui/chart': chart,
+  '@glyphui/ui/react-router': reactRouter,
+  '@glyphui/ui/vite': vite,
   '@glyphui/blocks': blocks,
 } as const
 

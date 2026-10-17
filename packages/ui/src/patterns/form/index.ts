@@ -6,6 +6,7 @@ export {
   type FormFieldProps,
   type FormProps,
   FormSubmit,
+  type FormSubmitProps,
   formErrorStyles,
   type SubmitResult,
   type UseFormOptions,

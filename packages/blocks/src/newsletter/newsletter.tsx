@@ -1,5 +1,6 @@
 import { Button, Container, cn, Heading, Input, Section, Text } from '@glyphui/ui'
 import { type ComponentProps, type FormEvent, type ReactNode, useId, useState } from 'react'
+import { useBlocksStylesCheck } from '../internal/styles-check'
 import type { HeadingLevel } from '../section-header'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
@@ -39,6 +40,7 @@ export function Newsletter({
   className,
   ...props
 }: NewsletterProps) {
+  useBlocksStylesCheck()
   const titleId = useId()
   const inputId = useId()
   const messageId = useId()
@@ -114,9 +116,7 @@ export function Newsletter({
             role={status === 'error' ? 'alert' : 'status'}
             className={cn(
               'min-h-5 text-small',
-              status === 'error'
-                ? 'text-danger'
-                : 'text-[color-mix(in_oklab,var(--color-success)_70%,var(--color-foreground))]',
+              status === 'error' ? 'text-danger-text' : 'text-success-text',
               !split && 'text-center',
             )}
           >

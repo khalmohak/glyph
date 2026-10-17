@@ -7,7 +7,7 @@ const schema = z.object({
 })
 
 export default function Example() {
-  const form = useForm({ schema, defaultValues: { dueDate: undefined } })
+  const form = useForm({ schema })
   return (
     <Form form={form} onSubmit={() => {}} className="grid w-72 gap-4">
       <FormField control={form.control} name="dueDate" label="Due date" required>

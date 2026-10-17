@@ -24,4 +24,14 @@ describe('Field', () => {
     )
     expect(screen.getByLabelText('Name')).not.toHaveAttribute('aria-invalid')
   })
+
+  it('keeps a label action out of the control name', () => {
+    render(
+      <Field label="Password" labelAction={<a href="#reset">Forgot password?</a>}>
+        <Input type="password" />
+      </Field>,
+    )
+    expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'password')
+    expect(screen.getByRole('link', { name: 'Forgot password?' })).toBeInTheDocument()
+  })
 })

@@ -1,5 +1,6 @@
 import { Container, cn, Eyebrow, Heading, Section, Text } from '@glyphui/ui'
 import { type ComponentProps, type ReactNode, useId } from 'react'
+import { useBlocksStylesCheck } from '../internal/styles-check'
 import { type HeadingLevel, SectionHeader } from '../section-header'
 
 export interface FeatureSplitItem {
@@ -33,6 +34,7 @@ export function FeatureSplit({
   className,
   ...props
 }: FeatureSplitProps) {
+  useBlocksStylesCheck()
   const titleId = useId()
   const rowLevel = (title ? Math.min(headingLevel + 1, 6) : headingLevel) as HeadingLevel
   return (

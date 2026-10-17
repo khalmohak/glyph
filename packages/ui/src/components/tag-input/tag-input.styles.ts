@@ -18,7 +18,7 @@ export const tagInputStyles = tv({
       'inline-flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-pill text-muted-foreground hover:bg-border-strong/40 hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring [&>svg]:size-3',
     input:
       'h-7 min-w-24 flex-1 bg-transparent px-1 text-foreground outline-none placeholder:text-faint-foreground disabled:cursor-not-allowed',
-    message: 'text-small font-medium text-danger',
+    message: 'text-small font-medium text-danger-text',
   },
   variants: {
     size: {
