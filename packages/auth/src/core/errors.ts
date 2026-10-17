@@ -18,6 +18,8 @@ export class AuthError extends Error {
   readonly code: AuthErrorCode
   readonly fieldErrors: Readonly<Record<string, string>> | undefined
   readonly status: number | undefined
+  /** For `rate-limited` errors: seconds until the server accepts another attempt, when it said. */
+  readonly retryAfter: number | undefined
 
   constructor(
     message: string,
@@ -25,6 +27,7 @@ export class AuthError extends Error {
       code?: AuthErrorCode
       fieldErrors?: Record<string, string> | undefined
       status?: number | undefined
+      retryAfter?: number | undefined
       cause?: unknown
     } = {},
   ) {
@@ -33,6 +36,7 @@ export class AuthError extends Error {
     this.code = options.code ?? 'unknown'
     this.fieldErrors = options.fieldErrors
     this.status = options.status
+    this.retryAfter = options.retryAfter
   }
 }
 

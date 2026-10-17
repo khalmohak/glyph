@@ -60,7 +60,8 @@ export function SessionExpiredDialog({ onSignOut }: SessionExpiredDialogProps) {
             type="button"
             variant="ghost"
             onClick={async () => {
-              await signOut({ reason: 'expired' })
+              // Signed out locally even if the server is unreachable; the client retries.
+              await signOut({ reason: 'expired' }).catch(() => {})
               onSignOut?.()
             }}
           >
@@ -127,7 +128,7 @@ export function IdleWarningDialog({ onSignOut }: IdleWarningDialogProps) {
             type="button"
             variant="ghost"
             onClick={async () => {
-              await signOut({ reason: 'user' })
+              await signOut({ reason: 'user' }).catch(() => {})
               onSignOut?.()
             }}
           >

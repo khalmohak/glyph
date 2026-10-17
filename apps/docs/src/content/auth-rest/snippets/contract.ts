@@ -15,9 +15,17 @@ export const signedIn = {
 export const nextStep = { status: 'needs-verification', email: 'ada@example.com' }
 // or { status: 'needs-second-factor' }
 
+// 204 (or 200 without `user`) also works: the user is then read from GET /auth/session.
+// GET /auth/session — 401 or `{ user: null }` when signed out.
+
 // 4xx — shown above the form, or next to fields listed in `errors`
 export const failed = {
   message: 'An account with this email already exists.',
   code: 'email-taken',
   errors: { email: 'An account with this email already exists. Sign in instead.' },
 }
+// Without a JSON `message`, a friendly text is used per status; 429 honors Retry-After.
+
+// POST /auth/sign-out — bearer mode sends { refreshToken } so the server can revoke it.
+// POST /auth/password/reset — { token, password }, plus { email } for code-based resets:
+// check the code against that account only.

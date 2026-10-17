@@ -141,7 +141,8 @@ export function UserMenu(inProps: UserMenuProps) {
         <DropdownMenuItem
           icon={<SignOutIcon />}
           onSelect={async () => {
-            await signOut()
+            // Signed out locally even if the server is unreachable; the client retries.
+            await signOut().catch(() => {})
             onSignOut?.()
           }}
         >

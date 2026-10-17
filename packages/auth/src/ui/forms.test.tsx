@@ -223,7 +223,12 @@ describe('password reset', () => {
     await user().type(screen.getByLabelText(/^Repeat new password/), 'brand new pw')
     await user().click(screen.getByRole('button', { name: 'Update password' }))
     await waitFor(() =>
-      expect(resetPassword).toHaveBeenCalledWith({ token: '123456', password: 'brand new pw' }),
+      // The email goes along: a 6-digit code alone must not identify the account.
+      expect(resetPassword).toHaveBeenCalledWith({
+        token: '123456',
+        password: 'brand new pw',
+        email: ada.email,
+      }),
     )
   })
 })

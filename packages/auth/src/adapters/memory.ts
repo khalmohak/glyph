@@ -315,10 +315,15 @@ export function memoryAdapter(options: MemoryAdapterOptions = {}): MemoryAdapter
         sendCode(store, 'reset-password', normalized)
       write(store)
     },
-    async resetPassword({ token, password }) {
+    async resetPassword({ token, password, email }) {
       await delay('resetPassword')
       const store = read()
-      const found = takeCode(store, 'reset-password', (c) => c.code === token)
+      const normalized = email?.trim().toLowerCase()
+      const found = takeCode(
+        store,
+        'reset-password',
+        (c) => c.code === token && (normalized === undefined || c.email === normalized),
+      )
       if (!found)
         throw new AuthError('This reset link has expired. Request a new one.', {
           code: 'expired-token',

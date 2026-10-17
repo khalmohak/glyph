@@ -159,7 +159,12 @@ export function ResetPasswordForm({
         className="grid gap-4"
         onSubmit={async (values) => {
           try {
-            await auth.resetPassword({ token: token ?? values.code, password: values.password })
+            await auth.resetPassword({
+              token: token ?? values.code,
+              password: values.password,
+              // A code is only meaningful together with the address it was sent to.
+              ...(!token && address && { email: address }),
+            })
             setDone(true)
             onSuccess?.()
           } catch (error) {

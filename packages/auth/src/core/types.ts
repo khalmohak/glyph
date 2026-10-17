@@ -101,7 +101,15 @@ export interface AuthAdapter {
   /** Renews the session (e.g. rotates a refresh token). Null means the session is gone. */
   refresh?(): Promise<AuthSession | null>
   requestPasswordReset?(email: string): Promise<void>
-  resetPassword?(input: { token: string; password: string }): Promise<void>
+  /**
+   * `token` is the link token or the emailed code. For code-based resets `email` is set too:
+   * a short code alone must never identify the account.
+   */
+  resetPassword?(input: {
+    token: string
+    password: string
+    email?: string | undefined
+  }): Promise<void>
   verifyEmail?(input: { email: string; code: string }): Promise<SignInResult>
   resendVerification?(email: string): Promise<void>
   verifySecondFactor?(input: { code: string }): Promise<SignInResult>
