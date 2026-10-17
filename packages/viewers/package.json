@@ -1,6 +1,6 @@
 {
   "name": "@glyphui/viewers",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "File and data viewers for Glyph: PDF, CSV, spreadsheets, JSON, code, Markdown, diffs, images, video and audio. Themed by your Glyph theme.",
   "license": "MIT",
   "author": "Mohak Gupta (https://github.com/khalmohak)",
