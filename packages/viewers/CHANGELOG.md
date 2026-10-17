@@ -1,5 +1,11 @@
 # @glyphui/viewers
 
+## 0.8.2
+
+### Patch Changes
+
+- [#36](https://github.com/khalmohak/glyph/pull/36) [`c5bbf94`](https://github.com/khalmohak/glyph/commit/c5bbf947a4fa8f5e9bad9fb6d7eebdc36ff798d8) Thanks [@khalmohak](https://github.com/khalmohak)! - The docs moved to [glyphui.xyz](https://glyphui.xyz), with the demo apps at [demo.glyphui.xyz](https://demo.glyphui.xyz) and [auth.glyphui.xyz](https://auth.glyphui.xyz). Package homepages and README links point there; the old GitHub Pages links redirect.
+
 ## 0.8.1
 
 ## 0.8.0
