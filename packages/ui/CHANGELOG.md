@@ -1,5 +1,39 @@
 # @glyphui/ui
 
+## 0.5.0
+
+### Minor Changes
+
+- [#20](https://github.com/khalmohak/glyph/pull/20) [`b6883cc`](https://github.com/khalmohak/glyph/commit/b6883cc45f159997c12c50ceb6a0564778e84cfe) Thanks [@khalmohak](https://github.com/khalmohak)! - Charts v2 in `@glyphui/ui/chart`.
+
+  - New chart types: `PieChart` (with slice labels; `DonutChart` is now a pie with a hole), `RadarChart`, `RadialBarChart`, `ScatterChart` (bubbles with `size`, groups with `groupBy`), `ComposedChart` (bars, lines and areas, with an optional right axis), `FunnelChart`, `Treemap`, `SankeyChart`, `Gauge` (with colored bands, read out as a meter) and `Heatmap` (a calendar of days you can move through with the arrow keys).
+  - Line, area, bar and composed charts get an interactive legend (click or press Enter to hide a series), `brush` to zoom, `referenceLines` and `referenceAreas`, axis options (`xAxis`, `yAxis`), `syncId`, `onPointClick`, a total row in stacked tooltips, horizontal bars (`layout="vertical"`) and 100% stacked areas (`expand`). The y axis now sizes itself to its labels.
+  - Every chart takes `loading`, `error` with `onRetry`, and `empty`, like the other data components.
+  - Charts animate in and when data changes, at the theme's motion level, and stay still for visitors who prefer reduced motion.
+  - `ChartCard`: a card with a period selector, a "view as table" toggle and a PNG/SVG download menu.
+  - `exportChart(element, { format })` downloads any chart as PNG or SVG with its title, legend and theme colors baked in.
+  - `Sparkline` gains `variant` (`area`, `line`, `bar`) and `showMinMax`.
+  - Fix: a chart color that your own code never mentioned (often `chart-4`) rendered black, because Tailwind only emits theme variables it finds in your source. Charts now use the theme's `--glyph-*` variables directly.
+
+- [#20](https://github.com/khalmohak/glyph/pull/20) [`b6883cc`](https://github.com/khalmohak/glyph/commit/b6883cc45f159997c12c50ceb6a0564778e84cfe) Thanks [@khalmohak](https://github.com/khalmohak)! - Motion is on by default, and the theme controls it.
+
+  - New theme keys: `motion.level` (`none`, `subtle` or `expressive`) and `motion.spring` (`{ stiffness, damping, mass? }`). The spring is compiled to a CSS `linear()` curve, so CSS and JavaScript animations move the same way: `--glyph-ease-spring` and `--glyph-duration-spring`, the `ease-spring` utility, and `springEasing()` in `@glyphui/tokens`. Brutalist snaps with no bounce; Playful is expressive.
+  - `GlyphProvider` takes `motion` to override the level app-wide (e.g. `motion="none"` in tests). Visitors who prefer reduced motion never get animation. The level is mirrored to `<html data-motion>`, with `motion-none:` and `motion-expressive:` variants.
+  - Menus, popovers, selects, tooltips and hover cards spring out of their trigger and animate out before unmounting. Dialogs, alert dialogs and the command menu rise in and settle out. Overlays fade in and out.
+  - Sliding active indicators in Tabs, SegmentedControl, Sidebar and Pagination. Files in FileUpload and chips in TagInput animate in and out. The Switch thumb uses the theme spring, the Checkbox tick draws on when checked, and buttons press down.
+  - New primitives: `Reveal`, `Stagger`/`StaggerItem`, `AnimatedNumber`, `PageTransition`, `Presence`, `ActiveIndicator`, `m` (from `motion`) and `useMotionSettings`. Content never depends on JavaScript to become visible.
+  - Every block animates in on scroll; Stats count up and Pricing prices spring between monthly and yearly. Pass `animate={false}` to turn a block's entrance off.
+
+- [#20](https://github.com/khalmohak/glyph/pull/20) [`b6883cc`](https://github.com/khalmohak/glyph/commit/b6883cc45f159997c12c50ceb6a0564778e84cfe) Thanks [@khalmohak](https://github.com/khalmohak)! - Smaller apps. `@glyphui/ui` now ships one file per module, so your bundler keeps only the components you import, and every style and theme definition is marked side-effect free.
+
+  - Importing one component no longer pulls in every dependency. `Badge` alone went from 56 kB to 14 kB gzipped.
+  - `GlyphProvider` loads the `useConfirm()` dialog the first time you call it, and the toast UI only when you turn on `toaster`. A provider plus a Button now loads 28 kB gzipped up front, down from 107 kB.
+
+### Patch Changes
+
+- Updated dependencies [[`b6883cc`](https://github.com/khalmohak/glyph/commit/b6883cc45f159997c12c50ceb6a0564778e84cfe), [`b6883cc`](https://github.com/khalmohak/glyph/commit/b6883cc45f159997c12c50ceb6a0564778e84cfe)]:
+  - @glyphui/tokens@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes
