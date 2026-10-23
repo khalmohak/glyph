@@ -118,7 +118,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "@clerk/react": "6.17.5",
+    "@clerk/react": "6.17.8",
     "@glyphui/blocks": "workspace:*",
     "@glyphui/tokens": "workspace:*",
     "@glyphui/tsconfig": "workspace:*",
