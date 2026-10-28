@@ -3,12 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Glyph Docs</title>
+    <title>Glyph: React components for Tailwind CSS v4, themed by one file</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="description" content="Docs and component catalog for Glyph, React components on Tailwind CSS v4 themed by one file." />
+    <meta name="description" content="React components on Tailwind CSS v4 that take their whole look from one typed theme file." />
+    <!-- Each prerendered page carries its content as static HTML for crawlers; with JavaScript on, React renders the page instead. -->
+    <style>
+      html[data-js] #prerender {
+        display: none;
+      }
+    </style>
     <script>
       ;(() => {
         const root = document.documentElement
+        root.dataset.js = ''
         let mode = null
         try {
           mode = localStorage.getItem('glyph-mode')

@@ -5,7 +5,15 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"],
-      "env": ["DOCS_BASE", "DEMO_BASE", "AUTH_EXAMPLE_BASE", "SITE_URL", "DEMO_URL", "AUTH_URL"]
+      "env": [
+        "DOCS_BASE",
+        "DEMO_BASE",
+        "AUTH_EXAMPLE_BASE",
+        "SITE_URL",
+        "DEMO_URL",
+        "AUTH_URL",
+        "POSTHOG_KEY"
+      ]
     },
     "dev": {
       "cache": false,

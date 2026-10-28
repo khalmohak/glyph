@@ -7,6 +7,7 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import './fonts'
 import './index.css'
+import { startAnalytics } from './lib/analytics'
 import type { DocsRouteHandle } from './shell/docs-layout'
 import { DocsLayout } from './shell/docs-layout'
 import { PageLayout } from './shell/page-layout'
@@ -87,6 +88,9 @@ const query = new URLSearchParams(window.location.search)
 const fixedTheme = frame ? presetNames.find((name) => name === query.get('theme')) : undefined
 const fixedMode = frame ? query.get('mode') : null
 const pinnedMode = fixedMode === 'light' || fixedMode === 'dark' ? fixedMode : undefined
+
+// Block frames are iframes inside the blocks page; counting them would inflate pageviews.
+if (!frame) startAnalytics()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

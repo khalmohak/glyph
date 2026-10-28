@@ -20,6 +20,7 @@ import { ContrastAudit } from '../components/studio/audit'
 import { StudioBoard } from '../components/studio/board'
 import { StudioControls, type Update } from '../components/studio/controls'
 import { ExportPanel } from '../components/studio/export-panel'
+import { track } from '../lib/analytics'
 import {
   buildTheme,
   decodeState,
@@ -128,6 +129,7 @@ export function ThemesPage() {
             onClick={async () => {
               try {
                 await navigator.clipboard.writeText(window.location.href)
+                track('theme_link_copied', { base: state.base })
                 toast.success('Link copied', { description: 'Anyone with it sees this theme.' })
               } catch {
                 toast.error('Couldn’t copy the link')
@@ -142,6 +144,7 @@ export function ThemesPage() {
             disabled={applied}
             onClick={() => {
               setCustom(state)
+              track('theme_applied', { base: state.base })
               toast.success('Theme applied to the whole site')
             }}
           >

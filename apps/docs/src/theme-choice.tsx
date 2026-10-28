@@ -8,6 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import { track } from './lib/analytics'
 import { buildTheme, decodeState, encodeState, type StudioState } from './lib/theme-studio'
 
 const names = Object.keys(presets) as PresetName[]
@@ -80,6 +81,7 @@ export function ThemeChoiceProvider({
   }, [fixed])
 
   const setTheme = useCallback((next: PresetName) => {
+    track('theme_preset_selected', { preset: next })
     setThemeState(next)
     setCustomState(null)
     write(CUSTOM_KEY, null)

@@ -1,6 +1,7 @@
 import { Button, Card, Skeleton, Text } from '@glyphui/ui'
 import { Download } from 'lucide-react'
 import { lazy, Suspense } from 'react'
+import { track } from '../../lib/analytics'
 
 // Shiki loads only when someone opens the studio.
 const CodeViewer = lazy(() =>
@@ -17,6 +18,7 @@ export function ExportPanel({ code }: { code: string }) {
     })
     link.click()
     URL.revokeObjectURL(url)
+    track('theme_exported')
   }
 
   return (

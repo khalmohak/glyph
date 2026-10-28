@@ -123,6 +123,13 @@ export interface StaticRoute {
 
 const pageTitle = (title: string) => `${title} · ${SITE_NAME}`
 
+/** The home page's title, which search results show for the bare domain. */
+export const HOME_TITLE = `${SITE_NAME}: React components for Tailwind CSS v4, themed by one file`
+
+/** A component page's title. Names alone ("Button") are too generic to rank for. */
+export const componentTitle = (name: string, planned = false) =>
+  planned ? pageTitle(`${name} (planned)`) : `${name} · React + Tailwind CSS · ${SITE_NAME}`
+
 /** Every route that isn't generated from the component catalog. */
 export const staticRoutes: readonly StaticRoute[] = [
   {

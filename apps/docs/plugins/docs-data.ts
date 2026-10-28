@@ -5,7 +5,6 @@ import { gzipSync } from 'node:zlib'
 import { withCustomConfig } from 'react-docgen-typescript'
 import { codeToHtml, createCssVariablesTheme } from 'shiki'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
-import { LIVE_URL, staticRoutes } from '../src/lib/site'
 
 /** This file's folder. Works under Vite's config bundler, its SSR loader and plain Node. */
 const here = dirname(fileURLToPath(import.meta.url))
@@ -214,50 +213,6 @@ async function componentSizes(
   return out
 }
 
-interface RouteMeta {
-  path: string
-  title: string
-  description?: string
-}
-
-const SITE = 'Glyph'
-const SITE_DESCRIPTION =
-  'React components on Tailwind CSS v4 that take their whole look from one typed theme file.'
-
-/** Reads name and description from meta.ts and roadmap.ts without executing them. */
-function routeMetas(contentRoot: string): RouteMeta[] {
-  const field = (src: string, key: string) =>
-    src.match(new RegExp(`${key}:\\s*(?:\\n\\s*)?(['"\`])((?:\\\\.|(?!\\1).)*)\\1`))?.[2]
-  // Static sections and guides come from the site map; component pages from content/.
-  const routes: RouteMeta[] = staticRoutes.map(({ path, title, description }) => ({
-    path,
-    title,
-    description,
-  }))
-  for (const dir of readdirSync(contentRoot, { withFileTypes: true })) {
-    const meta = join(contentRoot, dir.name, 'meta.ts')
-    if (!dir.isDirectory() || !existsSync(meta)) continue
-    const src = readFileSync(meta, 'utf8')
-    const description = field(src, 'description')
-    routes.push({
-      path: `components/${dir.name}`,
-      title: `${field(src, 'name') ?? dir.name} · ${SITE}`,
-      ...(description && { description }),
-    })
-  }
-  const roadmap = readFileSync(join(contentRoot, 'roadmap.ts'), 'utf8')
-  for (const entry of roadmap.matchAll(/\{[^{}]*?slug: '([^']+)'[^{}]*?\}/g)) {
-    const name = field(entry[0], 'name') ?? entry[1]
-    if (!routes.some((r) => r.path === `components/${entry[1]}`)) {
-      routes.push({ path: `components/${entry[1]}`, title: `${name} (planned) · ${SITE}` })
-    }
-  }
-  return routes
-}
-
-const escapeAttr = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
-
 export function docsData(): Plugin {
   const uiRoot = resolve(here, '../../../packages/ui')
   const viewersRoot = resolve(here, '../../../packages/viewers')
@@ -290,69 +245,6 @@ export function docsData(): Plugin {
     name: 'glyph-docs-data',
     configResolved(resolved) {
       config = resolved
-    },
-    // Static hosts (GitHub Pages) return 404 for client-side routes. Write an index.html for
-    // every route, with its own title and description, so deep links load and get indexed.
-    closeBundle() {
-      if (config?.command !== 'build') return
-      const outDir = resolve(config.root, config.build.outDir)
-      const shell = readFileSync(join(outDir, 'index.html'), 'utf8')
-      const urlOf = (path: string) => `${LIVE_URL}/${path ? `${path}/` : ''}`
-      const page = (
-        route: { path: string; title: string; description?: string },
-        noindex = false,
-      ) => {
-        const title = escapeAttr(route.title)
-        const description = escapeAttr(route.description ?? SITE_DESCRIPTION)
-        const url = escapeAttr(urlOf(route.path))
-        // Canonical and Open Graph URLs come from SITE_URL, so moving domains is one setting.
-        const head = [
-          `<link rel="canonical" href="${url}" />`,
-          `<meta property="og:type" content="website" />`,
-          `<meta property="og:site_name" content="${SITE}" />`,
-          `<meta property="og:title" content="${title}" />`,
-          `<meta property="og:description" content="${description}" />`,
-          `<meta property="og:url" content="${url}" />`,
-          `<meta name="twitter:card" content="summary" />`,
-          ...(noindex ? ['<meta name="robots" content="noindex" />'] : []),
-        ].join('\n    ')
-        return shell
-          .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
-          .replace(
-            /<meta name="description" content="[^"]*"/,
-            `<meta name="description" content="${description}"`,
-          )
-          .replace('</head>', `    ${head}\n  </head>`)
-      }
-      const routes = routeMetas(contentRoot)
-      for (const route of routes) {
-        mkdirSync(join(outDir, route.path), { recursive: true })
-        writeFileSync(join(outDir, route.path, 'index.html'), page(route))
-      }
-      // The blocks gallery's iframes load this one page with ?slug=&file=; keep it out of search.
-      mkdirSync(join(outDir, 'blocks/frame'), { recursive: true })
-      writeFileSync(
-        join(outDir, 'blocks/frame/index.html'),
-        page({ path: 'blocks/frame', title: `Block preview · ${SITE}` }, true),
-      )
-      // The home page keeps the shell's title; it gets the canonical and Open Graph tags too.
-      const homeTitle = /<title>(.*?)<\/title>/.exec(shell)?.[1] ?? SITE
-      writeFileSync(join(outDir, 'index.html'), page({ path: '', title: homeTitle }))
-      writeFileSync(
-        join(outDir, 'sitemap.xml'),
-        [
-          '<?xml version="1.0" encoding="UTF-8"?>',
-          '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-          `  <url><loc>${escapeAttr(urlOf(''))}</loc></url>`,
-          ...routes.map((route) => `  <url><loc>${escapeAttr(urlOf(route.path))}</loc></url>`),
-          '</urlset>',
-          '',
-        ].join('\n'),
-      )
-      writeFileSync(
-        join(outDir, 'robots.txt'),
-        `User-agent: *\nDisallow: ${new URL(urlOf('blocks/frame')).pathname}\n\nSitemap: ${urlOf('')}sitemap.xml\n`,
-      )
     },
     configureServer(s) {
       server = s
