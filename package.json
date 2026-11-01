@@ -19,6 +19,7 @@
     "e2e": "pnpm -C apps/docs e2e",
     "size": "node scripts/size.mjs",
     "changeset": "changeset",
+    "version-packages": "changeset version && node scripts/sync-mcp-server.mjs",
     "release": "turbo run build check:exports --filter='./packages/*' && pnpm publish -r --access public --provenance --no-git-checks && changeset tag",
     "prepare": "simple-git-hooks",
     "check:exports": "turbo run check:exports"

@@ -10,8 +10,12 @@ import {
   componentTitle,
   guides,
   HOME_TITLE,
+  homeFaq,
   LIVE_URL,
+  NPM_URL,
   REPO_URL,
+  SITE_DESCRIPTION,
+  SITE_KEYWORDS,
   SITE_NAME,
   sections,
   staticRoutes,
@@ -21,7 +25,8 @@ import {
  * Static hosts return 404 for client-side routes, so the build writes an index.html for every
  * route: its own title, description, canonical URL, Open Graph card and JSON-LD, plus the page
  * as static HTML inside #root. Crawlers that don't run JavaScript (Bing, AI search) index that
- * HTML; browsers hide it and React replaces it on mount. Also writes sitemap.xml and robots.txt.
+ * HTML; browsers hide it and React replaces it on mount. Also writes sitemap.xml and robots.txt,
+ * which names the AI crawlers it lets in.
  *
  * Runs after glyph-docs-content has written the Markdown exports, which become the static HTML
  * of component, guide and changelog pages.
@@ -35,8 +40,6 @@ interface RouteMeta {
   planned?: boolean
 }
 
-const SITE_DESCRIPTION =
-  'React components on Tailwind CSS v4 that take their whole look from one typed theme file.'
 /** public/og.png, made by scripts/og-image.mjs. */
 const OG_IMAGE = { path: 'og.png', width: 1200, height: 630 }
 
@@ -86,11 +89,39 @@ const urlOf = (path: string) => `${LIVE_URL}/${path ? `${path}/` : ''}`
 /** "Button · React + Tailwind CSS · Glyph" → "Button". */
 const shortTitle = (title: string) => title.split(' · ')[0] ?? title
 
-/** schema.org data: the project on the home page, a breadcrumb trail everywhere else. */
-function structuredData(route: RouteMeta): object {
+/**
+ * AI crawlers allowed in by name. `User-agent: *` already lets them in; naming them keeps that
+ * explicit if a group above them ever changes.
+ */
+const AI_CRAWLERS = [
+  'GPTBot',
+  'OAI-SearchBot',
+  'ChatGPT-User',
+  'ClaudeBot',
+  'Claude-SearchBot',
+  'Claude-User',
+  'PerplexityBot',
+  'Perplexity-User',
+  'Google-Extended',
+  'Applebot-Extended',
+  'Meta-ExternalAgent',
+  'Amazonbot',
+  'DuckAssistBot',
+  'MistralAI-User',
+  'CCBot',
+]
+
+/** schema.org data: the project and its FAQ on the home page, a breadcrumb trail elsewhere. */
+function structuredData(route: RouteMeta, version: string): object {
   if (!route.path) {
     return [
-      { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, url: urlOf('') },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: SITE_NAME,
+        url: urlOf(''),
+        description: SITE_DESCRIPTION,
+      },
       {
         '@context': 'https://schema.org',
         '@type': 'SoftwareSourceCode',
@@ -98,9 +129,22 @@ function structuredData(route: RouteMeta): object {
         description: SITE_DESCRIPTION,
         url: urlOf(''),
         codeRepository: REPO_URL,
+        sameAs: [REPO_URL, NPM_URL],
         programmingLanguage: ['TypeScript', 'React'],
         runtimePlatform: 'Web browser',
+        version,
+        keywords: SITE_KEYWORDS.join(', '),
         license: 'https://opensource.org/licenses/MIT',
+        isAccessibleForFree: true,
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: homeFaq.map((entry) => ({
+          '@type': 'Question',
+          name: entry.question,
+          acceptedAnswer: { '@type': 'Answer', text: entry.answer },
+        })),
       },
     ]
   }
@@ -123,11 +167,36 @@ function structuredData(route: RouteMeta): object {
 const link = (path: string, label: string) =>
   `<li><a href="${escapeAttr(urlOf(path))}">${escapeText(label)}</a></li>`
 
+/** The home page's text for crawlers: what Glyph is, how agents use it, and the FAQ. */
+function homeBody(): string {
+  const agentLinks = [
+    ['docs/ai', 'Set up your coding agent'],
+    ['llms.txt', 'llms.txt'],
+    ['llms-full.txt', 'llms-full.txt'],
+  ]
+    .map(
+      ([path = '', label = '']) =>
+        `<li><a href="${escapeAttr(`${LIVE_URL}/${path}`)}">${escapeText(label)}</a></li>`,
+    )
+    .join('')
+  return [
+    `<h1>${escapeText(HOME_TITLE)}</h1>`,
+    `<p>${escapeText(SITE_DESCRIPTION)}</p>`,
+    '<h2>Built for coding agents</h2>',
+    `<p>${escapeText('Install the MCP server with `claude mcp add glyph -- npx -y @glyphui/mcp`, or point any agent at llms.txt. Every docs page also has a Markdown version at its URL plus .md.')}</p>`,
+    `<ul>${agentLinks}</ul>`,
+    '<h2>Frequently asked questions</h2>',
+    ...homeFaq.map((e) => `<h3>${escapeText(e.question)}</h3><p>${escapeText(e.answer)}</p>`),
+  ].join('')
+}
+
 /** The page as plain HTML: its Markdown export where there is one, else title and summary. */
 function staticBody(route: RouteMeta, markdown: string | null, components: RouteMeta[]): string {
   const main = markdown
     ? renderToStaticMarkup(createElement(Markdown, { remarkPlugins: [remarkGfm] }, markdown))
-    : `<h1>${escapeText(route.path ? shortTitle(route.title) : HOME_TITLE)}</h1><p>${escapeText(route.description ?? SITE_DESCRIPTION)}</p>`
+    : route.path
+      ? `<h1>${escapeText(shortTitle(route.title))}</h1><p>${escapeText(route.description ?? SITE_DESCRIPTION)}</p>`
+      : homeBody()
   // Home and the gallery link every component, so each page is a click from the top.
   const index =
     route.path === '' || route.path === 'components'
@@ -161,6 +230,9 @@ export function prerender(): Plugin {
         const routes = routeMetas(contentRoot)
         const components = routes.filter((r) => r.path.startsWith('components/') && !r.planned)
         const ogImage = `${LIVE_URL}/${OG_IMAGE.path}`
+        const version = JSON.parse(
+          readFileSync(resolve(config.root, '../../packages/ui/package.json'), 'utf8'),
+        ).version as string
 
         const page = (route: RouteMeta, noindex = false) => {
           const title = escapeAttr(route.title)
@@ -171,7 +243,7 @@ export function prerender(): Plugin {
             route.path && existsSync(join(outDir, mdPath))
               ? readFileSync(join(outDir, mdPath), 'utf8')
               : null
-          const jsonLd = JSON.stringify(structuredData(route)).replace(/</g, '\\u003c')
+          const jsonLd = JSON.stringify(structuredData(route, version)).replace(/</g, '\\u003c')
           // Canonical and Open Graph URLs come from SITE_URL, so moving domains is one setting.
           const head = [
             `<link rel="canonical" href="${url}" />`,
@@ -189,6 +261,8 @@ export function prerender(): Plugin {
             `<meta property="og:image:width" content="${OG_IMAGE.width}" />`,
             `<meta property="og:image:height" content="${OG_IMAGE.height}" />`,
             `<meta name="twitter:card" content="summary_large_image" />`,
+            `<meta name="twitter:title" content="${title}" />`,
+            `<meta name="twitter:description" content="${description}" />`,
             `<meta name="twitter:image" content="${ogImage}" />`,
             ...(noindex || route.planned ? ['<meta name="robots" content="noindex" />'] : []),
             `<script type="application/ld+json">${jsonLd}</script>`,
@@ -230,9 +304,26 @@ export function prerender(): Plugin {
             '',
           ].join('\n'),
         )
+        const frame = new URL(urlOf('blocks/frame')).pathname
         writeFileSync(
           join(outDir, 'robots.txt'),
-          `User-agent: *\nDisallow: ${new URL(urlOf('blocks/frame')).pathname}\n\nSitemap: ${urlOf('')}sitemap.xml\n`,
+          [
+            '# AI crawlers and agents are welcome. For a Markdown copy of the docs, start at',
+            `# ${LIVE_URL}/llms.txt (index) or ${LIVE_URL}/llms-full.txt (everything).`,
+            '',
+            ...AI_CRAWLERS.map((agent) => `User-agent: ${agent}`),
+            'Allow: /',
+            `Disallow: ${frame}`,
+            '',
+            'User-agent: *',
+            // Cloudflare's Content Signals: search, answers built from the docs, and training are all fine.
+            'Content-Signal: search=yes, ai-input=yes, ai-train=yes',
+            'Allow: /',
+            `Disallow: ${frame}`,
+            '',
+            `Sitemap: ${urlOf('')}sitemap.xml`,
+            '',
+          ].join('\n'),
         )
       },
     },

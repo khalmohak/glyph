@@ -1,6 +1,7 @@
 {
   "name": "@glyphui/mcp",
   "version": "0.8.1",
+  "mcpName": "io.github.khalmohak/glyph",
   "description": "MCP server for Glyph: lets Claude Code, Cursor, VS Code and other AI coding agents look up Glyph components, props, examples, setup and theming before they write code.",
   "license": "MIT",
   "author": "Mohak Gupta (https://github.com/khalmohak)",
@@ -21,7 +22,15 @@
     "cursor",
     "react",
     "tailwindcss",
-    "design-system"
+    "design-system",
+    "mcp-server",
+    "ai-agents",
+    "claude-code",
+    "codex",
+    "vscode",
+    "windsurf",
+    "llms-txt",
+    "ui-library"
   ],
   "type": "module",
   "sideEffects": false,

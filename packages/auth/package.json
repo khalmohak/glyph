@@ -21,7 +21,13 @@
     "react-router",
     "firebase",
     "clerk",
-    "design-system"
+    "design-system",
+    "ai",
+    "ai-agents",
+    "mcp",
+    "llms-txt",
+    "claude-code",
+    "cursor"
   ],
   "type": "module",
   "sideEffects": [

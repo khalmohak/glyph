@@ -47,10 +47,10 @@ const html = `<!doctype html>
   glyph
 </div>
 <div>
-  <h1>React components for Tailwind CSS v4,<br><span>themed by one file.</span></h1>
-  <p>Color, type, shape, depth and motion from a single typed theme. Forms, data tables, auth and file viewers included.</p>
+  <h1>The React UI library<br><span>built for coding agents.</span></h1>
+  <p>An MCP server and Markdown docs give Claude Code, Cursor and Codex the real API. One theme file sets the look.</p>
 </div>
-<footer><span>glyphui.xyz</span><code>npm install @glyphui/ui</code></footer>`
+<footer><span>glyphui.xyz</span><code>claude mcp add glyph -- npx -y @glyphui/mcp</code></footer>`
 
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 } })

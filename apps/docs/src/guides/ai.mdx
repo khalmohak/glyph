@@ -1,11 +1,11 @@
 ---
-title: Use with AI
-description: Give Claude Code, Cursor, VS Code and other coding agents Glyph's real API.
+title: Use with AI agents
+description: Give Claude Code, Cursor, Codex, VS Code and other coding agents Glyph's real API.
 order: 2
 section: Foundations
 ---
 
-Coding agents write better Glyph code when they can look up the real API instead of recalling it. Glyph gives them three ways in: an MCP server for agents that call tools, Markdown versions of every page for agents that read the web, and a short block for your project's agent instructions.
+Glyph is built for coding agents. They write better code when they can look up the real API instead of recalling it from training data, which is often a version or two behind. Glyph gives them three ways in: an MCP server for agents that call tools, Markdown versions of every page for agents that read the web, and a short block for your project's agent instructions.
 
 ## MCP server
 
@@ -39,6 +39,14 @@ For GitHub Copilot's agent mode:
     "glyph": { "type": "stdio", "command": "npx", "args": ["-y", "@glyphui/mcp"] }
   }
 }
+```
+
+### Codex
+
+```toml title="~/.codex/config.toml"
+[mcp_servers.glyph]
+command = "npx"
+args = ["-y", "@glyphui/mcp"]
 ```
 
 ### Windsurf
@@ -90,6 +98,11 @@ For agents that read the web instead of calling tools:
 - [glyphui.xyz/llms.txt](https://glyphui.xyz/llms.txt) is an index of every guide and component, following the [llms.txt](https://llmstxt.org) convention.
 - [glyphui.xyz/llms-full.txt](https://glyphui.xyz/llms-full.txt) is all of it in one file, for pasting into a chat or a project's knowledge.
 - Every docs page has a Markdown version at the same URL plus `.md`, such as [glyphui.xyz/components/button.md](https://glyphui.xyz/components/button.md) or [glyphui.xyz/docs/forms.md](https://glyphui.xyz/docs/forms.md).
+- Agents that send `Accept: text/markdown` get that Markdown from the page's own URL, so `glyphui.xyz/docs/forms` works as well as `glyphui.xyz/docs/forms.md`. The home page answers with llms.txt.
+
+```sh
+curl -H "Accept: text/markdown" https://glyphui.xyz/components/data-table
+```
 
 ## Project instructions
 
