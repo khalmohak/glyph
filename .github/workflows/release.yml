@@ -28,7 +28,8 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck && pnpm test
+      # No typecheck/test here: CI's `check` job already runs them on every PR and push to main.
+      # `pnpm release` still builds the packages and verifies their exports before publishing.
       - uses: changesets/action@v1
         with:
           version: pnpm version-packages
