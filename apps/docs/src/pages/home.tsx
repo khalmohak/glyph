@@ -34,11 +34,13 @@ import {
 } from 'lucide-react'
 import { lazy, type ReactNode, Suspense, useState } from 'react'
 import { Link } from 'react-router'
+import { AgentPrompt } from '../components/agent-prompt'
 import { BrowserFrame } from '../components/home/browser-frame'
 import { ThemeTeaser } from '../components/home/theme-teaser'
 import { Snippet } from '../components/snippet'
+import { AGENTS_BLOCK } from '../lib/agent-setup'
 import { docs } from '../lib/catalog'
-import { AUTH_URL, DEMO_URL, homeFaq, LIVE_URL } from '../lib/site'
+import { AUTH_URL, DEMO_URL, homeFaq } from '../lib/site'
 import { version } from '../lib/version'
 import { presetLabel, presetNames } from '../shell/theme-controls'
 import { useThemeChoice } from '../theme-choice'
@@ -57,10 +59,6 @@ const MCP_COMMAND = 'claude mcp add glyph -- npx -y @glyphui/mcp'
 
 /** The tools @glyphui/mcp exposes, as listed in the AI guide. */
 const mcpTools = ['get_setup', 'get_component', 'search_docs', 'get_example', 'get_theming']
-
-const AGENTS_MD = `## UI
-
-This app uses Glyph for all UI. Before using a component, look it up with the glyph MCP server or at ${LIVE_URL}/llms.txt. Don't guess props.`
 
 export function HomePage() {
   return (
@@ -333,6 +331,16 @@ function AgentsSection() {
           </Button>
         }
       />
+      <Reveal className="grid gap-3">
+        <Heading level={3} size="h4">
+          Set up with one prompt
+        </Heading>
+        <Text tone="muted">
+          Paste it into your agent in your project. It connects the MCP server, installs Glyph and
+          adds the project instructions.
+        </Text>
+        <AgentPrompt />
+      </Reveal>
       <Stagger className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-3">
         <AgentCard
           icon={<Bot />}
@@ -370,7 +378,7 @@ function AgentsSection() {
           title="AGENTS.md"
           description="A few lines in your project's agent instructions keep every session on Glyph's conventions."
         >
-          <CodeBlock title="AGENTS.md" language="md" wrap code={AGENTS_MD} />
+          <CodeBlock title="AGENTS.md" language="md" wrap code={AGENTS_BLOCK} />
         </AgentCard>
       </Stagger>
     </Section>

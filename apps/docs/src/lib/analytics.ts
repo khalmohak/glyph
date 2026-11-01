@@ -37,6 +37,7 @@ export function startAnalytics() {
 export type AnalyticsEvent =
   | 'install_command_copied'
   | 'code_copied'
+  | 'setup_prompt_copied'
   | 'page_copied_as_markdown'
   | 'page_opened_externally'
   | 'search_result_selected'

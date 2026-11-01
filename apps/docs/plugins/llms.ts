@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { build } from 'esbuild'
+import { agentTargets, setupPrompt } from '../src/lib/agent-setup'
 import type { DocMeta } from '../src/lib/doc'
 import { categories } from '../src/lib/doc'
 import { LIVE_URL, SITE_NAME } from '../src/lib/site'
@@ -165,6 +166,24 @@ function prose(text: string, ctx: MarkdownContext): string {
       return [`> **${title ?? 'Note'}**`, '>', ...text].join('\n')
     },
   )
+  // The page has a tab per agent; Markdown gets Claude Code's prompt and a pointer to the rest.
+  body = body.replace(/<AgentPrompt\s*\/>/g, () => {
+    const [first] = agentTargets
+    if (!first) return ''
+    return [
+      `Prompt for ${first.label}:`,
+      '',
+      '```text',
+      setupPrompt(first),
+      '```',
+      '',
+      `Prompts for ${agentTargets
+        .slice(1)
+        .filter((t) => t.mcp)
+        .map((t) => t.label)
+        .join(', ')} and other agents: ${absolute('/docs/ai')}`,
+    ].join('\n')
+  })
   body = body.replace(/<Steps>|<\/Steps>/g, '')
   return body.replace(/\]\((\/[^)]*)\)/g, (_, path: string) => `](${absolute(path)})`)
 }

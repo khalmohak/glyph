@@ -7,6 +7,12 @@ section: Foundations
 
 Glyph is built for coding agents. They write better code when they can look up the real API instead of recalling it from training data, which is often a version or two behind. Glyph gives them three ways in: an MCP server for agents that call tools, Markdown versions of every page for agents that read the web, and a short block for your project's agent instructions.
 
+## Set up with one prompt
+
+Pick your agent, copy the prompt and paste it into a chat in your project. It connects the MCP server, installs and wires up Glyph, and adds the project instructions. The sections below cover each step by hand.
+
+<AgentPrompt />
+
 ## MCP server
 
 `@glyphui/mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) server. Your editor starts it on demand with `npx`; there is nothing to install in your project. Everything it serves is bundled in the package and generated from these docs for that release, so it works offline and answers for one exact Glyph version.
