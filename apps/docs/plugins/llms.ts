@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { build } from 'esbuild'
+import { agentTargets, setupPrompt } from '../src/lib/agent-setup'
 import type { DocMeta } from '../src/lib/doc'
 import { categories } from '../src/lib/doc'
 import { LIVE_URL, SITE_NAME } from '../src/lib/site'
@@ -165,6 +166,24 @@ function prose(text: string, ctx: MarkdownContext): string {
       return [`> **${title ?? 'Note'}**`, '>', ...text].join('\n')
     },
   )
+  // The page has a tab per agent; Markdown gets Claude Code's prompt and a pointer to the rest.
+  body = body.replace(/<AgentPrompt\s*\/>/g, () => {
+    const [first] = agentTargets
+    if (!first) return ''
+    return [
+      `Prompt for ${first.label}:`,
+      '',
+      '```text',
+      setupPrompt(first),
+      '```',
+      '',
+      `Prompts for ${agentTargets
+        .slice(1)
+        .filter((t) => t.mcp)
+        .map((t) => t.label)
+        .join(', ')} and other agents: ${absolute('/docs/ai')}`,
+    ].join('\n')
+  })
   body = body.replace(/<Steps>|<\/Steps>/g, '')
   return body.replace(/\]\((\/[^)]*)\)/g, (_, path: string) => `](${absolute(path)})`)
 }
@@ -186,7 +205,16 @@ export function changelogMarkdown(ctx: MarkdownContext): string {
 }
 
 const summary =
-  'Glyph is a React 19 component library on Tailwind CSS v4. One typed theme file sets color, type, shape, depth, motion and per-component defaults. Beyond components it ships solved patterns: schema-validated forms, a data table with server mode and URL state, app layout, charts, authentication with protected routes, and file viewers.'
+  'Glyph is a React 19 component library on Tailwind CSS v4, built for AI coding agents: an MCP server, this file and a Markdown version of every docs page give agents the real API for one exact version. One typed theme file sets color, type, shape, depth, motion and per-component defaults. Beyond components it ships solved patterns: schema-validated forms, a data table with server mode and URL state, app layout, charts, authentication with protected routes, and file viewers.'
+
+/** What an agent writing Glyph code should do; also in the AGENTS.md block in the AI guide. */
+const agentRules = [
+  "Look up a component before using it (`get_component` in the MCP server, or its `.md` page below). Don't guess props.",
+  'Import from the entry each component page lists, such as `@glyphui/ui/form` or `@glyphui/ui/data-table`, not always `@glyphui/ui`.',
+  'Style through the theme file and token utilities (`bg-primary`, `text-muted-foreground`), not hard-coded colors.',
+  'Prefer an existing pattern or block (Form, DataTable, AppShell, `@glyphui/blocks`) over rebuilding it from primitives.',
+  'Keep labels, `aria-label` on icon-only buttons, and keyboard behavior.',
+]
 
 /** The llms.txt index: what Glyph is, how to install it, and a link to every page's Markdown. */
 export function llmsIndex(ctx: MarkdownContext): string {
@@ -199,7 +227,11 @@ export function llmsIndex(ctx: MarkdownContext): string {
     '',
     'Install: `npm install @glyphui/ui`, then import `@glyphui/ui/fonts.css`, `tailwindcss` and `@glyphui/ui/styles.css` in your CSS and wrap the app in `<GlyphProvider>`.',
     '',
-    `Coding agents: the MCP server \`@glyphui/mcp\` serves these docs as tools (component props, examples, setup, theming, search). Claude Code: \`claude mcp add glyph -- npx -y @glyphui/mcp\`. Other editors: ${absolute('/docs/ai.md')}.`,
+    `Coding agents: the MCP server \`@glyphui/mcp\` serves these docs as tools (component props, examples, setup, theming, search). Claude Code: \`claude mcp add glyph -- npx -y @glyphui/mcp\`. Cursor, VS Code, Codex, Windsurf and Claude Desktop: ${absolute('/docs/ai.md')}. Any docs URL returns Markdown when requested with \`Accept: text/markdown\`.`,
+    '',
+    'When writing code with Glyph:',
+    '',
+    ...agentRules.map((rule) => `- ${rule}`),
     '',
     '## Guides',
     '',

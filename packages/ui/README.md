@@ -1,6 +1,6 @@
 # @glyphui/ui
 
-React components on Tailwind CSS v4 that take their whole look from **one typed theme file**, with the parts every app rebuilds already solved: forms, data tables, app layout, and loading / empty / error states.
+React components on Tailwind CSS v4, built for AI coding agents. They take their whole look from **one typed theme file**, and the parts every app rebuilds come solved: forms, data tables, app layout, and loading / empty / error states. An MCP server and Markdown docs give your agent the real API instead of a guess.
 
 [Docs](https://glyphui.xyz/) · [Components](https://glyphui.xyz/components) · [Theme studio](https://glyphui.xyz/themes) · [GitHub](https://github.com/khalmohak/glyph) · [Changelog](https://github.com/khalmohak/glyph/blob/main/packages/ui/CHANGELOG.md)
 
@@ -16,7 +16,7 @@ npm install recharts
 
 Requires React 19 and Tailwind CSS 4.1 or later.
 
-Using a coding agent? Add the MCP server so it looks up Glyph's props and examples instead of guessing: `claude mcp add glyph -- npx -y @glyphui/mcp`. Other editors: [Use with AI](https://glyphui.xyz/docs/ai).
+Using a coding agent? Add the MCP server so it looks up Glyph's props and examples instead of guessing: `claude mcp add glyph -- npx -y @glyphui/mcp`. Other editors: [Use with AI agents](https://glyphui.xyz/docs/ai).
 
 ## Set up
 

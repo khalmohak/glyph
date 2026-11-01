@@ -9,6 +9,7 @@ import {
 } from '@glyphui/ui'
 import { Bot, ChevronDown, Copy, FileText, MessageSquare } from 'lucide-react'
 import { useState } from 'react'
+import { track } from '../lib/analytics'
 
 /** The Markdown alternate of a page: `/components/button` → `<base>components/button.md`. */
 export function markdownUrl(path: string): string {
@@ -35,6 +36,7 @@ export function CopyAsMarkdown({ path, title }: { path: string; title: string })
       const res = await fetch(md)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       await navigator.clipboard.writeText(await res.text())
+      track('page_copied_as_markdown', { page: path })
       toast.success('Copied page as Markdown')
     } catch {
       toast.error('Couldn’t copy the page', { description: 'Open it as Markdown instead.' })
@@ -67,7 +69,12 @@ export function CopyAsMarkdown({ path, title }: { path: string; title: string })
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem icon={<FileText />} asChild>
-            <a href={md} target="_blank" rel="noreferrer">
+            <a
+              href={md}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => track('page_opened_externally', { page: path, target: 'markdown' })}
+            >
               View as Markdown
             </a>
           </DropdownMenuItem>
@@ -76,6 +83,7 @@ export function CopyAsMarkdown({ path, title }: { path: string; title: string })
               href={`https://chatgpt.com/?q=${prompt(absolute(md))}`}
               target="_blank"
               rel="noreferrer"
+              onClick={() => track('page_opened_externally', { page: path, target: 'chatgpt' })}
             >
               Open in ChatGPT
             </a>
@@ -85,6 +93,7 @@ export function CopyAsMarkdown({ path, title }: { path: string; title: string })
               href={`https://claude.ai/new?q=${prompt(absolute(md))}`}
               target="_blank"
               rel="noreferrer"
+              onClick={() => track('page_opened_externally', { page: path, target: 'claude' })}
             >
               Open in Claude
             </a>

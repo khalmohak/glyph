@@ -80,6 +80,7 @@ One-time setup (already done for `glyphui.xyz`; here for a fresh account or doma
    - secret `CLOUDFLARE_API_TOKEN` = the token
    - secret `CLOUDFLARE_ACCOUNT_ID` = your account ID (shown on the domain's overview page)
    - (only if the domain differs) variable `CLOUDFLARE_DOMAIN`
+   - variable `POSTHOG_KEY` = the PostHog project API key, for docs analytics. Without it the docs send nothing. Events go through `/ingest` on the docs domain (`apps/docs/functions/ingest`), which targets PostHog's US region.
 5. Run the **Cloudflare** workflow (Actions tab → Run workflow), or push to `main`.
 6. In Cloudflare, **Rules → Redirect Rules → Create rule → template "Redirect from WWW to Root"** so `www.glyphui.xyz` goes to `glyphui.xyz`.
 

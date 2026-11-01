@@ -10,6 +10,7 @@ minimumReleaseAge: 20160
 # dependency of @glyphui/auth) only print notices or build optional bits we don't use.
 allowBuilds:
   '@firebase/util': false
+  core-js: false
   esbuild: true
   protobufjs: false
   simple-git-hooks: true

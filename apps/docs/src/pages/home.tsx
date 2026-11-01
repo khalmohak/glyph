@@ -1,4 +1,4 @@
-import { Cta, FeatureGrid } from '@glyphui/blocks'
+import { Cta, Faq, FeatureGrid } from '@glyphui/blocks'
 import {
   AnimatedNumber,
   Badge,
@@ -20,22 +20,27 @@ import {
 import {
   ArrowRight,
   ArrowUpRight,
+  Bot,
   FileStack,
+  FileText,
   KeyRound,
   LayoutDashboard,
   LineChart,
   ListChecks,
   PanelsTopLeft,
+  ScrollText,
   Sparkles,
   Table2,
 } from 'lucide-react'
 import { lazy, type ReactNode, Suspense, useState } from 'react'
 import { Link } from 'react-router'
+import { AgentPrompt } from '../components/agent-prompt'
 import { BrowserFrame } from '../components/home/browser-frame'
 import { ThemeTeaser } from '../components/home/theme-teaser'
 import { Snippet } from '../components/snippet'
+import { AGENTS_BLOCK } from '../lib/agent-setup'
 import { docs } from '../lib/catalog'
-import { AUTH_URL, DEMO_URL } from '../lib/site'
+import { AUTH_URL, DEMO_URL, homeFaq } from '../lib/site'
 import { version } from '../lib/version'
 import { presetLabel, presetNames } from '../shell/theme-controls'
 import { useThemeChoice } from '../theme-choice'
@@ -48,7 +53,12 @@ const ProductMock = lazy(() =>
 const exampleCount = docs.reduce((sum, doc) => sum + (doc.examples?.length ?? 0), 0)
 
 /** Published packages, each its own install. */
-const packages = ['tokens', 'ui', 'blocks', 'auth', 'viewers']
+const packages = ['tokens', 'ui', 'blocks', 'auth', 'viewers', 'mcp']
+
+const MCP_COMMAND = 'claude mcp add glyph -- npx -y @glyphui/mcp'
+
+/** The tools @glyphui/mcp exposes, as listed in the AI guide. */
+const mcpTools = ['get_setup', 'get_component', 'search_docs', 'get_example', 'get_theming']
 
 export function HomePage() {
   return (
@@ -57,6 +67,7 @@ export function HomePage() {
       <Section>
         <StatsStrip />
       </Section>
+      <AgentsSection />
       <FeatureGrid
         eyebrow="What's in the box"
         title="Everything a SaaS needs, already solved"
@@ -179,16 +190,22 @@ export function HomePage() {
           />
         </Stagger>
       </Section>
+      <Faq
+        eyebrow="FAQ"
+        title="Common questions about Glyph"
+        layout="split"
+        items={homeFaq.map((entry) => ({ question: entry.question, answer: entry.answer }))}
+      />
       <Cta
-        title="Start with a theme, ship the product"
-        description={`Glyph ${version} is MIT licensed and on npm.`}
+        title="Give your agent a UI library it can look up"
+        description={`Glyph ${version} is MIT licensed and on npm, with its MCP server released alongside.`}
         actions={
           <>
             <Button size="lg" rightIcon={<ArrowRight />} asChild>
               <Link to="/docs/getting-started">Get started</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link to="/components">Browse components</Link>
+              <Link to="/docs/ai">Set up your agent</Link>
             </Button>
           </>
         }
@@ -245,27 +262,29 @@ function Hero() {
       <Container className="relative grid grid-cols-[minmax(0,1fr)] gap-12">
         <Reveal className="mx-auto grid max-w-3xl justify-items-center gap-6 text-center">
           <Badge tone="primary" dot asChild>
-            <Link to="/components?sort=newest">
-              v{version} · PDF, CSV and media viewers are here
-            </Link>
+            <Link to="/docs/ai">v{version} · Built for AI coding agents, MCP server included</Link>
           </Badge>
           <Heading level={1} size="display" className="text-balance">
-            One theme file. Every screen follows.
+            The UI library built for coding agents.
           </Heading>
           <Text size="lead" tone="muted" className="max-w-2xl text-pretty">
-            Glyph is a React component library on Tailwind CSS v4. Forms, data tables, charts, auth
-            and file viewers come solved, and one typed theme decides how all of it looks. This site
-            is built with it.
+            Glyph is a React and Tailwind CSS v4 library your agent looks up instead of guessing. An
+            MCP server and Markdown docs give Claude Code, Cursor and Codex the real props and
+            examples. Forms, data tables, charts, auth and file viewers come solved, and one typed
+            theme file decides how all of it looks.
           </Text>
           <div className="flex flex-wrap justify-center gap-3">
             <Button size="lg" rightIcon={<ArrowRight />} asChild>
               <Link to="/docs/getting-started">Get started</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link to="/components">Browse components</Link>
+              <Link to="/docs/ai">Set up your agent</Link>
             </Button>
           </div>
-          <Snippet code="npm install @glyphui/ui" className="w-full max-w-sm" />
+          <div className="grid w-full max-w-md gap-2">
+            <Snippet code="npm install @glyphui/ui" />
+            <Snippet code={MCP_COMMAND} />
+          </div>
         </Reveal>
 
         <Reveal scale delay={120} className="grid gap-4">
@@ -299,6 +318,100 @@ function Hero() {
   )
 }
 
+function AgentsSection() {
+  return (
+    <Section>
+      <SectionHeading
+        eyebrow="Built for agents"
+        title="Your agent reads the docs before it writes the code"
+        description="Agents guess when all they have is training data. Glyph gives them the API for the exact version you installed, in the form each agent reads best."
+        action={
+          <Button variant="outline" rightIcon={<ArrowRight />} asChild>
+            <Link to="/docs/ai">Agent setup guide</Link>
+          </Button>
+        }
+      />
+      <Reveal className="grid gap-3">
+        <Heading level={3} size="h4">
+          Set up with one prompt
+        </Heading>
+        <Text tone="muted">
+          Paste it into your agent in your project. It connects the MCP server, installs Glyph and
+          adds the project instructions.
+        </Text>
+        <AgentPrompt />
+      </Reveal>
+      <Stagger className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-3">
+        <AgentCard
+          icon={<Bot />}
+          title="MCP server"
+          description="Props, examples, setup and theming as tools, bundled for your Glyph version. Works offline in Claude Code, Cursor, VS Code, Codex and Windsurf."
+        >
+          <Snippet code={MCP_COMMAND} />
+          <ul className="flex flex-wrap gap-1.5" aria-label="Tools">
+            {mcpTools.map((tool) => (
+              <li key={tool}>
+                <Badge variant="outline" className="font-mono">
+                  {tool}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        </AgentCard>
+        <AgentCard
+          icon={<FileText />}
+          title="llms.txt and Markdown"
+          description="For agents that read the web: an index, the whole docs in one file, and every page as Markdown at its URL plus .md, or with Accept: text/markdown."
+        >
+          <ul className="grid gap-1.5 font-mono text-small">
+            {['/llms.txt', '/llms-full.txt', '/components/data-table.md'].map((path) => (
+              <li key={path}>
+                <a href={path} className="text-primary underline-offset-4 hover:underline">
+                  glyphui.xyz{path}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </AgentCard>
+        <AgentCard
+          icon={<ScrollText />}
+          title="AGENTS.md"
+          description="A few lines in your project's agent instructions keep every session on Glyph's conventions."
+        >
+          <CodeBlock title="AGENTS.md" language="md" wrap code={AGENTS_BLOCK} />
+        </AgentCard>
+      </Stagger>
+    </Section>
+  )
+}
+
+function AgentCard({
+  icon,
+  title,
+  description,
+  children,
+}: {
+  icon: ReactNode
+  title: string
+  description: string
+  children: ReactNode
+}) {
+  return (
+    <Card className="h-full content-start gap-4">
+      <div className="grid gap-2">
+        <span className="grid size-9 place-items-center rounded-md bg-subtle text-primary [&_svg]:size-5">
+          {icon}
+        </span>
+        <Heading level={3} size="h4">
+          {title}
+        </Heading>
+        <Text tone="muted">{description}</Text>
+      </div>
+      {children}
+    </Card>
+  )
+}
+
 function MockSkeleton() {
   return (
     <div className="grid h-full grid-cols-[15rem_1fr] max-md:grid-cols-1">
@@ -320,7 +433,7 @@ function StatsStrip() {
   const stats = [
     { value: docs.length, label: 'components and patterns' },
     { value: exampleCount, label: 'live examples' },
-    { value: packages.length, label: 'packages, install what you use' },
+    { value: packages.length, label: 'packages, MCP server included' },
     { value: presetNames.length, label: 'built-in themes' },
   ]
   return (

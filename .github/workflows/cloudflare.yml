@@ -58,6 +58,9 @@ jobs:
         run: pnpm install --frozen-lockfile
       - if: steps.ready.outputs.ready == 'true'
         run: pnpm turbo run build --filter=docs --filter=demo-saas --filter=auth-example
+        env:
+          # PostHog project API key (public); the docs only send analytics from the live domain.
+          POSTHOG_KEY: ${{ vars.POSTHOG_KEY }}
       # Projects, custom domains and DNS records; a no-op once they exist.
       - if: steps.ready.outputs.ready == 'true'
         name: Prepare Cloudflare
@@ -71,9 +74,10 @@ jobs:
           for app in docs:glyph-docs demo-saas:glyph-demo auth-example:glyph-auth; do
             dir="${app%%:*}"
             project="${app##*:}"
-            # No top-level 404.html, so Pages serves index.html for client-side routes.
-            npx --yes wrangler@4.147.0 pages deploy "apps/$dir/dist" \
-              --project-name="$project" --branch="$BRANCH" --commit-dirty=true | tee deploy.log
+            # No top-level 404.html, so Pages serves index.html for client-side routes. Deploying
+            # from the app's folder picks up its functions/ (the docs' analytics proxy).
+            (cd "apps/$dir" && npx --yes wrangler@4.147.0 pages deploy dist \
+              --project-name="$project" --branch="$BRANCH" --commit-dirty=true) | tee deploy.log
             url="$(grep -Eo 'https://[^ ]+\.pages\.dev' deploy.log | tail -1)"
             echo "- \`$project\`: $url" >> "$GITHUB_STEP_SUMMARY"
           done

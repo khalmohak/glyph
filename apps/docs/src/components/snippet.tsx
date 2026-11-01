@@ -1,6 +1,7 @@
 import { cn, IconButton, Tooltip } from '@glyphui/ui'
 import { Check, Copy } from 'lucide-react'
 import { useState } from 'react'
+import { track } from '../lib/analytics'
 
 /** Copy-to-clipboard button. Falls back silently when the clipboard is blocked. */
 export function CopyButton({ text, className }: { text: string; className?: string }) {
@@ -15,6 +16,9 @@ export function CopyButton({ text, className }: { text: string; className?: stri
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(text)
+            if (/^(npm|pnpm|yarn|bun|npx) /.test(text))
+              track('install_command_copied', { command: text })
+            else track('code_copied', { lines: text.split('\n').length })
             setCopied(true)
             setTimeout(() => setCopied(false), 1500)
           } catch {

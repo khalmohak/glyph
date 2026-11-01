@@ -1,0 +1,24 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Glyph",
+  "description": "React 19 and Tailwind CSS v4 UI library built for AI coding agents. One typed theme file sets the look; forms, data tables, app layout, charts, auth and file viewers come solved. Ships an MCP server (@glyphui/mcp) and llms.txt.",
+  "folders": ["apps/docs/src/guides", "packages"],
+  "excludeFolders": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "e2e",
+    "**/src",
+    "**/test",
+    "packages/mcp/data"
+  ],
+  "excludeFiles": ["CHANGELOG.md"],
+  "rules": [
+    "Look up a component's props and import entry before using it; with the glyph MCP server, call get_component. Don't guess props.",
+    "Import from the entry each component lists, such as @glyphui/ui/form or @glyphui/ui/data-table, not always @glyphui/ui.",
+    "Import @glyphui/ui/fonts.css, then tailwindcss, then @glyphui/ui/styles.css in the app's CSS, and wrap the app in <GlyphProvider>.",
+    "Style through the theme file (defineTheme) and token utilities such as bg-primary and text-muted-foreground, not hard-coded colors.",
+    "Prefer an existing pattern or block (Form, DataTable, AppShell, @glyphui/blocks) over rebuilding it from primitives.",
+    "Keep all @glyphui/* packages on the same version."
+  ]
+}

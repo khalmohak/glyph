@@ -51,8 +51,9 @@ export const guides: readonly Guide[] = [
   },
   {
     slug: 'ai',
-    title: 'Use with AI',
-    description: "Give Claude Code, Cursor, VS Code and other coding agents Glyph's real API.",
+    title: 'Use with AI agents',
+    description:
+      "Give Claude Code, Cursor, Codex, VS Code and other coding agents Glyph's real API.",
   },
   {
     slug: 'theming',
@@ -123,11 +124,76 @@ export interface StaticRoute {
 
 const pageTitle = (title: string) => `${title} · ${SITE_NAME}`
 
+/** The home page's title, which search results show for the bare domain. */
+export const HOME_TITLE = `${SITE_NAME}: the React UI library built for AI coding agents`
+
+/** The default meta description: search snippets, link previews and the JSON-LD summary. */
+export const SITE_DESCRIPTION =
+  'React and Tailwind CSS v4 components built for AI coding agents. An MCP server, llms.txt and Markdown docs give Claude Code, Cursor and Codex the real API.'
+
+/** Search terms for the JSON-LD `keywords`; keep in step with the packages' npm keywords. */
+export const SITE_KEYWORDS = [
+  'React UI library',
+  'Tailwind CSS v4 components',
+  'UI library for AI coding agents',
+  'MCP server',
+  'llms.txt',
+  'Claude Code',
+  'Cursor',
+  'design system',
+]
+
+export interface FaqEntry {
+  question: string
+  answer: string
+}
+
+/**
+ * The home page FAQ. Plain text, because the prerender writes the same entries into the static
+ * HTML and the FAQPage JSON-LD; structured data has to match what the page shows.
+ */
+export const homeFaq: readonly FaqEntry[] = [
+  {
+    question: 'What is Glyph?',
+    answer:
+      'Glyph is an MIT-licensed React 19 component library on Tailwind CSS v4, built so AI coding agents can use it correctly. Besides components it ships solved patterns (forms, data tables, app layout, charts, authentication and file viewers), all styled by one typed theme file.',
+  },
+  {
+    question: "How does a coding agent learn Glyph's API?",
+    answer:
+      'It looks it up instead of guessing. The @glyphui/mcp server answers tool calls for components, props, examples, setup and theming. Agents that read the web get llms.txt and a Markdown version of every docs page. A short AGENTS.md block tells the agent to check both before it writes code.',
+  },
+  {
+    question: 'Which coding agents does it work with?',
+    answer:
+      'Any agent that supports the Model Context Protocol: Claude Code, Cursor, VS Code with GitHub Copilot, Codex, Windsurf and Claude Desktop. Agents without MCP can read glyphui.xyz/llms.txt or any page with .md added to its URL.',
+  },
+  {
+    question: 'Does the MCP server need an API key or network access?',
+    answer:
+      'No. Everything it serves is bundled in the npm package and generated from the docs for that release, so it runs offline and answers for one exact Glyph version.',
+  },
+  {
+    question: 'How is Glyph different from shadcn/ui?',
+    answer:
+      'shadcn/ui copies component source into your project for you to edit. Glyph is an npm package that you upgrade with a version bump, and one typed theme file sets color, type, shape, depth, density and motion everywhere. It also ships app-level patterns that most libraries leave to you: server-side data tables with URL state, schema-validated forms with server errors, authentication and file viewers.',
+  },
+  {
+    question: 'Does it work with Next.js and Vite?',
+    answer:
+      'Yes. Glyph works in any React 19 app on Tailwind CSS v4, including Vite and Next.js. The get_setup tool in the MCP server writes the install command, CSS imports and provider tree for your framework.',
+  },
+]
+
+/** A component page's title. Names alone ("Button") are too generic to rank for. */
+export const componentTitle = (name: string, planned = false) =>
+  planned ? pageTitle(`${name} (planned)`) : `${name} · React + Tailwind CSS · ${SITE_NAME}`
+
 /** Every route that isn't generated from the component catalog. */
 export const staticRoutes: readonly StaticRoute[] = [
   {
     path: 'components',
-    title: pageTitle('Components'),
+    title: pageTitle('React components'),
     description: 'Every Glyph component with a live preview, its status, and the roadmap.',
   },
   {

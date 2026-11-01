@@ -33,6 +33,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { StatusBadge } from './components/status-badge'
+import { track } from './lib/analytics'
 import { docs, docsByCategory } from './lib/catalog'
 import { guideIndex } from './lib/content'
 import { guides } from './lib/site'
@@ -97,6 +98,7 @@ export function SearchCommand() {
   }, [propIndex, query])
 
   const go = (href: string) => {
+    track('search_result_selected', { query: query.trim(), href })
     setQuery('')
     navigate(href)
   }

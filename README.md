@@ -2,17 +2,25 @@
 
 # Glyph
 
-**One theme file. Every screen follows.**
+**The React UI library built for AI coding agents.**
 
-React components on Tailwind CSS v4 that take their whole look from one typed theme, with the parts every app rebuilds (forms, data tables, app layout, loading / empty / error states) already solved.
+React components on Tailwind CSS v4 that your agent looks up instead of guessing: an MCP server, llms.txt and Markdown docs give Claude Code, Cursor and Codex the real API for the version you installed. One typed theme file sets the whole look, and the parts every app rebuilds (forms, data tables, app layout, loading / empty / error states) come solved.
 
 [![CI](https://github.com/khalmohak/glyph/actions/workflows/ci.yml/badge.svg)](https://github.com/khalmohak/glyph/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@glyphui/ui?label=%40glyphui%2Fui)](https://www.npmjs.com/package/@glyphui/ui)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-[Docs](https://glyphui.xyz/) · [Components](https://glyphui.xyz/components) · [Theme studio](https://glyphui.xyz/themes) · [Contributing](./CONTRIBUTING.md) · [Changelog](./packages/ui/CHANGELOG.md)
+[Docs](https://glyphui.xyz/) · [Components](https://glyphui.xyz/components) · [Use with AI agents](https://glyphui.xyz/docs/ai) · [Theme studio](https://glyphui.xyz/themes) · [Contributing](./CONTRIBUTING.md) · [Changelog](./packages/ui/CHANGELOG.md)
 
 </div>
+
+## For coding agents
+
+```sh
+claude mcp add glyph -- npx -y @glyphui/mcp
+```
+
+[`@glyphui/mcp`](./packages/mcp) gives Claude Code, Cursor, VS Code, Codex, Windsurf and Claude Desktop Glyph's components, props, examples, setup and theming as tools. It is bundled for one Glyph version and makes no network requests. Agents that read the web get [llms.txt](https://glyphui.xyz/llms.txt), [llms-full.txt](https://glyphui.xyz/llms-full.txt), and every docs page as Markdown (add `.md` to the URL, or send `Accept: text/markdown`). Setup for each editor and an `AGENTS.md` block: [Use with AI agents](https://glyphui.xyz/docs/ai).
 
 ## Install
 

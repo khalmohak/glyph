@@ -7,6 +7,7 @@ import { defaultClientConditions, defineConfig } from 'vite'
 import { docsContent } from './plugins/docs-content'
 import { docsData } from './plugins/docs-data'
 import { remarkGuide } from './plugins/guides'
+import { prerender } from './plugins/prerender'
 
 export default defineConfig({
   // GitHub Pages serves the docs from /glyph/; locally they run at /.
@@ -16,6 +17,8 @@ export default defineConfig({
     'process.env.SITE_URL': JSON.stringify(process.env.SITE_URL ?? ''),
     'process.env.DEMO_URL': JSON.stringify(process.env.DEMO_URL ?? ''),
     'process.env.AUTH_URL': JSON.stringify(process.env.AUTH_URL ?? ''),
+    // PostHog's project API key (public by design); lib/analytics.ts stays off without it.
+    'process.env.POSTHOG_KEY': JSON.stringify(process.env.POSTHOG_KEY ?? ''),
   },
   plugins: [
     // Guides are MDX. Frontmatter is read separately (plugins/guides.ts), so it's only stripped here.
@@ -27,6 +30,7 @@ export default defineConfig({
     tailwindcss(),
     docsData(),
     docsContent(),
+    prerender(),
   ],
   resolve: {
     conditions: ['@glyphui/source', ...defaultClientConditions],

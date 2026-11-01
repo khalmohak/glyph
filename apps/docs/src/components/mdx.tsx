@@ -28,6 +28,7 @@ import {
   useSyncExternalStore,
 } from 'react'
 import { getDoc } from '../lib/catalog'
+import { AgentPrompt } from './agent-prompt'
 import { ExampleView } from './example-view'
 import { CopyButton } from './snippet'
 
@@ -293,6 +294,7 @@ export const mdxComponents: MDXComponents = {
   Install,
   Callout,
   Example,
+  AgentPrompt: () => <AgentPrompt className="my-6" />,
   h2: ({ id, children }) => (
     <Heading level={2} size="h3" id={id} className={cn(headingClass, 'mt-12 mb-3')}>
       {children}

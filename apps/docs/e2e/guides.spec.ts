@@ -40,7 +40,7 @@ test.describe('Guides', () => {
       .getByRole('navigation', { name: 'More guides' })
       .getByRole('link', { name: /Use with AI/ })
       .click()
-    await expect(page.getByRole('heading', { level: 1, name: 'Use with AI' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'Use with AI agents' })).toBeVisible()
   })
 
   test('copy the page as Markdown', async ({ page, context }) => {
