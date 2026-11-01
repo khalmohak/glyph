@@ -1,6 +1,6 @@
 {
   "name": "@glyphui/mcp",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "mcpName": "io.github.khalmohak/glyph",
   "description": "MCP server for Glyph: lets Claude Code, Cursor, VS Code and other AI coding agents look up Glyph components, props, examples, setup and theming before they write code.",
   "license": "MIT",
