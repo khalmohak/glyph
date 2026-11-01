@@ -1,5 +1,13 @@
 # @glyphui/viewers
 
+## 0.9.0
+
+### Patch Changes
+
+- [#42](https://github.com/khalmohak/glyph/pull/42) [`f576405`](https://github.com/khalmohak/glyph/commit/f576405d882b0d57679d91311edabf50d848bd36) Thanks [@khalmohak](https://github.com/khalmohak)! - npm descriptions and keywords for AI coding agents. `@glyphui/mcp` declares `mcpName` (`io.github.khalmohak/glyph`) and ships a `server.json`, so it can be listed in the official MCP Registry.
+
+- [#38](https://github.com/khalmohak/glyph/pull/38) [`0eb5f45`](https://github.com/khalmohak/glyph/commit/0eb5f4512a10c07d70b65d3c5b63f5001155b717) Thanks [@khalmohak](https://github.com/khalmohak)! - PdfViewer sets `aria-busy` while a document loads, so screen readers know it isn't ready yet (its toolbar is disabled meanwhile).
+
 ## 0.8.2
 
 ### Patch Changes

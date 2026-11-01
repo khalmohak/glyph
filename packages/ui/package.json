@@ -1,6 +1,6 @@
 {
   "name": "@glyphui/ui",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "React components on Tailwind CSS v4, built for AI coding agents: an MCP server and Markdown docs give agents the real API. One theme file sets the look; forms, data tables, app layouts and async states included.",
   "license": "MIT",
   "author": "Mohak Gupta (https://github.com/khalmohak)",
