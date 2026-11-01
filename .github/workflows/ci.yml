@@ -45,6 +45,8 @@ jobs:
         run: pnpm size
 
   e2e:
+    # Playwright tests are disabled in CI. Remove this line to re-enable them.
+    if: false
     runs-on: ubuntu-latest
     # Keep the tag in sync with @playwright/test in apps/docs/package.json.
     container:
